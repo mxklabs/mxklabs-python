@@ -14,19 +14,19 @@ This Python package mxklabs.dimacs is for reading (and in future possibly writin
 
 ### Summary
 
-| Object | Description | Type |
-|---|---|---|
-| [`mxklabs.dimacs.read`](#mxklabs.dimacs.read)`(file=None, filename=None, string=None)` |  A function for parsing the DIMCAS format. | `function` |
-| [`mxklabs.dimacs.Dimacs`](#mxklabs.dimacs.Dimacs) | A class representing a Boolean formula (in DIMACS format). | `class` | 
-| [`mxklabs.dimacs.DimacsException`](#mxklabs.dimacs.DimacsException) | A class representing an exception (inherits from [Exception](https://docs.python.org/3/library/exceptions.html#Exception)). | `class` |
+| Object | Type |
+|---|---|
+| [`mxklabs.dimacs.read`](#mxklabs.dimacs.read) | `function` |
+| [`mxklabs.dimacs.Dimacs`](#mxklabs.dimacs.Dimacs) | `class` | 
+| [`mxklabs.dimacs.DimacsException`](#mxklabs.dimacs.DimacsException) | `class` |
 
 #### <a name="mxklabs.dimacs.read"></a>Function `mxklabs.dimacs.read(file=None, filename=None, string=None)`
 
 Use this function to parse a DIMACS file (or string in DIMACS format) by passing either:
 
-1. an *open [`file`](https://docs.python.org/2/library/stdtypes.html#file-objects) object* (using the `file` parameter), 
-2. a *filename* (using the `filename` parameter) or
-3. an *input string* (using the `string` parameter).
+1. an open [`file`](https://docs.python.org/2/library/stdtypes.html#file-objects) object (using the `file` parameter), 
+2. a filename (using the `filename` parameter) or
+3. an input string (using the `string` parameter).
 
 When parsing is successful this function will return an object of type [`mxklabs.dimacs.Dimacs`](#mxklabs.dimacs.Dimacs). Should parsing fail an exception of type [`mxklabs.dimacs.DimacsException`](#mxklabs.dimacs.DimacsException) will be raised.
 
