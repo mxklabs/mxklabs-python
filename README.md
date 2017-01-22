@@ -31,17 +31,13 @@ except mxklabs.dimacs.DimacsException e:
 
 ### Module mxklabs.dimacs: API
 
-### mxklabs.dimacs
-
 | Object | Type | Description |
 |---|---|---|
 | [mxklabs.dimacs.Dimacs](#mxklabs.dimacs.Dimacs) | 'class' | A class representing a Boolean formula (in DIMACS format). |
 | [mxklabs.dimacs.DimacsException](#mxklabs.dimacs.DimacsException) | 'class' | A class representing an exception. |
-| mxklabs.dimacs.read_from_file(file) | 'function' | Parses the content of the 'file' object (as specified by the file parameter) and returns an object of type '[mxklabs.dimacs.Dimacs](#mxklabs.dimacs.Dimacs)'. |
-| mxklabs.dimacs.read_from_filename(filename) | 'function' | Opens a file (as specified by the filename parameter), parses its returns an object of type '[mxklabs.dimacs.Dimacs](#mxklabs.dimacs.Dimacs)'. |
-| mxklabs.dimacs.read_from_string(string) | 'function' | Parses the string parameter and returns an object of type '[mxklabs.dimacs.Dimacs](#mxklabs.dimacs.Dimacs)'. |
+| [mxklabs.dimacs.read](#mxklabs.dimacs.read)(file=None, filename=None, string=None) | 'function' | Parses the content of either a 'file' object, the content of a file as specified by a filename or a string variable and returns an object of the type '[mxklabs.dimacs.Dimacs](#mxklabs.dimacs.Dimacs)'. |
 
-## <a name="mxklabs.dimacs.Dimacs">Class mxklabs.dimacs.Dimacs</a>
+#### <a name="mxklabs.dimacs.Dimacs">Class mxklabs.dimacs.Dimacs</a>
 
 | Object | Type | Description |
 |---|---|---|
@@ -49,15 +45,8 @@ except mxklabs.dimacs.DimacsException e:
 | num_clauses | 'int' | The number of clauses. |
 | clauses | 'list' of 'list' of 'int' | The clauses. | 
 
-## <a name="mxklabs.dimacs.DimacsException">Class mxklabs.dimacs.DimacsException</a>
+#### <a name="mxklabs.dimacs.DimacsException">Class mxklabs.dimacs.DimacsException</a>
 
 *Inherits from Exception.*
 
-## Reading DIMACS input.
-
-1. Reading from a file:
-
-```python
-import mxklabs.dimacs as dimacs
-dimacs = dimacs.read_from_file('file1.cnf')
-```
+#### <a name="mxklabs.dimacs.read">Function mxklabs.dimacs.read</a>
