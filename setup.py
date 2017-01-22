@@ -1,7 +1,7 @@
 from distutils.core import setup
 setup(
   name = 'pydimacs',
-  packages = ['pydimcas'], # this must be the same as the name above
+  packages = ['pydimacs'], # this must be the same as the name above
   version = '0.1',
   description = 'A library for reading files in the DIMACS format',
   author = 'Mark Kattenbelt',
