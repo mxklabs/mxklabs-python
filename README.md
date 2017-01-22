@@ -1,23 +1,17 @@
-*NOTE: This is a work in progress.*
-
----
 # Package mxklabs
 
-## Package mxklabs: Installation
-*TODO*
+*TODO (installation, etc.)*
 
-## Package mxklabs: Modules
+### Package mxklabs: Modules
 
 | Module | Description |
 |---|---|---|
-| [mxklabs.dimacs](#mxklabs.dimacs) | A module for writing DIMACS files. |
-
----
+| [mxklabs.dimacs](#mxklabs.dimacs) | A Python module for writing DIMACS files. |
 
 # <a name="mxklabs.dimacs">Module mxklabs.dimacs
-The Python package mxklabs.dimacs is for reading (and in future possibly writing) files in the DIMACS format. This format is the 'de facto' standard for Boolean formulas in SAT competitions and SAT solvers.
+This Python package mxklabs.dimacs is for reading (and in future possibly writing) files in the [DIMACS](http://people.sc.fsu.edu/~jburkardt/data/cnf/cnf.html) format. This format is the 'de facto' standard for Boolean formulas in [SAT competitions](http://www.satcompetition.org/) and [SAT solvers](http://www.satlive.org/solvers/).
 
-## Quick Example
+### Module mxklabs.dimacs: Example
 ```python
 import mxklabs.dimacs
 
@@ -35,7 +29,7 @@ except mxklabs.dimacs.DimacsException e:
   print e  
 ```
 
-## Quick API Overview
+### Module mxklabs.dimacs: API
 
 ### mxklabs.dimacs
 
