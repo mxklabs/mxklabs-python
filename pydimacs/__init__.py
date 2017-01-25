@@ -1,1 +1,0 @@
-from pydimacs import Dimacs
