@@ -1,24 +1,32 @@
-# Package mxklabs
-*TODO (installation, etc.)*
-
-### Modules
-
-| Module | Description |
-|---|---|---|
-| [mxklabs.dimacs](#mxklabs.dimacs) | A Python module for writing DIMACS files. |
-
-# <a name="mxklabs.dimacs">Module mxklabs.dimacs
+## <a name="mxklabs.dimacs">Module mxklabs.dimacs
 This Python package mxklabs.dimacs is for reading (and in future possibly writing) files in the [DIMACS](http://people.sc.fsu.edu/~jburkardt/data/cnf/cnf.html) format. This format is the 'de facto' standard for Boolean formulas in [SAT competitions](http://www.satcompetition.org/) and [SAT solvers](http://www.satlive.org/solvers/).
 
-## API
+### Example
 
-### Summary
+Read a DIMACS file named "simple.cnf":
+```python
+import mxklabs.dimacs
+
+try:
+  # Read the DIMACS file "simple.cnf".
+  dimacs = mxklabs.dimacs.read(filename="simple.cnf")
+  # Print some stats.
+  print("num_vars=%d, num_clauses=%d" % (dimacs.num_vars, dimacs.num_clauses))
+  # Iterate over clauses.
+  for clause in dimacs.clauses:
+    # Print them out.
+    print clause
+except mxklabs.dimacs.DimacsException e:
+  # Report error.
+  print e  
+```
+### API Summary
 
 | Object | Type |
 |---|---|
-| [`mxklabs.dimacs.read`](#mxklabs.dimacs.read) | `function` |
-| [`mxklabs.dimacs.Dimacs`](#mxklabs.dimacs.Dimacs) | `class` | 
-| [`mxklabs.dimacs.DimacsException`](#mxklabs.dimacs.DimacsException) | `class` |
+| [`mxklabs.dimacs.read`](#mxklabs.dimacs.read) [`details`](#mxklabs.dimacs.read)] | `function` |
+| [`mxklabs.dimacs.Dimacs`](#mxklabs.dimacs.Dimacs) [`details`](#mxklabs.dimacs.Dimacs)] | `class` | 
+| [`mxklabs.dimacs.DimacsException`](#mxklabs.dimacs.DimacsException) [`details`](#mxklabs.dimacs.DimacsException)]| `class` |
 
 #### <a name="mxklabs.dimacs.read"></a>Function `mxklabs.dimacs.read(file=None, filename=None, string=None)`
 
@@ -44,22 +52,3 @@ The function returns a populated object of the type [`mxklabs.dimacs.Dimacs`](#m
 
 A custom exception type that inherits from inherits from `[Exception](https://docs.python.org/3/library/exceptions.html#Exception`.
 
-### Module mxklabs.dimacs: Example
-
-Read a DIMACS file named "simple.cnf":
-```python
-import mxklabs.dimacs
-
-try:
-  # Read the DIMACS file "simple.cnf".
-  dimacs = mxklabs.dimacs.read(filename="simple.cnf")
-  # Print some stats.
-  print("num_vars=%d, num_clauses=%d" % (dimacs.num_vars, dimacs.num_clauses))
-  # Iterate over clauses.
-  for clause in dimacs.clauses:
-    # Print them out.
-    print clause
-except mxklabs.dimacs.DimacsException e:
-  # Report error.
-  print e  
-```
