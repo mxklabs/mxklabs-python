@@ -16,7 +16,8 @@ try:
   for clause in dimacs.clauses:
     # Print them out.
     print clause
-except mxklabs.dimacs.DimacsException e:
+
+except mxklabs.dimacs.DimacsException as e:
   # Report error.
   print e  
 ```
@@ -24,11 +25,11 @@ except mxklabs.dimacs.DimacsException e:
 
 | Object | Type |
 |---|---|
-| [`mxklabs.dimacs.read`](#mxklabs.dimacs.read) [`details`](#mxklabs.dimacs.read)] | `function` |
-| [`mxklabs.dimacs.Dimacs`](#mxklabs.dimacs.Dimacs) [`details`](#mxklabs.dimacs.Dimacs)] | `class` | 
-| [`mxklabs.dimacs.DimacsException`](#mxklabs.dimacs.DimacsException) [`details`](#mxklabs.dimacs.DimacsException)]| `class` |
+| [`mxklabs.dimacs.read`](#mxklabs.dimacs.read) [[`link`](#mxklabs.dimacs.read)] | `function` |
+| [`mxklabs.dimacs.Dimacs`](#mxklabs.dimacs.Dimacs) [[`link`](#mxklabs.dimacs.Dimacs)] | `class` | 
+| [`mxklabs.dimacs.DimacsException`](#mxklabs.dimacs.DimacsException) [[`link`](#mxklabs.dimacs.DimacsException)]| `class` |
 
-#### <a name="mxklabs.dimacs.read"></a>Function `mxklabs.dimacs.read(file=None, filename=None, string=None)`
+#### <a name="mxklabs.dimacs.read"></a> `mxklabs.dimacs.read(file=None, filename=None, string=None)`
 
 Use this function to parse a DIMACS file (or string in DIMACS format) by passing either:
 
@@ -40,7 +41,7 @@ When parsing is successful this function will return an object of type [`mxklabs
 
 The function returns a populated object of the type [`mxklabs.dimacs.Dimacs`](#mxklabs.dimacs.Dimacs).
 
-#### <a name="mxklabs.dimacs.Dimacs"></a>Class `mxklabs.dimacs.Dimacs`
+#### <a name="mxklabs.dimacs.Dimacs"></a> `mxklabs.dimacs.Dimacs`
 
 | Object | Type | Description |
 |---|---|---|
@@ -48,7 +49,7 @@ The function returns a populated object of the type [`mxklabs.dimacs.Dimacs`](#m
 | num_clauses | 'int' | The number of clauses. |
 | clauses | 'list' of 'list' of 'int' | The clauses. | 
 
-#### <a name="mxklabs.dimacs.DimacsException"></a>Class `mxklabs.dimacs.DimacsException`
+#### <a name="mxklabs.dimacs.DimacsException"></a> `mxklabs.dimacs.DimacsException`
 
 A custom exception type that inherits from inherits from `[Exception](https://docs.python.org/3/library/exceptions.html#Exception`.
 
