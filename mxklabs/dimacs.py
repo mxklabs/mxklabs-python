@@ -1,14 +1,20 @@
 import sys
-import unittest
-import itertools
 import string
-     
+import unittest
+
+class Dimacs(object):
+  
+  def __init__(self, clauses):
+    self.clauses = clauses
+    self.num_clauses = len(self.clauses)
+    self.num_vars = max([0] + [max([0] + [abs(l) for l in c]) for c in self.clauses])
+
 class DimacsException(Exception):
   pass
 
-class Dimacs(object):
+class DimacsParser(object):
 
-  def __init__(self, filename=None, file=None, string=None):
+  def __init__(self, file=None, filename=None, string=None):
     self.in_filename = filename
     self.in_file = file
     self.in_string = string
@@ -156,7 +162,11 @@ class Dimacs(object):
     if was_in_token:
       result.append((s[token_start], (token_start,len(s))))
     return result
-  
+
+def read(file=None, filename=None, string=None):
+  dimacs_parser = DimacsParser(file=file, filename=filename, string=string)
+  return Dimacs(clauses=dimacs_parser.clauses)
+
 class Tests(unittest.TestCase):
 
   ''' Check a good instance parses without problems. '''
@@ -258,17 +268,3 @@ class Tests(unittest.TestCase):
     with self.assertRaises(DimacsException) as c:
       sat = Dimacs(dimacs_string=dimacs_string)
     self.assertEqual("error: missing problem statement", str(c.exception))
-
-
-# problem statement absent altogether
-# clause before problem statement
-
-if __name__ == "__main__":
-  ARGV_LEN = len(sys.argv)
-  if ARGV_LEN == 2:
-    parser = Dimacs(file=open(sys.argv[1],'r'))
-  else:
-    if ARGV_LEN > 0:
-      print("usage error: {} <file>".format(sys.argv[0]))
-    else:
-      print("usage error")
