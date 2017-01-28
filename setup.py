@@ -1,7 +1,7 @@
 from distutils.core import setup
 setup(
   name = 'mxklabs',
-  packages = ['mxklabs'], # this must be the same as the name above
+  packages = ['dimacs'],
   version = '0.1',
   description = 'A python library for reading files in the DIMACS format',
   author = 'Mark Kattenbelt',
