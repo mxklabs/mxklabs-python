@@ -9,9 +9,6 @@ class Dimacs(object):
     self.num_clauses = len(self.clauses)
     self.num_vars = max([0] + [max([0] + [abs(l) for l in c]) for c in self.clauses])
 
-class DimacsException(Exception):
-  pass
-
 class DimacsParser(object):
 
   def __init__(self, file=None, filename=None, string=None):
@@ -137,7 +134,7 @@ class DimacsParser(object):
     self.line_no += 1
  
   def __process_error(self, error_msg):
-    raise DimacsException("error: %s" % error_msg)
+    raise Exception("error: %s" % error_msg)
 
   def __process_error_with_location(self, msg, line, col):
     self.__process_error("%s (line %d, column %d)" % (msg, line, col))
@@ -185,7 +182,7 @@ class Tests(unittest.TestCase):
   def test_invalid_problem_statement_1(self):
     dimacs_string = "pt cnf 3 1\n2 3 -1 0\n"
     
-    with self.assertRaises(DimacsException) as c:
+    with self.assertRaises(Exception) as c:
       sat = Dimacs(dimacs_string=dimacs_string)
     self.assertEqual("error: invalid syntax (line 1, column 1)", str(c.exception))
   
@@ -193,7 +190,7 @@ class Tests(unittest.TestCase):
   def test_invalid_problem_statement_2(self):
     dimacs_string = "p dnf 3 1\n2 3 -1 0\n"
     
-    with self.assertRaises(DimacsException) as c:
+    with self.assertRaises(Exception) as c:
       sat = Dimacs(dimacs_string=dimacs_string)
     self.assertEqual("error: invalid syntax (line 1, column 3)", str(c.exception))
   
@@ -201,7 +198,7 @@ class Tests(unittest.TestCase):
   def test_invalid_problem_statement_3(self):
     dimacs_string = "p cnf a 1\n2 3 -1 0\n"
     
-    with self.assertRaises(DimacsException) as c:
+    with self.assertRaises(Exception) as c:
       sat = Dimacs(dimacs_string=dimacs_string)
     self.assertEqual("error: invalid syntax (line 1, column 7)", str(c.exception))
    
@@ -209,7 +206,7 @@ class Tests(unittest.TestCase):
   def test_invalid_problem_statement_4(self):
     dimacs_string = "p cnf 3 a\n2 3 -1 0\n"
     
-    with self.assertRaises(DimacsException) as c:
+    with self.assertRaises(Exception) as c:
       sat = Dimacs(dimacs_string=dimacs_string)
     self.assertEqual("error: invalid syntax (line 1, column 9)", str(c.exception))
   
@@ -217,7 +214,7 @@ class Tests(unittest.TestCase):
   def test_invalid_problem_statement_5(self):
     dimacs_string = "p cnf 3 1 4\n2 3 -1 0\n"
     
-    with self.assertRaises(DimacsException) as c:
+    with self.assertRaises(Exception) as c:
       sat = Dimacs(dimacs_string=dimacs_string)
     self.assertEqual("error: invalid syntax (line 1, column 1)", str(c.exception))
   
@@ -225,7 +222,7 @@ class Tests(unittest.TestCase):
   def test_invalid_syntax_3(self):
     dimacs_string = "p cnf 3 1\n2 a -1 0\n"
     
-    with self.assertRaises(DimacsException) as c:
+    with self.assertRaises(Exception) as c:
       sat = Dimacs(dimacs_string=dimacs_string)
     self.assertEqual("error: invalid syntax (line 2, column 3)", str(c.exception))
 
@@ -233,7 +230,7 @@ class Tests(unittest.TestCase):
   def test_invalid_num_clauses(self):
     dimacs_string = "p cnf 3 7\n2 3 -1 0\n"
     
-    with self.assertRaises(DimacsException) as c:
+    with self.assertRaises(Exception) as c:
       sat = Dimacs(dimacs_string=dimacs_string)
     self.assertEqual("error: the declared number of clauses (7) does not match the actual number of clauses (1) (line 1, column 9)", str(c.exception))
 
@@ -241,7 +238,7 @@ class Tests(unittest.TestCase):
   def test_invalid_variable_num(self):
     dimacs_string = "p cnf 3 2\n2 4 -1 0\n2 5 -8 0\n"
     
-    with self.assertRaises(DimacsException) as c:
+    with self.assertRaises(Exception) as c:
       sat = Dimacs(dimacs_string=dimacs_string)
     self.assertEqual("error: the declared number of variables (3) is smaller than the actual number of variables (8) (line 1, column 7)", str(c.exception))
 
@@ -249,7 +246,7 @@ class Tests(unittest.TestCase):
   def test_clause_before_problem_statement(self):
     dimacs_string = "c comment\n2 -1 0\np cnf 1 2\n1 -2 0\n"
     
-    with self.assertRaises(DimacsException) as c:
+    with self.assertRaises(Exception) as c:
       sat = Dimacs(dimacs_string=dimacs_string)
     self.assertEqual("error: expected a problem statement or comment on this line (line 2, column 1)", str(c.exception))
 
@@ -257,7 +254,7 @@ class Tests(unittest.TestCase):
   def test_too_many_problem_statements(self):
     dimacs_string = "p cnf 3 2\np cnf 3 2\n2 4 -1 0\n2 5 -1 0\n"
     
-    with self.assertRaises(DimacsException) as c:
+    with self.assertRaises(Exception) as c:
       sat = Dimacs(dimacs_string=dimacs_string)
     self.assertEqual("error: invalid syntax (line 2, column 1)", str(c.exception))
 
@@ -265,6 +262,6 @@ class Tests(unittest.TestCase):
   def test_missing_problem_statement(self):
     dimacs_string = ""
     
-    with self.assertRaises(DimacsException) as c:
+    with self.assertRaises(Exception) as c:
       sat = Dimacs(dimacs_string=dimacs_string)
     self.assertEqual("error: missing problem statement", str(c.exception))
