@@ -11,7 +11,7 @@ class Dimacs(object):
 
 class DimacsParser(object):
 
-  def __init__(self, file=None, filename=None, string=None):
+  def __init__(self, filename=None, file=None, string=None):
     self.in_filename = filename
     self.in_file = file
     self.in_string = string
@@ -160,8 +160,8 @@ class DimacsParser(object):
       result.append((s[token_start], (token_start,len(s))))
     return result
 
-def read(file=None, filename=None, string=None):
-  dimacs_parser = DimacsParser(file=file, filename=filename, string=string)
+def read(filename=None, file=None, string=None):
+  dimacs_parser = DimacsParser(filename=filename, file=file, string=string)
   return Dimacs(clauses=dimacs_parser.clauses)
 
 class Tests(unittest.TestCase):

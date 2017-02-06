@@ -13,7 +13,7 @@ if __name__ == "__main__":
   if ARGV_LEN == 2:
     try:
       # Read the DIMACS file "simple.cnf".
-      dimacs = mxklabs.dimacs.read(filename=sys.argv[1])
+      dimacs = mxklabs.dimacs.read(sys.argv[1])
       # Print some stats.
       print("num_vars=%d, num_clauses=%d" % (dimacs.num_vars, dimacs.num_clauses))
       # Iterate over clauses.
@@ -37,12 +37,12 @@ if __name__ == "__main__":
 | [`mxklabs.dimacs.read`](#mxklabs.dimacs.read) [[`link`](#mxklabs.dimacs.read)] | `function` |
 | [`mxklabs.dimacs.Dimacs`](#mxklabs.dimacs.Dimacs) [[`link`](#mxklabs.dimacs.Dimacs)] | `class` | 
 
-#### <a name="mxklabs.dimacs.read"></a> `mxklabs.dimacs.read(file=None, filename=None, string=None)`
+#### <a name="mxklabs.dimacs.read"></a> `mxklabs.dimacs.read(filename=None, file=None, string=None)`
 
 This function parses DIMACS input and returns a [`mxklabs.dimacs.Dimacs`](#mxklabs.dimacs.Dimacs) object. Input can be either:
 
-1. an open [`file`](https://docs.python.org/2/library/stdtypes.html#file-objects) object (using the `file` parameter), 
-2. a filename (using the `filename` parameter) or
+1. a filename (using the `filename` parameter) or
+2. an open [`file`](https://docs.python.org/2/library/stdtypes.html#file-objects) object (using the `file` parameter), 
 3. an input string (using the `string` parameter).
 
 In case of any errors the function will raise an [exception](https://docs.python.org/3/library/exceptions.html#Exception).
