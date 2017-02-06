@@ -1,0 +1,20 @@
+Instructions for publishing a new version on PyPi:
+
+1 Ensure a .pypirc file exists in your home directory
+(see https://docs.python.org/2/distutils/packageindex.html)
+2 Ensure all changes are committed.
+3 Update the 'version' and 'download_url' fields in setup.py with a new version number, e.g.:
+> set -i 's/0.0.2/0.0.3/g' setup.py
+4 Commit the changes to setup.py and push all changes to the master branch git repository.
+> git add setup.py
+> git commit -m "Upped version number to 0.0.3."
+> git push
+5 Tag the commit with, e.g.:
+> git tag -a 0.0.3 -m "v0.0.3"
+> git push 0.0.3
+(Ensure it matches with the tarball name you put in 'download_url')
+6 Upload to PiPY: 
+> python setup.py sdist upload -r pypi
+7 Update your local version with pip.
+> pip install mxklabs -U
+
