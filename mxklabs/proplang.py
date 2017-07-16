@@ -17,30 +17,49 @@ class Transform(lark.Transformer):
 
 
 json_parser = lark.Lark(r"""
-    ?value: dict
-          | list
-          | string
-          | SIGNED_NUMBER      -> number
-          | "true"             -> true
-          | "false"            -> false
-          | "null"             -> null
-
-    list : "[" [value ("," value)*] "]"
-
-    dict : "{" [pair ("," pair)*] "}"
-    pair : string ":" value
-
-    string : ESCAPED_STRING
+    main: decls asserts
+    
+    decls: (decl)+
+    ?decl: fun
+    
+    fun: "(" "declare-fun" id "(" ")" "Bool" ")"
+    
+    asserts: (assert)+
+    ?assert: boolexpr
+    
+    ?boolexpr: or
+               | id
+    
+    or : "(" "or" boolexpr boolexpr ")"
+    
+    id: /[A-Za-z_][A-Za-z_0-9]*/
 
     %import common.ESCAPED_STRING
     %import common.SIGNED_NUMBER
     %import common.WS
     %ignore WS
 
-    """, start='value', parser='lalr', transformer=Transform())
+    """, start='main', parser='lalr', lexer="standard", debug=True)
 
-text = '{"key": ["item0", "item1", 3.14]}'
-b = json_parser.parse(text)
+#, transformer=Transform()
 
-print(b)
-print("--")
+text = '''
+(declare-fun v1 () Bool)
+'''
+
+'''
+(declare-fun v2 () Bool)
+(declare-fun v3 () Bool)
+(assert (or v1 (not v2))) 
+(assert (or v2 (not v1))) 
+(assert (or v1 v3)) 
+(assert (or v1 (not v3)))
+'''
+
+print "tokens=%r" % list(json_parser.lexer_conf.tokens)
+b = list(json_parser.lex(text))
+a = json_parser.parse(text)
+
+print("%s" % b)
+#print(b.pretty())
+#print("--")
