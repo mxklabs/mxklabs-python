@@ -55,25 +55,54 @@ class Variable(Expression):
 
 class Function(Expression):
   
-  def __init__(self, name, operands, type=Bool):
+  def __init__(self, name, operands, type=Bool, num_operands=None, min_num_operands=None, max_num_operands=None):
     Expression.__init__(self, type=type, hashstr="({name} {operands})".format(
       name=name,
       operands=" ".join([o._hashstr for o in operands])
     ))
     self._name = name
     self._operands = operands
+    self._num_operands = num_operands
+    self._min_num_operands = min_num_operands
+    self._max_num_operands = max_num_operands
+    
+    self.check()
+  
+  def check(self):
+    
+    if self._num_operands is not None and len(self._operands) != self._num_operands:
+      raise Exception("type \"{type}\" requires exactly {num_operands} operand(s)".format(
+        type=type(self), 
+        num_operands=self._num_operands
+      ))
 
-''' Logical conjunction. '''
+    if self._min_num_operands is not None and len(self._operands) < self._min_num_operands:
+      raise Exception("type \"{type}\" requires at least {min_num_operands} operand(s)".format(
+        type=type(self), 
+        min_num_operands=self._min_num_operands
+      ))
+    
+    if self._max_num_operands is not None and len(self._operands) > self._max_num_operands:
+      raise Exception("type \"{type}\" requires at most {max_num_operands} operand(s)".format(
+        type=type(self), 
+        max_num_operands=self._max_num_operands
+      ))
+''' Logical operations. '''
   
 class LogicalAnd(Function):
   
   def __init__(self, operands):
-    Function.__init__(self, name="and", operands=sorted(operands), type=Bool)
-  
+    Function.__init__(self, name="and", operands=sorted(operands), type=Bool, min_num_operands=1)
+
 class LogicalOr(Function):
   
   def __init__(self, operands):
-    Function.__init__(self, name="or", operands=sorted(operands), type=Bool)
+    Function.__init__(self, name="or", operands=sorted(operands), type=Bool, min_num_operands=1)
+
+class LogicalNot(Function):
+  
+  def __init__(self, operands):
+    Function.__init__(self, name="not", operands=operands, type=Bool, num_operands=1)
     
 # 
 
