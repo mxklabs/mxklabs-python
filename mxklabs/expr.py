@@ -40,7 +40,7 @@ class Expression(object):
 class Constant(Expression):
   
   def __init__(self, value, type=Bool):
-    Expression.__init__(self, type=type, hashstr="{value}".format(value=str(value).lower()))
+    Expression.__init__(self, type=type, hashstr="(value {value})".format(value=str(value).lower()))
     self._value = value
     
 ''' Variable. '''
@@ -48,7 +48,7 @@ class Constant(Expression):
 class Variable(Expression):
   
   def __init__(self, id, type=Bool):
-    Expression.__init__(self, type=type, hashstr="@{id}".format(id=id))
+    Expression.__init__(self, type=type, hashstr="(var {id})".format(id=id))
     self._id = id
 
 ''' Function. '''
@@ -145,8 +145,8 @@ import unittest
 class Tests(unittest.TestCase):
   
   def test_expr_hashstr(self):    
-    self.assertEquals(LogicalAnd([Variable("v1", Bool),Variable("v2", Bool)])._hashstr, "(and @v1 @v2)")
-    self.assertEquals(LogicalAnd([Variable("v1", Bool),Constant(True, Bool)])._hashstr, "(and @v1 true)")
-    self.assertEquals(LogicalAnd([Variable("v2", Bool),Variable("v1", Bool)])._hashstr, "(and @v1 @v2)")
-    self.assertEquals(LogicalOr([Constant(False, Bool),Variable("v1", Bool)])._hashstr, "(or @v1 false)")
+    self.assertEquals(LogicalAnd([Variable("v1", Bool),Variable("v2", Bool)])._hashstr, "(and (var v1) (var v2))")
+    self.assertEquals(LogicalAnd([Variable("v1", Bool),Constant(True, Bool)])._hashstr, "(and (value true) (var v1))")
+    self.assertEquals(LogicalAnd([Variable("v2", Bool),Variable("v1", Bool)])._hashstr, "(and (var v1) (var v2))")
+    self.assertEquals(LogicalOr([Constant(False, Bool),Variable("v1", Bool)])._hashstr, "(or (value false) (var v1))")
     
