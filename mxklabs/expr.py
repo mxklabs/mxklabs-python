@@ -47,6 +47,9 @@ class Expression(object):
   def __hash__(self):
     return hash(self._hashstr)
   
+  @abc.abstractmethod
+  def visit(self, visitor, args): pass  
+  
   def _check(self):
     
     if self._num_children is not None and len(self._children) != self._num_children:
@@ -64,6 +67,7 @@ class Expression(object):
         type=type(self), 
         max_num_children=self._max_num_children))
 
+
 ''' Constant. '''
 
 class Const(Expression):
@@ -72,8 +76,8 @@ class Const(Expression):
     Expression.__init__(self, type=type, nodestr="(const {value})".format(value=str(value).lower()))
     self._value = value
 
-  def visit(self, visitor):
-    visitor.visitConst(self)
+  def visit(self, visitor, args):
+    visitor.visitConst(self, args)
     
 ''' Variable. '''
 
@@ -83,8 +87,8 @@ class Var(Expression):
     Expression.__init__(self, type=type, nodestr="(var {id})".format(id=id))
     self._id = id
 
-  def visit(self, visitor):
-    visitor.visitVar(self)
+  def visit(self, visitor, args):
+    visitor.visitVar(self, args)
 
 '''  operations. '''
   
@@ -93,24 +97,24 @@ class And(Expression):
   def __init__(self, children):
     Expression.__init__(self, type=Bool, nodestr="and", children=sorted(children), min_num_children=1)
     
-  def visit(self, visitor):
-    visitor.visitAnd(self)
+  def visit(self, visitor, args):
+    visitor.visitAnd(self, args)
 
 class Or(Expression):
   
   def __init__(self, children):
     Expression.__init__(self, type=Bool, nodestr="or", children=sorted(children), min_num_children=1)
     
-  def visit(self, visitor):
-    visitor.visitAnd(self)
+  def visit(self, visitor, args):
+    visitor.visitAnd(self, args)
 
 class Not(Expression):
   
   def __init__(self, children):
     Expression.__init__(self, type=Bool, nodestr="not", children=children, num_children=1)
 
-  def visit(self, visitor):
-    visitor.visitNot(self)
+  def visit(self, visitor, args):
+    visitor.visitNot(self, args)
 
   
 ''' Visitor object. '''
@@ -118,24 +122,19 @@ class Not(Expression):
 class Visitor(object):
 
   @abc.abstractmethod
-  def visitVar(expr):
-    pass
+  def visitVar(expr, args): pass
 
   @abc.abstractmethod
-  def visitConst(expr):
-    pass
+  def visitConst(expr, args): pass
 
   @abc.abstractmethod
-  def visitAnd(expr):
-    pass
-  
-  @abc.abstractmethod
-  def visitOr(expr):
-    pass
+  def visitAnd(expr, args): pass
 
   @abc.abstractmethod
-  def visitNot(expr):
-    pass
+  def visitOr(expr, args): pass
+
+  @abc.abstractmethod
+  def visitNot(expr, args): pass
   
 # 
 
@@ -159,13 +158,15 @@ class Visitor(object):
 #  #
 #    if expr.
   
-class Walker(object):
+class BottomUpWalker(object):
+  
+  
   
   @staticmethod
-  def walk_bottom_up(expr, visitor):
+  def walk(expr, visitor):
     
-    t_children = [visitor(child) for child in expr.children()]
-    t_expr = visitor.visit(expr, t_children)
+    child_map = dict([(child, walk(child, visitor)) for child in expr.children()])
+    t_expr = expr.visit(visitor, child_map)
     
     return t_expr  
     
