@@ -47,6 +47,15 @@ class Expression(object):
   def __hash__(self):
     return hash(self._hashstr)
   
+  def __str__(self):
+    return self._hashstr  
+  
+  def __repr__(self):
+    return self._hashstr
+
+  def children(self):
+    return self._children
+  
   @abc.abstractmethod
   def visit(self, visitor, args): pass  
   
@@ -67,7 +76,6 @@ class Expression(object):
         type=type(self), 
         max_num_children=self._max_num_children))
 
-
 ''' Constant. '''
 
 class Const(Expression):
@@ -77,8 +85,11 @@ class Const(Expression):
     self._value = value
 
   def visit(self, visitor, args):
-    visitor.visitConst(self, args)
-    
+    return visitor.visitConst(self, args)#
+  
+  def value(self):
+    return self._value  
+  
 ''' Variable. '''
 
 class Var(Expression):
@@ -88,25 +99,28 @@ class Var(Expression):
     self._id = id
 
   def visit(self, visitor, args):
-    visitor.visitVar(self, args)
+    return visitor.visitVar(self, args)
+    
+  def id(self):
+    return self._id
 
 '''  operations. '''
   
 class And(Expression):
   
   def __init__(self, children):
-    Expression.__init__(self, type=Bool, nodestr="and", children=sorted(children), min_num_children=1)
+    Expression.__init__(self, type=Bool, nodestr="and", children=children, min_num_children=1)
     
   def visit(self, visitor, args):
-    visitor.visitAnd(self, args)
+    return visitor.visitAnd(self, args)
 
 class Or(Expression):
   
   def __init__(self, children):
-    Expression.__init__(self, type=Bool, nodestr="or", children=sorted(children), min_num_children=1)
+    Expression.__init__(self, type=Bool, nodestr="or", children=children, min_num_children=1)
     
   def visit(self, visitor, args):
-    visitor.visitAnd(self, args)
+    return visitor.visitOr(self, args)
 
 class Not(Expression):
   
@@ -114,7 +128,7 @@ class Not(Expression):
     Expression.__init__(self, type=Bool, nodestr="not", children=children, num_children=1)
 
   def visit(self, visitor, args):
-    visitor.visitNot(self, args)
+    return visitor.visitNot(self, args)
 
   
 ''' Visitor object. '''
@@ -122,57 +136,27 @@ class Not(Expression):
 class Visitor(object):
 
   @abc.abstractmethod
-  def visitVar(expr, args): pass
+  def visitVar(self, expr, args): pass
 
   @abc.abstractmethod
-  def visitConst(expr, args): pass
+  def visitConst(self, expr, args): pass
 
   @abc.abstractmethod
-  def visitAnd(expr, args): pass
+  def visitAnd(self, expr, args): pass
 
   @abc.abstractmethod
-  def visitOr(expr, args): pass
+  def visitOr(self, expr, args): pass
 
   @abc.abstractmethod
-  def visitNot(expr, args): pass
-  
-# 
+  def visitNot(self, expr, args): pass
 
-#class Constant(Expr):
-#  def __init__(self, type, value):
-#    Expr.__init__(type=type, )
-#  
-#class Variable(Expr):
-
-#class And(object):
+''' Walker object. '''
   
-#  def __init__(self, children):
-#    Expr.__init__(Bool, "and", children)
-#    self.operation = operation
-#    self.children = children
-#    self.type = type
+class Walker(object):
   
-#class Visitor(object):
-  
-#  def walk(expr, )
-#  #
-#    if expr.
-  
-class BottomUpWalker(object):
-  
-  
-  
-  @staticmethod
-  def walk(expr, visitor):
-    
-    child_map = dict([(child, walk(child, visitor)) for child in expr.children()])
-    t_expr = expr.visit(visitor, child_map)
-    
-    return t_expr  
-    
-    
-         
-  
+  def walk(self, expr, visitor):
+    assert(isinstance(visitor, Visitor))
+    return expr.visit(visitor, dict([(c, self.walk(c, visitor)) for c in expr.children()]))  
   
 import unittest
 
@@ -180,7 +164,34 @@ class Tests(unittest.TestCase):
   
   def test_expr_hashstr(self):    
     self.assertEquals(And([Var(Bool, "v1"),Var(Bool, "v2")])._hashstr, "(and (var v1) (var v2))")
-    self.assertEquals(And([Var(Bool, "v1"),Const(Bool, True)])._hashstr, "(and (const true) (var v1))")
-    self.assertEquals(And([Var(Bool, "v2"),Var(Bool, "v1")])._hashstr, "(and (var v1) (var v2))")
+    self.assertEquals(And([Var(Bool, "v1"),Const(Bool, True)])._hashstr, "(and (var v1) (const true))")
+    self.assertEquals(And([Var(Bool, "v2"),Var(Bool, "v1")])._hashstr, "(and (var v2) (var v1))")
     self.assertEquals(Or([Const(Bool, False),Var(Bool, "v1")])._hashstr, "(or (const false) (var v1))")
+    
+  def test_expr_walker(self):
+    
+    class PrettyPrinter(Visitor):
+      
+      def visitVar(self, expr, args): 
+        return str(expr.id())
+      
+      def visitConst(self, expr, args): 
+        return str(expr.value()).lower()
+      
+      def visitAnd(self, expr, args):
+        return "(" + " AND ".join([args[c] for c in expr.children()]) + ")"
+      
+      def visitOr(self, expr, args): 
+        return "(" + " OR ".join([args[c] for c in expr.children()]) + ")"
+      
+      def visitNot(self, expr, args): 
+        return "(NOT" + args[expr.children()[0]] + ")"
+    
+    expr = And([Var(Bool, "v1"),Or([Const(Bool, False),Var(Bool, "v1")])])
+    visitor = PrettyPrinter()
+    walker = Walker()
+    
+    self.assertEquals(walker.walk(expr, visitor), "(v1 AND (false OR v1))")
+    
+  
     
