@@ -1,5 +1,13 @@
 import abc
 import functools
+import re
+
+''' Helper functions. '''
+
+camel_case_regex = re.compile('((?<=[a-z0-9])[A-Z]|(?!^)[A-Z](?=[a-z]))')
+
+def camel_case_converter(string):
+  return camel_case_regex.sub(r'_\1', string).lower()
 
 ''' Base class for all types. '''
 class Type(object):
@@ -56,8 +64,10 @@ class Expression(object):
   def children(self):
     return self._children
   
-  @abc.abstractmethod
-  def visit(self, visitor, args): pass  
+  def visit(self, visitor, args):
+    visit_method_name = 'visit_' + camel_case_converter(type(self).__name__)
+    visit_method = getattr(visitor, visit_method_name)
+    return visit_method(self, args)
   
   def _check(self):
     
@@ -84,9 +94,6 @@ class Const(Expression):
     Expression.__init__(self, type=type, nodestr="(const {value})".format(value=str(value).lower()))
     self._value = value
 
-  def visit(self, visitor, args):
-    return visitor.visitConst(self, args)#
-  
   def value(self):
     return self._value  
   
@@ -98,9 +105,6 @@ class Var(Expression):
     Expression.__init__(self, type=type, nodestr="(var {id})".format(id=id))
     self._id = id
 
-  def visit(self, visitor, args):
-    return visitor.visitVar(self, args)
-    
   def id(self):
     return self._id
 
@@ -111,52 +115,23 @@ class And(Expression):
   def __init__(self, children):
     Expression.__init__(self, type=Bool, nodestr="and", children=children, min_num_children=1)
     
-  def visit(self, visitor, args):
-    return visitor.visitAnd(self, args)
-
 class Or(Expression):
   
   def __init__(self, children):
     Expression.__init__(self, type=Bool, nodestr="or", children=children, min_num_children=1)
     
-  def visit(self, visitor, args):
-    return visitor.visitOr(self, args)
-
 class Not(Expression):
   
   def __init__(self, children):
     Expression.__init__(self, type=Bool, nodestr="not", children=children, num_children=1)
-
-  def visit(self, visitor, args):
-    return visitor.visitNot(self, args)
-
-  
-''' Visitor object. '''
-  
-class Visitor(object):
-
-  @abc.abstractmethod
-  def visitVar(self, expr, args): pass
-
-  @abc.abstractmethod
-  def visitConst(self, expr, args): pass
-
-  @abc.abstractmethod
-  def visitAnd(self, expr, args): pass
-
-  @abc.abstractmethod
-  def visitOr(self, expr, args): pass
-
-  @abc.abstractmethod
-  def visitNot(self, expr, args): pass
 
 ''' Walker object. '''
   
 class Walker(object):
   
   def walk(self, expr, visitor):
-    assert(isinstance(visitor, Visitor))
-    return expr.visit(visitor, dict([(c, self.walk(c, visitor)) for c in expr.children()]))  
+    result = expr.visit(visitor, dict([(c, self.walk(c, visitor)) for c in expr.children()]))
+    return result
   
 import unittest
 
@@ -170,22 +145,12 @@ class Tests(unittest.TestCase):
     
   def test_expr_walker(self):
     
-    class PrettyPrinter(Visitor):
-      
-      def visitVar(self, expr, args): 
-        return str(expr.id())
-      
-      def visitConst(self, expr, args): 
-        return str(expr.value()).lower()
-      
-      def visitAnd(self, expr, args):
-        return "(" + " AND ".join([args[c] for c in expr.children()]) + ")"
-      
-      def visitOr(self, expr, args): 
-        return "(" + " OR ".join([args[c] for c in expr.children()]) + ")"
-      
-      def visitNot(self, expr, args): 
-        return "(NOT" + args[expr.children()[0]] + ")"
+    class PrettyPrinter(object):
+      def visit_var(self, expr, args): return str(expr.id())
+      def visit_const(self, expr, args): return str(expr.value()).lower()
+      def visit_and(self, expr, args): return "(" + " AND ".join([args[c] for c in expr.children()]) + ")"
+      def visit_or(self, expr, args): return "(" + " OR ".join([args[c] for c in expr.children()]) + ")"
+      def visit_not(self, expr, args): return "(NOT" + args[expr.children()[0]] + ")"
     
     expr = And([Var(Bool, "v1"),Or([Const(Bool, False),Var(Bool, "v1")])])
     visitor = PrettyPrinter()
