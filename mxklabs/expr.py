@@ -68,6 +68,9 @@ class Expression(object):
     visit_method_name = 'visit_' + camel_case_converter(type(self).__name__)
     visit_method = getattr(visitor, visit_method_name)
     return visit_method(self, args)
+
+  def bottom_up_walk(self, visitor):
+    return self.visit(visitor, dict([(c, c.bottom_up_walk(visitor)) for c in self.children()]))
   
   def _check(self):
     
@@ -119,14 +122,7 @@ class Not(Expression):
   def __init__(self, children):
     Expression.__init__(self, type=Bool, nodestr="not", children=children, num_children=1)
 
-''' Walker object. '''
-  
-class Walker(object):
-  
-  def walk(self, expr, visitor):
-    result = expr.visit(visitor, dict([(c, self.walk(c, visitor)) for c in expr.children()]))
-    return result
-  
+ 
 import unittest
 
 class Tests(unittest.TestCase):
@@ -148,9 +144,9 @@ class Tests(unittest.TestCase):
     
     expr = And([Var(Bool, "v1"),Or([Const(Bool, False),Var(Bool, "v1")])])
     visitor = PrettyPrinter()
-    walker = Walker()
     
-    self.assertEquals(walker.walk(expr, visitor), "(v1 AND (false OR v1))")
+    
+    self.assertEquals(expr.bottom_up_walk(visitor), "(v1 AND (false OR v1))")
     
   
     
