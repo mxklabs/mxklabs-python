@@ -92,21 +92,15 @@ class Const(Expression):
   
   def __init__(self, type, value):
     Expression.__init__(self, type=type, nodestr="(const {value})".format(value=str(value).lower()))
-    self._value = value
+    self.value = value
 
-  def value(self):
-    return self._value  
-  
 ''' Variable. '''
 
 class Var(Expression):
   
   def __init__(self, type, id):
     Expression.__init__(self, type=type, nodestr="(var {id})".format(id=id))
-    self._id = id
-
-  def id(self):
-    return self._id
+    self.id = id
 
 '''  operations. '''
   
@@ -146,8 +140,8 @@ class Tests(unittest.TestCase):
   def test_expr_walker(self):
     
     class PrettyPrinter(object):
-      def visit_var(self, expr, args): return str(expr.id())
-      def visit_const(self, expr, args): return str(expr.value()).lower()
+      def visit_var(self, expr, args): return str(expr.id)
+      def visit_const(self, expr, args): return str(expr.value).lower()
       def visit_and(self, expr, args): return "(" + " AND ".join([args[c] for c in expr.children()]) + ")"
       def visit_or(self, expr, args): return "(" + " OR ".join([args[c] for c in expr.children()]) + ")"
       def visit_not(self, expr, args): return "(NOT" + args[expr.children()[0]] + ")"
