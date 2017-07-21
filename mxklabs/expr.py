@@ -68,9 +68,6 @@ class Expression(object):
     visit_method_name = 'visit_' + camel_case_converter(type(self).__name__)
     visit_method = getattr(visitor, visit_method_name)
     return visit_method(self, args)
-
-  def bottom_up_walk(self, visitor):
-    return self.visit(visitor, dict([(c, c.bottom_up_walk(visitor)) for c in self.children()]))
   
   def _check(self):
     
@@ -122,6 +119,12 @@ class Not(Expression):
   def __init__(self, children):
     Expression.__init__(self, type=Bool, nodestr="not", children=children, num_children=1)
 
+''' Walker object. '''
+
+class Visitor(object):
+  
+  def bottom_up_walk(self, expr):
+    return expr.visit(self, dict([(c, self.bottom_up_walk(c)) for c in expr.children()]))
  
 import unittest
 
@@ -135,7 +138,9 @@ class Tests(unittest.TestCase):
     
   def test_expr_walker(self):
     
-    class PrettyPrinter(object):
+    class PrettyPrinter(Visitor):
+      def to_string(self, expr): return self.bottom_up_walk(expr);
+      
       def visit_var(self, expr, args): return str(expr.id)
       def visit_const(self, expr, args): return str(expr.value).lower()
       def visit_and(self, expr, args): return "(" + " AND ".join([args[c] for c in expr.children()]) + ")"
@@ -143,10 +148,10 @@ class Tests(unittest.TestCase):
       def visit_not(self, expr, args): return "(NOT" + args[expr.children()[0]] + ")"
     
     expr = And([Var(Bool, "v1"),Or([Const(Bool, False),Var(Bool, "v1")])])
-    visitor = PrettyPrinter()
+    printer = PrettyPrinter()
     
     
-    self.assertEquals(expr.bottom_up_walk(visitor), "(v1 AND (false OR v1))")
+    self.assertEquals(printer.to_string(expr), "(v1 AND (false OR v1))")
     
   
     
