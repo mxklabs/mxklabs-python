@@ -1,30 +1,13 @@
 import abc
 import functools
-import re
+import exprtype
+import utils
 
-''' Helper functions. '''
 
-camel_case_regex = re.compile('((?<=[a-z0-9])[A-Z]|(?!^)[A-Z](?=[a-z]))')
 
-def camel_case_converter(string):
-  return camel_case_regex.sub(r'_\1', string).lower()
-
-''' Base class for all types. '''
-class Type(object):
-  
-  def __init__(self, type):
-    self._type = type
-    
-  def __eq__(self, other):
-    return self._type == other._type
-  
-  def __hash__(self):
-    return hash(self._type)
-  
-''' Type constants. '''
-Bool = Type("bool")
-
-''' Base class for all expressions. '''
+''' 
+  Base class for all expression classes.  
+'''
 @functools.total_ordering
 class Expression(object):
   
@@ -34,6 +17,7 @@ class Expression(object):
     self._num_children = num_children
     self._min_num_children = min_num_children
     self._max_num_children = max_num_children
+    
     if len(children) == 0:
       self._hashstr = nodestr
     else:
@@ -64,8 +48,14 @@ class Expression(object):
   def children(self):
     return self._children
   
+  def domain(self):
+    return exprtype.Product([c.codomain() for c in self.children()])
+    
+  def codomain(self):
+    return self._type
+  
   def visit(self, visitor, args):
-    visit_method_name = 'visit_' + camel_case_converter(type(self).__name__)
+    visit_method_name = 'visit_' + utils.Utils.camel_case_to_underscore(type(self).__name__)
     visit_method = getattr(visitor, visit_method_name)
     return visit_method(self, args)
   
@@ -94,6 +84,9 @@ class Const(Expression):
     Expression.__init__(self, type=type, nodestr="(const {value})".format(value=str(value).lower()))
     self.value = value
 
+  def evaluate(self, args):
+    return self.value
+
 ''' Variable. '''
 
 class Var(Expression):
@@ -101,23 +94,35 @@ class Var(Expression):
   def __init__(self, type, id):
     Expression.__init__(self, type=type, nodestr="(var {id})".format(id=id))
     self.id = id
+    
+  def evaluate(self, args):
+    return args[self]
 
 '''  operations. '''
   
 class And(Expression):
   
   def __init__(self, children):
-    Expression.__init__(self, type=Bool, nodestr="and", children=children, min_num_children=1)
+    Expression.__init__(self, type=exprtype.Bool, nodestr="and", children=children, min_num_children=1)
+    
+  def evaluate(self, args):
+    return all([args[c] for c in self.children()])
     
 class Or(Expression):
   
   def __init__(self, children):
-    Expression.__init__(self, type=Bool, nodestr="or", children=children, min_num_children=1)
+    Expression.__init__(self, type=exprtype.Bool, nodestr="or", children=children, min_num_children=1)
     
+  def evaluate(self, args):
+    return any([args[c] for c in self.children()])
+
 class Not(Expression):
   
   def __init__(self, children):
-    Expression.__init__(self, type=Bool, nodestr="not", children=children, num_children=1)
+    Expression.__init__(self, type=exprtype.Bool, nodestr="not", children=children, num_children=1)
+    
+  def evaluate(self, args):
+    return not args[self.children()[0]]
 
 ''' Walker object. '''
 
@@ -131,10 +136,10 @@ import unittest
 class Tests(unittest.TestCase):
   
   def test_expr_hashstr(self):    
-    self.assertEquals(And([Var(Bool, "v1"),Var(Bool, "v2")])._hashstr, "(and (var v1) (var v2))")
-    self.assertEquals(And([Var(Bool, "v1"),Const(Bool, True)])._hashstr, "(and (var v1) (const true))")
-    self.assertEquals(And([Var(Bool, "v2"),Var(Bool, "v1")])._hashstr, "(and (var v2) (var v1))")
-    self.assertEquals(Or([Const(Bool, False),Var(Bool, "v1")])._hashstr, "(or (const false) (var v1))")
+    self.assertEquals(And([Var(exprtype.Bool, "v1"),Var(exprtype.Bool, "v2")])._hashstr, "(and (var v1) (var v2))")
+    self.assertEquals(And([Var(exprtype.Bool, "v1"),Const(exprtype.Bool, True)])._hashstr, "(and (var v1) (const true))")
+    self.assertEquals(And([Var(exprtype.Bool, "v2"),Var(exprtype.Bool, "v1")])._hashstr, "(and (var v2) (var v1))")
+    self.assertEquals(Or([Const(exprtype.Bool, False),Var(exprtype.Bool, "v1")])._hashstr, "(or (const false) (var v1))")
     
   def test_expr_walker(self):
     
@@ -147,11 +152,10 @@ class Tests(unittest.TestCase):
       def visit_or(self, expr, args): return "(" + " OR ".join([args[c] for c in expr.children()]) + ")"
       def visit_not(self, expr, args): return "(NOT" + args[expr.children()[0]] + ")"
     
-    expr = And([Var(Bool, "v1"),Or([Const(Bool, False),Var(Bool, "v1")])])
+    expr = And([Var(exprtype.Bool, "v1"),Or([Const(exprtype.Bool, False),Var(exprtype.Bool, "v1")])])
     printer = PrettyPrinter()
     
     
     self.assertEquals(printer.to_string(expr), "(v1 AND (false OR v1))")
     
-  
     

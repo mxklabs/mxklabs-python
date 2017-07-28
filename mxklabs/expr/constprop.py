@@ -18,6 +18,8 @@ class ConstProp(Visitor):
     return ConstProp.Res(expr=expr, is_const=True, value=expr.value)
   
   def visit_and(self, expr, args):
+    
+    print str(expr.domain()) + " -> " + str(expr.codomain())
 
     # If ANY operand is false, return false.
     if any([args[child].is_const and not args[child].value for child in expr.children()]):
