@@ -2,7 +2,7 @@ import unittest
 
 import mxklabs.expr as e
 
-class Tests(unittest.TestCase):
+class Test_ConstProp(unittest.TestCase):
   
   def test_and(self):              
     const_prop = e.ConstProp()

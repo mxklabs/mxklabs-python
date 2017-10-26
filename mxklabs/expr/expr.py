@@ -146,33 +146,6 @@ class Var(Expression):
     
   def evaluate(self, args):
     return args[self]
-
-'''  operations. '''
-  
-class And(Expression):
-  
-  def __init__(self, args):
-    Expression.__init__(self, type=Bool, nodestr="and", children=args, min_num_children=1)
-    
-  def evaluate(self, args):
-    return all([args[c] for c in self.children()])
-    
-class Or(Expression):
-  
-  def __init__(self, args):
-    Expression.__init__(self, type=Bool, nodestr="or", children=args, min_num_children=1)
-    
-  def evaluate(self, args):
-    return any([args[c] for c in self.children()])
-
-class Not(Expression):
-  
-  def __init__(self, arg):
-    Expression.__init__(self, type=Bool, nodestr="not", children=[arg], num_children=1)
-    
-  def evaluate(self, args):
-    return not args[self.children()[0]]
-
 ''' Walker object. '''
 
 class Visitor(object):

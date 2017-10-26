@@ -1,6 +1,6 @@
 import collections
 
-import expr as e
+from mxklabs.expr import expr as e
 
 ''' Help eliminate constants in expressions. '''
 
