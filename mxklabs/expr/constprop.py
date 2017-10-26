@@ -1,8 +1,10 @@
 import collections
 
+import expr as e
+
 ''' Help eliminate constants in expressions. '''
 
-class ConstProp(Visitor):
+class ConstProp(e.Visitor):
   
   Res = collections.namedtuple('Res', ['expr', 'is_const', 'value'])
   
@@ -19,11 +21,11 @@ class ConstProp(Visitor):
     
     # If ANY operand is false, return false.
     if any([args[child].is_const and not args[child].value for child in expr.children()]):
-      return ConstProp.Res(expr=Const(Bool, False), is_const=True, value=False)
+      return ConstProp.Res(expr=e.Const(e.Bool, False), is_const=True, value=False)
     
     # If ALL operands are true, return true.
     if all([args[child].is_const and args[child].value for child in expr.children()]):
-      return ConstProp.Res(expr=Const(Bool, True), is_const=True, value=True)
+      return ConstProp.Res(expr=e.Const(e.Bool, True), is_const=True, value=True)
     
     
     return ConstProp.Res(expr=expr, is_const=False, value=None)
@@ -35,20 +37,4 @@ class ConstProp(Visitor):
     return ConstProp.Res(expr=expr, is_const=False, value=None)
   
 
-import unittest
-
-class Tests(unittest.TestCase):
-  
-  def test_and(self):              
-    const_prop = ConstProp()
-    
-    # Check (and (var v1) (const false)) simplifies to (const false)
-    self.assertEquals(
-      Const(Bool, False), 
-      const_prop.process(And([Var(Bool, "v1"),Const(Bool, False)])))
-
-    # Check (and (var v1) (const false)) simplifies to (const false)
-    self.assertEquals(
-      Const(Bool, True), 
-      const_prop.process(And([Const(Bool, True),Const(Bool, True)])))
   
