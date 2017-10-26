@@ -1,7 +1,5 @@
 import collections
 
-from expr import *
-
 ''' Help eliminate constants in expressions. '''
 
 class ConstProp(Visitor):
@@ -33,7 +31,6 @@ class ConstProp(Visitor):
     return ConstProp.Res(expr=expr, is_const=False, value=None)
   
   def visit_or(self, expr, args):
-    # 
     return ConstProp.Res(expr=expr, is_const=False, value=None)
   
   def visit_not(self, expr, args):
@@ -41,7 +38,6 @@ class ConstProp(Visitor):
   
 
 import unittest
-
 
 class Tests(unittest.TestCase):
   
