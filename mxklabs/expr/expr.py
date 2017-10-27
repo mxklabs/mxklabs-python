@@ -48,11 +48,6 @@ class Product(Type):
 
 Bool = Type("bool", values=[False,True], num_values=2)
 
-''' Parameterised types. '''
-
-@mxklabs.utils.Memoise 
-def BitVector(bits): return Type("uint%d" % bits, values=six.moves.range(2**bits), num_values=2**bits)
-
 ''' 
   Base class for all expression classes.  
 '''
