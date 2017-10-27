@@ -119,6 +119,10 @@ class Expression(object):
       raise Exception("type \"{type}\" requires at most {max_num_children} operand(s)".format(
         type=type(self), 
         max_num_children=self._max_num_children))
+  
+  ''' Work out the value of the expression given a map from self.children to values. '''
+  def evaluate(self, args):
+    raise Exception("Not implemented for class {classname}".format(classname=self.__class__.__name__))
 
 ''' Constant. '''
 
