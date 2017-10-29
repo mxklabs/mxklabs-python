@@ -62,9 +62,12 @@ class Expression(object):
     return self._type
   
   def visit(self, visitor, args):
-    visit_method_name = 'visit_' + mxklabs.utils.Utils.camel_case_to_underscore(type(self).__name__)
-    visit_method = getattr(visitor, visit_method_name)
-    return visit_method(self, args)
+    try:
+      visit_method_name = 'visit_' + mxklabs.utils.Utils.camel_case_to_underscore(type(self).__name__)
+      visit_method = getattr(visitor, visit_method_name)
+      return visit_method(self, args)
+    except:
+      return visitor.visit_default(self, args)
   
   ''' Work out the value of the expression given a map from self.children to values. '''
   def evaluate(self, args):

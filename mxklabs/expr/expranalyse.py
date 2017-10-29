@@ -4,6 +4,31 @@ from mxklabs.expr import exprtype as et
 from mxklabs.expr import expr as ex
 from mxklabs.expr import exprwalker as ew
 
+
+''' Help eliminate constants in expressions. '''
+
+class GetVariables(ew.Visitor):
+  
+  Res = collections.namedtuple('Res', ['vars'])
+  
+  def process(self, expr):
+    return self.bottom_up_walk(expr).vars
+  
+  def visit_variable(self, expr, args):
+    return GetVariables.Res(vars=[expr])
+  
+  def visit_default(self, expr, args):
+    
+    result = []
+    
+    for child in expr.children():
+      for child_var in args[child].vars:
+        if child_var not in result:
+          result.append(child_var)
+
+    return GetVariables.Res(vars=result)
+  
+
 ''' Help eliminate constants in expressions. '''
 
 class ConstantPropagator(ew.Visitor):
@@ -12,9 +37,6 @@ class ConstantPropagator(ew.Visitor):
   
   def process(self, expr):
     return self.bottom_up_walk(expr).expr
-  
-  def visit_variable(self, expr, args):
-    return ConstantPropagator.Res(expr=expr, is_const=False, value=None)
   
   def visit_constant(self, expr, args):
     return ConstantPropagator.Res(expr=expr, is_const=True, value=expr.value())
@@ -43,7 +65,7 @@ class ConstantPropagator(ew.Visitor):
 
     return ConstantPropagator.Res(expr=expr, is_const=False, value=None)
 
-  def visit_logical_not(self, expr, args):
+  def visit_default(self, expr, args):
     return ConstantPropagator.Res(expr=expr, is_const=False, value=None)
   
 
