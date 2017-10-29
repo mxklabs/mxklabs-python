@@ -2,10 +2,10 @@ import unittest
 
 import mxklabs.expr as e
 
-class Test_ConstProp(unittest.TestCase):
+class Test_ConstantPropagator(unittest.TestCase):
   
   def test_and(self):              
-    const_prop = e.ConstProp()
+    const_prop = e.ConstantPropagator()
     
     # Check (logical-and (var v1) (const false)) simplifies to (const false)
     self.assertEqual(
@@ -22,7 +22,7 @@ class Test_ConstProp(unittest.TestCase):
         e.Constant(e.Bool(), True))))
 
   def test_or(self):              
-    const_prop = e.ConstProp()
+    const_prop = e.ConstantPropagator()
     
     # Check (logical-or (var v1) (const true) simplifies to (const true)
     self.assertEqual(
