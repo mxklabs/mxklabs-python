@@ -2,21 +2,21 @@ import unittest
 
 import mxklabs.expr as e
 
-class Test_GetVariables(unittest.TestCase):
+class Test_VariableHarvester(unittest.TestCase):
   
   def test_and(self):              
-    getvars = e.GetVariables()
+    getvars = e.VariableHarvester()
     
     # Check (logical-and (var v1) (const false)) simplifies to (const false)
     self.assertEqual(
-      [e.Variable(e.Bool(), "v1")], 
+      set([e.Variable(e.Bool(), "v1")]),
       getvars.process(e.LogicalAnd(
         e.Variable(e.Bool(), "v1"),
         e.Constant(e.Bool(), False))))
 
     # Check (logical-and (const true) (const true)) simplifies to (const false)
     self.assertEqual(
-      [e.Variable(e.Bool(), "v1"),e.Variable(e.Bool(), "v2")],
+      set([e.Variable(e.Bool(), "v1"),e.Variable(e.Bool(), "v2")]),
       getvars.process(e.LogicalAnd(
         e.Variable(e.Bool(), "v1"),
         e.Variable(e.Bool(), "v2"),

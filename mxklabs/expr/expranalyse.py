@@ -7,7 +7,7 @@ from mxklabs.expr import exprwalker as ew
 
 ''' Help eliminate constants in expressions. '''
 
-class GetVariables(ew.Visitor):
+class VariableHarvester(ew.Visitor):
   
   Res = collections.namedtuple('Res', ['vars'])
   
@@ -15,19 +15,22 @@ class GetVariables(ew.Visitor):
     return self.bottom_up_walk(expr).vars
   
   def visit_variable(self, expr, args):
-    return GetVariables.Res(vars=[expr])
+    return VariableHarvester.Res(vars=set([expr]))
   
   def visit_default(self, expr, args):
     
-    result = []
+    result = set()
     
     for child in expr.children():
-      for child_var in args[child].vars:
-        if child_var not in result:
-          result.append(child_var)
-
-    return GetVariables.Res(vars=result)
+      result = result.union(args[child].vars)
   
+    return VariableHarvester.Res(vars=result)
+  
+''' Quick version (avoid creating VariableHarvester). '''
+def harvest_variables(expr):
+    
+    vh = VariableHarvester()
+    return vh.process(expr)
 
 ''' Help eliminate constants in expressions. '''
 
@@ -68,6 +71,11 @@ class ConstantPropagator(ew.Visitor):
   def visit_default(self, expr, args):
     return ConstantPropagator.Res(expr=expr, is_const=False, value=None)
   
+''' Quick version (avoid creating VariableHarvester). '''
+def propagate_constants(expr):
+    
+    cp = ConstantPropagator()
+    return cp.process(expr)
 
   
   
