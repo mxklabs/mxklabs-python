@@ -1,27 +1,37 @@
-from mxklabs.expr import expr as e
+from mxklabs.expr import exprtype as et
+from mxklabs.expr import expr as ex
 
-'''  operations. '''
-
-class And(e.Expression):
+class LogicalAnd(ex.Expression):
   
-  def __init__(self, args):
-    e.Expression.__init__(self, type=e.Bool, nodestr="and", children=args, min_num_children=1)
+  def __init__(self, *args):
+    super().__init__(type=et.Bool(), nodestr="logical-and", children=args)
+    
+    self.ensureMinimumNumberOfChildren(1)
+    for i in range(len(self.children())):
+      self.ensureChildIsType(i, et.Bool())
     
   def evaluate(self, args):
     return all([args[c] for c in self.children()])
     
-class Or(e.Expression):
+class LogicalOr(ex.Expression):
   
-  def __init__(self, args):
-    e.Expression.__init__(self, type=e.Bool, nodestr="or", children=args, min_num_children=1)
+  def __init__(self, *args):
+    super().__init__(type=et.Bool(), nodestr="logical-or", children=args)
+    
+    self.ensureMinimumNumberOfChildren(1)
+    for i in range(len(self.children())):
+      self.ensureChildIsType(i, et.Bool())
     
   def evaluate(self, args):
     return any([args[c] for c in self.children()])
 
-class Not(e.Expression):
+class LogicalNot(ex.Expression):
   
   def __init__(self, arg):
-    e.Expression.__init__(self, type=e.Bool, nodestr="not", children=[arg], num_children=1)
+    super().__init__(type=et.Bool(), nodestr="logical-not", children=[arg])
+    
+    self.ensureNumberOfChildren(1)
+    self.ensureChildIsType(0, et.Bool())
     
   def evaluate(self, args):
     return not args[self.children()[0]]
