@@ -34,6 +34,9 @@ class Solver(object):
         variable = variables[v]
         evalargs[variable] = variable_assignment[v]
 
-      print(evalargs)
-      
-      print(all([constraint.evaluate(evalargs) for constraint in constraints]))
+      if all([constraint.evaluate(evalargs) for constraint in constraints]):
+        print("SAT (" + str(evalargs) + ")")
+        return True
+    
+    print("UNSAT")
+    return False
