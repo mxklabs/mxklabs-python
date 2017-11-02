@@ -22,7 +22,7 @@ class Expression(object):
         nodestr=nodestr,
         children=" ".join([o._hashstr for o in children]))
 
-    if not et.isType(type):
+    if not et.is_type(type):
         raise Exception("the 'type' parameter of expression '{expr}' must inherit from type 'Type' (found type " "'{type}')".format(expr=self, type=type.__class__.__name__))
     
     try:
@@ -31,7 +31,7 @@ class Expression(object):
       raise Exception("the 'children' parameter must be a iterable collection of 'Expression' objects")
     
     for child in self._children:
-      if not isExpression(child):
+      if not is_expression(child):
         raise Exception("the 'children' parameter must be a iterable collection of 'Expression' objects")
 
   def type(self):
@@ -63,37 +63,37 @@ class Expression(object):
   
   def visit(self, visitor, args):
     try:
-      visit_method_name = 'visit_' + mxklabs.utils.Utils.camel_case_to_underscore(type(self).__name__)
+      visit_method_name = 'visit_' + mxklabs.utils.Utils.camel_case_to_snake_case(type(self).__name__)
       visit_method = getattr(visitor, visit_method_name)
       return visit_method(self, args)
-    except:
+    except AttributeError:
       return visitor.visit_default(self, args)
   
   ''' Work out the value of the expression given a map from self.children to values. '''
   def evaluate(self, args):
     raise Exception("Not implemented for class {classname}".format(classname=self.__class__.__name__))
 
-  def ensureNumberOfChildren(self, n):
+  def ensure_number_of_children(self, n):
     if len(self._children) != n:
       raise Exception("type \"{type}\" requires exactly {num_children} operand(s)".format(
                       type=type(self), num_children=n))
  
-  def ensureMinimumNumberOfChildren(self, n):
+  def ensure_minimum_number_of_children(self, n):
     if len(self._children) < n:
       raise Exception("type \"{type}\" requires at least {min_num_children} operand(s)".format(
                       type=type(self), min_num_children=n))
     
-  def ensureMaximumNumberOfChildren(self, n):
+  def ensure_maximum_number_of_children(self, n):
     if len(self._children) > n:
       raise Exception("type \"{type}\" requires at most {max_num_children} operand(s)".format(
                       type=type(self), max_num_children=n))
 
-  def ensureChildIsConstant(self, index):
+  def ensure_child_is_constant(self, index):
     if not isinstance(self._children[index], Constant):
       raise Exception("type \"{type}\" requires subexpression '{childstr}' to be constant".format(
                       type=type(self), childstr=str(self._children[index])))
 
-  def ensureChildIsType(self, index, type):
+  def ensure_child_is_type(self, index, type):
     if self._children[index].type() != type:
       raise Exception("type \"{type}\" requires subexpression '{childstr}' to be to be of type "
                       "'{exptype}' but it is of type '{childtype}')".format(
@@ -101,7 +101,7 @@ class Expression(object):
                       childtype=type(self._children[index])))
 
 ''' Helper function to decide if something is a subclass of Type. '''
-def isExpression(expr):
+def is_expression(expr):
   try:
     return isinstance(expr, Expression)
   except:

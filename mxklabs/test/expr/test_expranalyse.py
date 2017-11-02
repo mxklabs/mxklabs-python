@@ -1,59 +1,59 @@
 import unittest
 
-import mxklabs.expr as e
+import mxklabs as mxk
 
 class Test_VariableHarvester(unittest.TestCase):
   
   def test_and(self):              
-    getvars = e.VariableHarvester()
+    getvars = mxk.VariableHarvester()
     
     # Check (logical-and (var v1) (const false)) simplifies to (const false)
     self.assertEqual(
-      set([e.Variable(e.Bool(), "v1")]),
-      getvars.process(e.LogicalAnd(
-        e.Variable(e.Bool(), "v1"),
-        e.Constant(e.Bool(), False))))
+      set([mxk.Variable(mxk.Bool(), "v1")]),
+      getvars.process(mxk.LogicalAnd(
+        mxk.Variable(mxk.Bool(), "v1"),
+        mxk.Constant(mxk.Bool(), False))))
 
     # Check (logical-and (const true) (const true)) simplifies to (const false)
     self.assertEqual(
-      set([e.Variable(e.Bool(), "v1"),e.Variable(e.Bool(), "v2")]),
-      getvars.process(e.LogicalAnd(
-        e.Variable(e.Bool(), "v1"),
-        e.Variable(e.Bool(), "v2"),
-        e.LogicalNot(e.Variable(e.Bool(), "v1")))))
+      set([mxk.Variable(mxk.Bool(), "v1"),mxk.Variable(mxk.Bool(), "v2")]),
+      getvars.process(mxk.LogicalAnd(
+        mxk.Variable(mxk.Bool(), "v1"),
+        mxk.Variable(mxk.Bool(), "v2"),
+        mxk.LogicalNot(mxk.Variable(mxk.Bool(), "v1")))))
 
 class Test_ConstantPropagator(unittest.TestCase):
   
   def test_and(self):              
-    const_prop = e.ConstantPropagator()
+    const_prop = mxk.ConstantPropagator()
     
     # Check (logical-and (var v1) (const false)) simplifies to (const false)
     self.assertEqual(
-      e.Constant(e.Bool(), False), 
-      const_prop.process(e.LogicalAnd(
-        e.Variable(e.Bool(), "v1"),
-        e.Constant(e.Bool(), False))))
+      mxk.Constant(mxk.Bool(), False), 
+      const_prop.process(mxk.LogicalAnd(
+        mxk.Variable(mxk.Bool(), "v1"),
+        mxk.Constant(mxk.Bool(), False))))
 
     # Check (logical-and (const true) (const true)) simplifies to (const false)
     self.assertEqual(
-      e.Constant(e.Bool(), True),                 
-      const_prop.process(e.LogicalAnd(
-        e.Constant(e.Bool(), True),
-        e.Constant(e.Bool(), True))))
+      mxk.Constant(mxk.Bool(), True),                 
+      const_prop.process(mxk.LogicalAnd(
+        mxk.Constant(mxk.Bool(), True),
+        mxk.Constant(mxk.Bool(), True))))
 
   def test_or(self):              
-    const_prop = e.ConstantPropagator()
+    const_prop = mxk.ConstantPropagator()
     
     # Check (logical-or (var v1) (const true) simplifies to (const true)
     self.assertEqual(
-      e.Constant(e.Bool(), True), 
-      const_prop.process(e.LogicalOr(
-        e.Variable(e.Bool(), "v1"),
-        e.Constant(e.Bool(), True))))
+      mxk.Constant(mxk.Bool(), True), 
+      const_prop.process(mxk.LogicalOr(
+        mxk.Variable(mxk.Bool(), "v1"),
+        mxk.Constant(mxk.Bool(), True))))
 
     # Check (logical-or (const false) (const false)) simplifies to (const false)
     self.assertEqual(
-      e.Constant(e.Bool(), False),      
-      const_prop.process(e.LogicalOr(
-        e.Constant(e.Bool(), False),
-            e.Constant(e.Bool(), False))))
+      mxk.Constant(mxk.Bool(), False),      
+      const_prop.process(mxk.LogicalOr(
+        mxk.Constant(mxk.Bool(), False),
+            mxk.Constant(mxk.Bool(), False))))

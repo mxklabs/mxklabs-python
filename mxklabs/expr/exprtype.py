@@ -47,7 +47,7 @@ class Type(object):
 
 ''' Helper function to decide if something is a subclass of Type. '''
 
-def isType(type):
+def is_type(type):
   try:
     return isinstance(type, Type)
   except Exception as e:

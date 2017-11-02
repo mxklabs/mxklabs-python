@@ -1,17 +1,38 @@
 import unittest
 
-import mxklabs.utils
+import mxklabs as mxk
 
-class Tests(unittest.TestCase):
+class Test_Utils(unittest.TestCase):
   
-  def test_camel_case_to_underscore(self):
-    self.assertEqual("this_is_camel_case", mxklabs.utils.Utils.camel_case_to_underscore("ThisIsCamelCase"))
+  def test_Utils_is_camel_case(self):
+    self.assertTrue(mxk.Utils.is_camel_case("IsCamelCase"))
+    self.assertFalse(mxk.Utils.is_camel_case("isNotCamelCase"))
+    self.assertFalse(mxk.Utils.is_camel_case("is_not_camel_case"))
+
+  def test_Utils_is_snake_case(self):
+    self.assertTrue(mxk.Utils.is_snake_case("is_snake_case"))
+    self.assertFalse(mxk.Utils.is_snake_case("IsNotSnakeCase"))
+    self.assertFalse(mxk.Utils.is_snake_case("is-not-snake-case"))
+
+  def test_Utils_is_kebab_case(self):
+    self.assertTrue(mxk.Utils.is_kebab_case("is-kebab-case"))
+    self.assertFalse(mxk.Utils.is_kebab_case("IsNotKebabCase"))
+    self.assertFalse(mxk.Utils.is_kebab_case("is_not_kebab_case"))
   
-  def test_dashed_to_camel_case(self):
-    self.assertEqual("ThisIsCamelCase", mxklabs.utils.Utils.underscore_to_camel_case("this_is_camel_case"))
+  def test_Utils_camel_case_to_snake_case(self):
+    self.assertEqual("test_word", mxk.Utils.camel_case_to_snake_case("TestWord"))
+  
+  def test_Utils_camel_case_to_kebab_case(self):
+    self.assertEqual("test-word", mxk.Utils.camel_case_to_kebab_case("TestWord"))
+  
+  def test_Utils_snake_case_to_camel_case(self):
+    self.assertEqual("TestWord", mxk.Utils.snake_case_to_camel_case("test_word"))
     
-  def test_camel_case_to_dashed(self):
-    self.assertEqual("this-is-camel-case", mxklabs.utils.Utils.camel_case_to_dashed("ThisIsCamelCase"))
+  def test_Utils_snake_case_to_kebab_case(self):
+    self.assertEqual("test-word", mxk.Utils.snake_case_to_kebab_case("test_word"))
     
-  def test_dashed_to_camel_case(self):
-    self.assertEqual("ThisIsCamelCase", mxklabs.utils.Utils.dashed_to_camel_case("this-is-camel-case"))
+  def test_Utils_kebab_case_to_camel_case(self):
+    self.assertEqual("TestWord", mxk.Utils.kebab_case_to_camel_case("test-word"))
+    
+  def test_Utils_kebab_case_to_snake_case(self):
+    self.assertEqual("test_word", mxk.Utils.kebab_case_to_snake_case("test-word"))

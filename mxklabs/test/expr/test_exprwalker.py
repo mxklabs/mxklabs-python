@@ -1,12 +1,12 @@
 import unittest
 
-import mxklabs.expr as e
+import mxklabs as mxk
 
 class Test_ExprWalker(unittest.TestCase):
   
   def test_expr_walker(self):
     
-    class PrettyPrinter(e.Visitor):
+    class PrettyPrinter(mxk.Visitor):
       def to_string(self, expr): return self.bottom_up_walk(expr);
       
       def visit_variable(self, expr, args): return str(expr.id)
@@ -15,11 +15,11 @@ class Test_ExprWalker(unittest.TestCase):
       def visit_logical_or(self, expr, args): return "(" + " OR ".join([args[c] for c in expr.children()]) + ")"
       def visit_logical_not(self, expr, args): return "(NOT" + args[expr.children()[0]] + ")"
     
-    expr = e.LogicalAnd(
-      e.Variable(type=e.Bool(), id="v1"),
-      e.LogicalOr(
-        e.Constant(type=e.Bool(), value=False), 
-        e.Variable(type=e.Bool(), id="v1")))
+    expr = mxk.LogicalAnd(
+      mxk.Variable(type=mxk.Bool(), id="v1"),
+      mxk.LogicalOr(
+        mxk.Constant(type=mxk.Bool(), value=False), 
+        mxk.Variable(type=mxk.Bool(), id="v1")))
 
     printer = PrettyPrinter()
     

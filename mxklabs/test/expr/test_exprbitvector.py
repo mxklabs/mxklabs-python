@@ -1,6 +1,6 @@
 import unittest
 
-import mxklabs.expr as e
+import mxklabs as mxk
 
 #class Test_Expr(unittest.TestCase):
 #
