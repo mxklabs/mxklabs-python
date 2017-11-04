@@ -16,11 +16,11 @@ class Expression(object):
     self._children = children
     
     if len(children) == 0:
-      self._hashstr = nodestr
+      self._hash_str = nodestr
     else:
-      self._hashstr = "({nodestr} {children})".format(
+      self._hash_str = "({nodestr} {children})".format(
         nodestr=nodestr,
-        children=" ".join([o._hashstr for o in children]))
+        children=" ".join([o._hash_str for o in children]))
 
     if not et.is_type(type):
         raise Exception("the 'type' parameter of expression '{expr}' must inherit from type 'Type' (found type " "'{type}')".format(expr=self, type=type.__class__.__name__))
@@ -37,20 +37,23 @@ class Expression(object):
   def type(self):
     return self._type
   
+  def hash_str(self):
+    return self._hash_str
+  
   def __lt__(self, other):
-    return self._hashstr < other._hashstr
+    return self._hash_str < other._hash_str
 
   def __eq__(self, other):
-    return self._hashstr == other._hashstr
+    return self._hash_str == other._hash_str
   
   def __hash__(self):
-    return hash(self._hashstr)
+    return hash(self._hash_str)
   
   def __str__(self):
-    return self._hashstr  
+    return self._hash_str  
   
   def __repr__(self):
-    return self._hashstr
+    return self._hash_str
 
   def children(self):
     return self._children
@@ -62,12 +65,10 @@ class Expression(object):
     return self._type
   
   def visit(self, visitor, args):
-    try:
-      visit_method_name = 'visit_' + mxklabs.utils.Utils.camel_case_to_snake_case(type(self).__name__)
-      visit_method = getattr(visitor, visit_method_name)
-      return visit_method(self, args)
-    except AttributeError:
-      return visitor.visit_default(self, args)
+    visit_method_name = 'visit_' + mxklabs.utils.Utils.camel_case_to_snake_case(type(self).__name__)
+    visit_method = getattr(visitor, visit_method_name)
+    result = visit_method(self, args)
+    return result
   
   ''' Work out the value of the expression given a map from self.children to values. '''
   def evaluate(self, args):
@@ -107,7 +108,6 @@ def is_expression(expr):
   except:
     return False
 
-
 ''' Constant. '''
 
 class Constant(Expression):
@@ -134,10 +134,13 @@ class Variable(Expression):
   def __init__(self, type, id):
     Expression.__init__(self, type=type, nodestr="(var {id})".format(id=id))
 
-    self.id = id
+    self.id_ = id
     
   def evaluate(self, args):
     return args[self]
+
+  def id(self):
+    return self.id_
   
 ''' Walker object. '''
 

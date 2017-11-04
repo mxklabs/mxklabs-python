@@ -9,7 +9,7 @@ class Test_ExprWalker(unittest.TestCase):
     class PrettyPrinter(mxk.Visitor):
       def to_string(self, expr): return self.bottom_up_walk(expr);
       
-      def visit_variable(self, expr, args): return str(expr.id)
+      def visit_variable(self, expr, args): return str(expr.id())
       def visit_constant(self, expr, args): return str(expr.value()).lower()
       def visit_logical_and(self, expr, args): return "(" + " AND ".join([args[c] for c in expr.children()]) + ")"
       def visit_logical_or(self, expr, args): return "(" + " OR ".join([args[c] for c in expr.children()]) + ")"

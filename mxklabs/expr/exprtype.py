@@ -16,6 +16,8 @@ class Type(object):
     self._num_values = num_values
     
   def __eq__(self, other):
+    if not isinstance(other, Type):
+      return False
     return self._typestr == other._typestr
   
   def __hash__(self):
