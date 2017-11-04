@@ -55,6 +55,9 @@ class Expression(object):
   def __repr__(self):
     return self._hash_str
 
+  def child(self, index=0):
+    return self._children[index]
+
   def children(self):
     return self._children
   
