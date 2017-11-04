@@ -46,15 +46,6 @@ class Test_Tseitin(unittest.TestCase):
     exp_clauses = [[mxk.Tseitin.TRUE_LIT],[tseitin._lit(e_)]]
     self._test_clauses(tseitin, e_, exp_clauses)
 
-  def test_tseitin_logical_not(self):
-    tseitin = mxk.Tseitin()
-    x_ = mxk.Variable(type=mxk.Bool(), id='x')
-    e_ = mxk.LogicalNot(x_)
-    tseitin.add_constraint(e_)
-    
-    exp_clauses = [[mxk.Tseitin.TRUE_LIT],[-tseitin._lit(x_)]]    
-    self._test_clauses(tseitin, e_, exp_clauses)
-   
   def test_tseitin_logical_and(self):
     tseitin = mxk.Tseitin()
     x_ = mxk.Variable(type=mxk.Bool(), id='x')
@@ -69,4 +60,29 @@ class Test_Tseitin(unittest.TestCase):
       [-tseitin._lit(e_), tseitin._lit(y_)],
       [ tseitin._lit(e_),-tseitin._lit(x_),-tseitin._lit(y_)]
     ]
+    self._test_clauses(tseitin, e_, exp_clauses)
+    
+  def test_tseitin_logical_or(self):
+    tseitin = mxk.Tseitin()
+    x_ = mxk.Variable(type=mxk.Bool(), id='x')
+    y_ = mxk.Variable(type=mxk.Bool(), id='y')
+    e_ = mxk.LogicalOr(x_, y_)
+    tseitin.add_constraint(e_)
+    
+    exp_clauses = [
+      [mxk.Tseitin.TRUE_LIT],
+      [tseitin._lit(e_)],
+      [ tseitin._lit(e_),-tseitin._lit(x_)],
+      [ tseitin._lit(e_),-tseitin._lit(y_)],
+      [-tseitin._lit(e_), tseitin._lit(x_), tseitin._lit(y_)]
+    ]
+    self._test_clauses(tseitin, e_, exp_clauses)
+
+  def test_tseitin_logical_not(self):
+    tseitin = mxk.Tseitin()
+    x_ = mxk.Variable(type=mxk.Bool(), id='x')
+    e_ = mxk.LogicalNot(x_)
+    tseitin.add_constraint(e_)
+    
+    exp_clauses = [[mxk.Tseitin.TRUE_LIT],[-tseitin._lit(x_)]]    
     self._test_clauses(tseitin, e_, exp_clauses)

@@ -47,9 +47,6 @@ class Tseitin(ew.Visitor):
     else:
       raise RuntimeError("type {type} not supported".format(type=type))
 
-  def visit_logical_not(self, expr, args):
-    return -args[expr.child()]
-  
   def visit_logical_and(self, expr, args):
     exprlit, fresh = self._lit_with_flag(expr)
     
@@ -65,9 +62,22 @@ class Tseitin(ew.Visitor):
     return exprlit
   
   def visit_logical_or(self, expr, args):
+    exprlit, fresh = self._lit_with_flag(expr)
     
-    pass
-
+    if fresh:
+      # Ensure when the logical or is false, exprlit is false.
+      self._dimacs.clauses.add(frozenset([-exprlit]+[args[child] for child in expr.children()]))
+      
+      # Ensure when any child causes the logical and to be true, exprlit is true, too.
+      for child in expr.children():
+        childlit = args[child]
+        self._dimacs.clauses.add(frozenset([exprlit, -childlit]))
+    
+    return exprlit
+  
+  def visit_logical_not(self, expr, args):
+    return -args[expr.child()]
+  
   ''' Generate a literal. '''
   def _lit(self, expr):
     if expr not in self._idcache.keys():
