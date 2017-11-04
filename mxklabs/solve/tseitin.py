@@ -28,7 +28,12 @@ class Tseitin(ew.Visitor):
   ''' Evaluate a boolean expression and ensure it is asserted to hold. '''
   def add_constraint(self, expr):
     lit = self.bottom_up_walk(expr)
-    self._dimacs.clauses.add(frozenset([lit]))    
+    self._dimacs.clauses.add(frozenset([lit]))
+    
+  ''' Evaluate a number of boolean expressions and ensure they are asserted. '''
+  def add_constraints(self, exprs):
+    for expr in exprs:
+      self.add_constraint(expr)   
   
   ''' Return a representation of this expression in the form of literals. '''
   def visit_variable(self, expr, args):
