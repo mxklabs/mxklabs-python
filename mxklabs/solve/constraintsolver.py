@@ -2,8 +2,6 @@ import itertools
 import operator
 import six
 
-import pycryptosat as pycryptosat
-
 from mxklabs.expr import expr as ex
 from mxklabs.expr import exprtype as et
 from mxklabs.expr import expranalyse as ea
@@ -81,7 +79,7 @@ class ConstraintSolver(object):
     Solver that just enumerates all possible variable assignments and tests form
     satisfiability. 
 '''
-def BruteForceConstraintSolver(ConstraintSolver):
+class BruteForceConstraintSolver(ConstraintSolver):
 
   # Don't even attempt to brute-force solve problems state spaces exceeding this number.
   MAX_STATESPACE = 2 ** 20

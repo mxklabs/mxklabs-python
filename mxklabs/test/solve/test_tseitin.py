@@ -55,10 +55,8 @@ class Test_Tseitin(unittest.TestCase):
     
     exp_clauses = [
       [mxk.Tseitin.TRUE_LIT],
-      [tseitin._lit(e_)],
-      [-tseitin._lit(e_), tseitin._lit(x_)],
-      [-tseitin._lit(e_), tseitin._lit(y_)],
-      [ tseitin._lit(e_),-tseitin._lit(x_),-tseitin._lit(y_)]
+      [tseitin._lit(x_)],
+      [tseitin._lit(y_)]
     ]
     self._test_clauses(tseitin, e_, exp_clauses)
     
