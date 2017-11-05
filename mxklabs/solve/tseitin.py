@@ -1,7 +1,8 @@
 import collections
 
-from mxklabs.expr import exprtype as et
 from mxklabs.expr import expr as ex
+from mxklabs.expr import exprbool as eb
+from mxklabs.expr import exprtype as et
 from mxklabs.expr import exprwalker as ew
 
 from mxklabs import dimacs
@@ -27,8 +28,12 @@ class Tseitin(ew.Visitor):
   
   ''' Evaluate a boolean expression and ensure it is asserted to hold. '''
   def add_constraint(self, expr):
-    lit = self.bottom_up_walk(expr)
-    self._dimacs.clauses.add(frozenset([lit]))
+    if isinstance(expr, eb.LogicalAnd):
+      for child in expr.children():
+        self.add_constraint(child)
+    else:    
+      lit = self.bottom_up_walk(expr)
+      self._dimacs.clauses.add(frozenset([lit]))
     
   ''' Evaluate a number of boolean expressions and ensure they are asserted. '''
   def add_constraints(self, exprs):

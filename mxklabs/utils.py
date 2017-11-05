@@ -44,7 +44,7 @@ class Utils(object):
   @staticmethod
   def kebab_case_to_snake_case(string):
     return "_".join([noun for noun in string.split('-')])
-
+  
 # NOTE: I'd have rather used functools.lru_cache to achieve memoisation but it's not available 
 # in Python 2.x. Hence, I'm using a solution from stack overflow: 
 # https://stackoverflow.com/questions/815110/is-there-a-decorator-to-simply-cache-function-return-values
