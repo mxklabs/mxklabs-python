@@ -1,7 +1,5 @@
 import six
 
-import pycryptosat
-
 from mxklabs.expr import expr as ex
 
 ''' 
@@ -81,6 +79,12 @@ class CryptoSatSolver(SatSolver):
       assigment (a dictionary mapping from variables to values using get_satisfying_assignment().'''
   def _solve_impl(self):
     
+    try:
+      import pycryptosat
+    except ImportError as e:
+      print("error: missing module 'pycryptosat' (see PyPi package 'pycryptosat')")
+      exit(1)
+    
     # Create a SAT solver.
     pycryptosat_solver = pycryptosat.Solver()
     
@@ -99,4 +103,53 @@ class CryptoSatSolver(SatSolver):
     else:
       self.logger("UNSAT")
       return SatSolver.RESULT_UNSAT
+
+'''
+    Implementation of SatSolver using Z3.
+'''
+class Z3SatSolver(SatSolver):
+
+  def __init__(self, logger=lambda msg : print("@Z3SatSolver: {msg}".format(msg=msg))):
+    super(Z3SatSolver, self).__init__(logger)
+
+  ''' Returns either Solver.RESULT_SAT (if satisfiable), Solver.RESULT_UNSAT (if
+      not satisfiable or Solver.RESULT_ERROR on error. If satisfiable, get a satisfying
+      assigment (a dictionary mapping from variables to values using get_satisfying_assignment().'''
+  def _solve_impl(self):
+
+    try:
+      import z3
+    except ImportError as e:
+      print("error: missing module 'z3' (see PyPi package 'z3-solver')")
+      exit(1)
+    
+    z3_vars = [z3.Bool("%d" % v) for v in six.moves.range(self.dimacs.num_vars+1)]
+    z3_solver = z3.Solver()
+    
+    for clause in self.dimacs.clauses:
+      z3_clause = []
+      
+      for lit in clause:
+        if lit > 0:
+          z3_clause.append(z3_vars[lit])
+        else:
+          z3_clause.append(z3.Not(z3_vars[lit]))
+      
+      z3_solver.add(z3.Or(*z3_clause))
+      
+    z3_result = z3_solver.check()
+    
+    if z3_result == z3.sat:
+      self.logger("SAT")
+      # Make callable satisfying assignment.
+      model = z3_solver.model()
+      self._satisfying_assignment = lambda lit : bool(model[z3_vars[lit]])  
+      return SatSolver.RESULT_SAT
+    elif z3_result == z3.unsat:
+      self.logger("UNSAT")
+      return SatSolver.RESULT_UNSAT
+    else:    
+      self.logger("ERROR")
+      return SatSolver.RESULT_ERROR
+
         

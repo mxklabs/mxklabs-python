@@ -137,7 +137,7 @@ class TseitinConstraintSolver(ConstraintSolver):
     tseitin.add_constraints(self.constraints)
     
     # Make a SAT solver.
-    sat_solver = self.sat_solver_type()
+    sat_solver = self.sat_solver_type(logger=self.logger)
     
     # Solve CNF using our SAT solver.
     sat_result = sat_solver.solve(tseitin.dimacs())

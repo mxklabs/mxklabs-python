@@ -6,8 +6,8 @@ import mxklabs as mxk
 
 class Test_CodingStyle(unittest.TestCase):
 
-  CAMEL_CASE_REGEX = '(([A-Z][a-z]*)+)'
-  SNAKE_CASE_REGEX = '([a-z]+(\_[a-z]+)*)'
+  CAMEL_CASE_REGEX = '(([A-Z][a-z]*[0-9]*)+)'
+  SNAKE_CASE_REGEX = '([a-z]+(\_[a-z]+[0-9]*)*)'
   
   ''' Helper function. '''
   def _check_names(self, names, regex):
