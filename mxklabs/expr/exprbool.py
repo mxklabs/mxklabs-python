@@ -35,3 +35,15 @@ class LogicalNot(ex.Expression):
     
   def evaluate(self, args):
     return not args[self.children()[0]]
+
+class Implies(ex.Expression):
+  
+  def __init__(self, arg):
+    super().__init__(type=et.Bool(), nodestr="implies", children=[arg])
+    
+    self.ensure_number_of_children(2)
+    self.ensure_child_is_type(0, et.Bool())
+    self.ensure_child_is_type(1, et.Bool())
+    
+  def evaluate(self, args):
+    return not args[self.children()[0]] or args[self.children()[1]]
