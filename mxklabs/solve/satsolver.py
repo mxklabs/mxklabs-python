@@ -26,7 +26,7 @@ class SatSolver(object):
   RESULT_UNSAT = 1
   RESULT_ERROR = 2
   
-  def __init__(self, logger=lambda msg : print(msg)):
+  def __init__(self, logger):
     self.logger = logger
     self.dimacs = None
     self.statespace = None
@@ -73,7 +73,7 @@ class SatSolver(object):
 '''
 class CryptoSatSolver(SatSolver):
 
-  def __init__(self, logger=lambda msg : print(msg)):
+  def __init__(self, logger=lambda msg : print("@CryptoSatSolver: {msg}".format(msg=msg))):
     super(CryptoSatSolver, self).__init__(logger)
 
   ''' Returns either Solver.RESULT_SAT (if satisfiable), Solver.RESULT_UNSAT (if
@@ -91,10 +91,12 @@ class CryptoSatSolver(SatSolver):
     # Get the SAT solver to do our dirty work.
     issat, solution = pycryptosat_solver.solve()
 
-    if issat:     
+    if issat:
+      self.logger("SAT")
       # Make callable satisfying assignment.
       self._satisfying_assignment = lambda lit : bool(solution[lit])      
       return SatSolver.RESULT_SAT
     else:
+      self.logger("UNSAT")
       return SatSolver.RESULT_UNSAT
         

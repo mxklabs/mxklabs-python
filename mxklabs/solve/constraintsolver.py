@@ -31,7 +31,7 @@ class ConstraintSolver(object):
   RESULT_UNSAT = 1
   RESULT_ERROR = 2
   
-  def __init__(self, logger=lambda msg : print(msg)):
+  def __init__(self, logger):
     self.logger = logger
     self._satisfying_assignment = None
     self.constraints = None
@@ -84,35 +84,39 @@ class BruteForceConstraintSolver(ConstraintSolver):
   # Don't even attempt to brute-force solve problems state spaces exceeding this number.
   MAX_STATESPACE = 2 ** 20
 
-  def __init__(self, logger=lambda msg : print(msg)):
+  def __init__(self, logger=lambda msg : print("@BruteForceConstraintSolve: {msg}".format(msg=msg))):
     super(BruteForceConstraintSolver, self).__init__(logger)
 
   def _solve_impl(self):
     
     if self.statespace <= BruteForceConstraintSolver.MAX_STATESPACE:
       
+      variable_list = list(self.variables)
+      
       # Get an iterator over all variable assignments.
-      variable_assignments = itertools.product(*[v.type().values() for v in self.variables])
+      variable_assignments = itertools.product(*[v.type().values() for v in variable_list])
       # Iterate over them.
       for variable_assignment in variable_assignments:
         # For this assignment, create a mapping from variables to values so we can 
         # evaluate the constraints.
         evalargs = {}        
-        for v in range(len(self.variables)):
-          variable = self.variables[v]
+        for v in range(len(variable_list)):
+          variable = variable_list[v]
           evalargs[variable] = variable_assignment[v]
 
         if all([constraint.evaluate(evalargs) for constraint in self.constraints]):
           # All constraints hold under this variable assignment, SAT!
+          self.logger("SAT")
           self._satisfying_assignment = lambda var : evalargs[var]
           return ConstraintSolver.RESULT_SAT
         
       # No satisfiable assignment, UNSAT.
+      self.logger("UNSAT")
       return ConstraintSolver.RESULT_UNSAT
     
     else:
-
       # We're not patient enough to solve this problem using brute force.
+      self.logger("ERROR")
       self.logger("state space is too large for '{classname}'".format(classname=self.__class__.__name__))
       return Solver.RESULT_ERROR
 
@@ -122,7 +126,7 @@ class BruteForceConstraintSolver(ConstraintSolver):
 '''
 class TseitinConstraintSolver(ConstraintSolver):
   
-  def __init__(self, sat_solver_type=sat.CryptoSatSolver, logger=lambda msg : print(msg)):
+  def __init__(self, sat_solver_type=sat.CryptoSatSolver, logger=lambda msg : print("@TseitinConstraintSolver: {msg}".format(msg=msg))):
     self.sat_solver_type = sat_solver_type
     super(TseitinConstraintSolver, self).__init__(logger)
   
@@ -140,7 +144,8 @@ class TseitinConstraintSolver(ConstraintSolver):
     
     # Convert the result.
     if sat_result == sat.SatSolver.RESULT_SAT:
-      
+      self.logger("SAT")
+            
       def sat_ass(variable):
         if variable.type() == et.Bool():
           lit = tseitin._lit(variable)
@@ -150,8 +155,10 @@ class TseitinConstraintSolver(ConstraintSolver):
         
       self._satisfying_assignment = sat_ass
       return ConstraintSolver.RESULT_SAT
-    elif sat_result == sat.SatSolver.RESULT_SAT:
+    elif sat_result == sat.SatSolver.RESULT_UNSAT:
+      self.logger("UNSAT")
       return ConstraintSolver.RESULT_UNSAT
     else:
+      self.logger("ERROR")
       return ConstraintSolver.RESULT_ERROR
     

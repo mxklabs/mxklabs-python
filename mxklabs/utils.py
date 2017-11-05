@@ -1,3 +1,4 @@
+import inspect
 import re
 
 # Compile this regex once.
@@ -44,6 +45,17 @@ class Utils(object):
   @staticmethod
   def kebab_case_to_snake_case(string):
     return "_".join([noun for noun in string.split('-')])
+  
+  ''' Return classes in module that inherit from base_class, but not base_class itself. '''
+  @staticmethod
+  def get_derived_classes(module, base_class):
+    result = []
+    for name, obj in inspect.getmembers(module):
+      if inspect.isclass(obj) and issubclass(obj, base_class) and obj != base_class:
+          result.append(obj)
+    return result
+    
+    
   
 # NOTE: I'd have rather used functools.lru_cache to achieve memoisation but it's not available 
 # in Python 2.x. Hence, I'm using a solution from stack overflow: 
