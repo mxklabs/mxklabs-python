@@ -46,6 +46,18 @@ class Type(object):
     else:
       raise Exception("Not implemented for class {classname} (with {number_of_values} "
                       "values)".format(classname=self.__class__.__name__, values=self.num_values()))
+  
+  ''' Number of booleans to encode value. '''
+  def littup_size(self):
+    return 1
+  
+  ''' '''
+  def littup_to_value(self, littup):
+    
+    pass
+  
+  def value_to_littup(self, value):
+    pass
 
 ''' Helper function to decide if something is a subclass of Type. '''
 

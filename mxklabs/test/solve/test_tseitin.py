@@ -4,6 +4,9 @@ import mxklabs as mxk
 
 #tseitin._print_cache()
 
+TRUE = mxk.TseitinCache.TRUE_LIT
+FALSE = mxk.TseitinCache.FALSE_LIT
+
 class Test_Tseitin(unittest.TestCase):
     
   def _to_set(self, list_of_lists):
@@ -27,7 +30,7 @@ class Test_Tseitin(unittest.TestCase):
     e_ = mxk.Constant(type=mxk.Bool(), value=True)    
     tseitin.add_constraint(e_)
     
-    exp_clauses = [[mxk.Tseitin.TRUE_LIT]]
+    exp_clauses = [[TRUE]]
     self._test_clauses(tseitin, e_, exp_clauses)
 
   def test_tseitin_constant_false(self):
@@ -35,7 +38,7 @@ class Test_Tseitin(unittest.TestCase):
     e_ = mxk.Constant(type=mxk.Bool(), value=False)    
     tseitin.add_constraint(e_)
     
-    exp_clauses = [[mxk.Tseitin.TRUE_LIT],[mxk.Tseitin.FALSE_LIT]]
+    exp_clauses = [[TRUE],[FALSE]]
     self._test_clauses(tseitin, e_, exp_clauses)
 
   def test_tseitin_variable(self):
@@ -43,7 +46,7 @@ class Test_Tseitin(unittest.TestCase):
     e_ = mxk.Variable(type=mxk.Bool(), id='x')    
     tseitin.add_constraint(e_)
     
-    exp_clauses = [[mxk.Tseitin.TRUE_LIT],[tseitin._lit(e_)]]
+    exp_clauses = [[TRUE],[tseitin.cache_lookup(e_)]]
     self._test_clauses(tseitin, e_, exp_clauses)
 
   def test_tseitin_logical_and(self):
@@ -54,9 +57,9 @@ class Test_Tseitin(unittest.TestCase):
     tseitin.add_constraint(e_)
     
     exp_clauses = [
-      [mxk.Tseitin.TRUE_LIT],
-      [tseitin._lit(x_)],
-      [tseitin._lit(y_)]
+      [TRUE],
+      [tseitin.cache_lookup(x_)],
+      [tseitin.cache_lookup(y_)]
     ]
     self._test_clauses(tseitin, e_, exp_clauses)
     
@@ -68,11 +71,11 @@ class Test_Tseitin(unittest.TestCase):
     tseitin.add_constraint(e_)
     
     exp_clauses = [
-      [mxk.Tseitin.TRUE_LIT],
-      [tseitin._lit(e_)],
-      [ tseitin._lit(e_),-tseitin._lit(x_)],
-      [ tseitin._lit(e_),-tseitin._lit(y_)],
-      [-tseitin._lit(e_), tseitin._lit(x_), tseitin._lit(y_)]
+      [TRUE],
+      [tseitin.cache_lookup(e_)],
+      [ tseitin.cache_lookup(e_),-tseitin.cache_lookup(x_)],
+      [ tseitin.cache_lookup(e_),-tseitin.cache_lookup(y_)],
+      [-tseitin.cache_lookup(e_), tseitin.cache_lookup(x_), tseitin.cache_lookup(y_)]
     ]
     self._test_clauses(tseitin, e_, exp_clauses)
 
@@ -82,5 +85,5 @@ class Test_Tseitin(unittest.TestCase):
     e_ = mxk.LogicalNot(x_)
     tseitin.add_constraint(e_)
     
-    exp_clauses = [[mxk.Tseitin.TRUE_LIT],[-tseitin._lit(x_)]]    
+    exp_clauses = [[TRUE],[-tseitin.cache_lookup(x_)]]    
     self._test_clauses(tseitin, e_, exp_clauses)
