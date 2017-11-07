@@ -57,7 +57,7 @@ class Type(object):
     pass
   
   def value_to_littup(self, value):
-    pass
+    return (value,)
 
 ''' Helper function to decide if something is a subclass of Type. '''
 
@@ -72,7 +72,7 @@ def is_type(type):
 class Bool(Type):
 
   def __init__(self):
-    super().__init__("bool", values=[False,True], num_values=2)
+    super().__init__("bool", values=[(False,),(True,)], num_values=2)
 
 ''' Class for product of types. '''
 
@@ -101,6 +101,8 @@ class Product(Type):
     def is_valid_value(self, value):
       if len(value) != len(self._subtypes):
         return False
+      else:
+        return all([self._subtypes[s].is_valid_value(value[s]) for s in range(len(self._subtypes))])
 
 ''' Parameterised types. '''
 
@@ -111,9 +113,9 @@ class BitVector(Product):
 
   @staticmethod
   def int_to_value(bits, n):
-    return tuple([(((1 << b) & n) != 0) for b in range(bits)])
+    return tuple([(((1 << b) & n) != 0,) for b in range(bits)])
 
   @staticmethod
   def value_to_int(bits, value):
-    return sum([(1 << b) if value[b] else 0 for b in range(len(value))])
+    return sum([(1 << b) if value[b][0] else 0 for b in range(len(value))])
 

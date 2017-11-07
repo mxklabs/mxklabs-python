@@ -4,9 +4,8 @@ import mxklabs.utils
 
 from mxklabs.expr import exprtype as et
 
-''' 
-  Base class for all expression classes.  
-'''
+''' Base class for all expression classes. '''
+
 @functools.total_ordering
 class Expression(object):
   
@@ -105,6 +104,7 @@ class Expression(object):
                       childtype=type(self._children[index])))
 
 ''' Helper function to decide if something is a subclass of Type. '''
+
 def is_expression(expr):
   try:
     return isinstance(expr, Expression)

@@ -148,7 +148,7 @@ class TseitinConstraintSolver(ConstraintSolver):
             
       def sat_ass(variable):
         if variable.type() == et.Bool():
-          lit = tseitin.cache_lookup(variable)
+          lit, = tseitin.cache_lookup(variable)
           return bool(sat_solver.get_satisfying_assignment()(lit))
         else:
           raise Exception("Only boolean variables are supported")

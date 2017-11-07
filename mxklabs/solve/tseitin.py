@@ -19,8 +19,8 @@ class TseitinCache(object):
     # Map tuple of expression and bit to literal.
     self._cache = \
     { 
-      ex.Constant(type=et.Bool(), value=True) : { 0 : TseitinCache.TRUE_LIT },
-      ex.Constant(type=et.Bool(), value=False) : { 0 : TseitinCache.FALSE_LIT }
+      ex.Constant(type=et.Bool(), value=(True,)) : { 0 : TseitinCache.TRUE_LIT },
+      ex.Constant(type=et.Bool(), value=(False,)) : { 0 : TseitinCache.FALSE_LIT }
     }
     self._dimacs = dimacs.Dimacs(clauses=set([frozenset([TseitinCache.TRUE_LIT])]))
 
@@ -102,7 +102,7 @@ class Tseitin(ew.Visitor):
 
   ''' Return a representation of this expression in the form of literals. '''
   def visit_constant(self, expr, args):
-    return tuple(TseitinCache.TRUE_LIT if valbit else TseitinCache.TRUE_LIT for valbit in expr.littup_value())
+    return tuple(TseitinCache.TRUE_LIT if valbit else TseitinCache.FALSE_LIT for valbit in expr.value())
 
   ''' Return a representation of this expression in the form of literals. '''
   def visit_logical_and(self, expr, args):
