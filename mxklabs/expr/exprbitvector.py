@@ -7,7 +7,7 @@ from mxklabs.expr import expr as e
 #''' Amalgamate one or mode product expressions into one. '''
 #
 #
-#class Glue(Expression):
+#class Glue(Expr):
 #  
 #  def __init__(self, *children):
 #    self.ensureMinChildren(1)
@@ -18,10 +18,10 @@ from mxklabs.expr import expr as e
 #    the second child is non-constant the product must be homogenous (i.e. each child must
 #    have the same type). '''
 #
-#class GetItem(Expression):
+#class GetItem(Expr):
 #
 #  def __init__(self, indexee, index):
-#    e.Expression.__init__(self, type=indexee.type(), nodestr="index", children=[indexee, index], min_num_children=2, max_num_children=2)
+#    e.Expr.__init__(self, type=indexee.type(), nodestr="index", children=[indexee, index], min_num_children=2, max_num_children=2)
 #    
 #  def evaluate(self, args):
 #    indexee = args[self.children()[0]]
@@ -31,7 +31,7 @@ from mxklabs.expr import expr as e
 #''' From a product (first child) select the components started from the component indexed
 #    by the second child up to but not including the component indexed by the third child. '''
 #
-#class Break(Expression):
+#class Break(Expr):
 #  
 #  def __init__(self, product, from, to):
 #    self.ensureChildIsConst(from)

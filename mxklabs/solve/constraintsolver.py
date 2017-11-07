@@ -11,7 +11,7 @@ from mxklabs.solve import satsolver as sat
 
 ''' 
     Base class for constraint solvers. Constraints solvers can be used to
-    decide, given a iterable set of constraints (Expression objects), whether this
+    decide, given a iterable set of constraints (Expr objects), whether this
     set of constraints is satisfiable. In this context satisfiable means 'there 
     exists an assignment of values to variables under which all constraints 
     evaluate to true'. 

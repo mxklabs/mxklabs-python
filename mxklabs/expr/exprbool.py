@@ -1,7 +1,7 @@
 from mxklabs.expr import exprtype as et
 from mxklabs.expr import expr as ex
 
-class LogicalAnd(ex.Expression):
+class LogicalAnd(ex.Expr):
   
   def __init__(self, *args):
     super().__init__(type=et.Bool(), nodestr="logical-and", children=args)
@@ -13,7 +13,7 @@ class LogicalAnd(ex.Expression):
   def evaluate(self, args):
     return (all([args[c][0] for c in self.children()]),)
     
-class LogicalOr(ex.Expression):
+class LogicalOr(ex.Expr):
   
   def __init__(self, *args):
     super().__init__(type=et.Bool(), nodestr="logical-or", children=args)
@@ -25,7 +25,7 @@ class LogicalOr(ex.Expression):
   def evaluate(self, args):
     return (any([args[c][0] for c in self.children()]),)
 
-class LogicalNot(ex.Expression):
+class LogicalNot(ex.Expr):
   
   def __init__(self, arg):
     super().__init__(type=et.Bool(), nodestr="logical-not", children=[arg])
@@ -36,7 +36,7 @@ class LogicalNot(ex.Expression):
   def evaluate(self, args):
     return (not args[self.children()[0]][0],)
 
-class Implies(ex.Expression):
+class Implies(ex.Expr):
   
   def __init__(self, arg):
     super().__init__(type=et.Bool(), nodestr="implies", children=[arg])

@@ -7,7 +7,7 @@ from mxklabs.expr import exprtype as et
 ''' Base class for all expression classes. '''
 
 @functools.total_ordering
-class Expression(object):
+class Expr(object):
   
   def __init__(self, type, nodestr, children=[]):
     
@@ -27,11 +27,11 @@ class Expression(object):
     try:
       it = iter(self._children)
     except:
-      raise Exception("the 'children' parameter must be a iterable collection of 'Expression' objects")
+      raise Exception("the 'children' parameter must be a iterable collection of 'Expr' objects")
     
     for child in self._children:
-      if not Expression.is_expression(child):
-        raise Exception("the 'children' parameter must be a iterable collection of 'Expression' objects")
+      if not Expr.is_expr(child):
+        raise Exception("the 'children' parameter must be a iterable collection of 'Expr' objects")
 
   def type(self):
     return self._type
@@ -105,18 +105,18 @@ class Expression(object):
 
   ''' Helper function to decide if something is a subclass of Type. '''
   @staticmethod
-  def is_expression(expr):
+  def is_expr(expr):
     try:
-      return isinstance(expr, Expression)
+      return isinstance(expr, Expr)
     except:
       return False
   
 ''' Constant. '''
 
-class Constant(Expression):
+class Constant(Expr):
   
   def __init__(self, type, value):
-    Expression.__init__(self, type=type, nodestr="(const {value})".format(value=str(value).lower()))
+    Expr.__init__(self, type=type, nodestr="(const {value})".format(value=str(value).lower()))
     
     if not type.is_valid_value(value=value):
       raise Exception("'{value}' is not a valid value for a constant of type '{type}'".format(
@@ -132,10 +132,10 @@ class Constant(Expression):
 
 ''' Variable. '''
 
-class Variable(Expression):
+class Variable(Expr):
   
   def __init__(self, type, id):
-    Expression.__init__(self, type=type, nodestr="(var {id})".format(id=id))
+    Expr.__init__(self, type=type, nodestr="(var {id})".format(id=id))
 
     self.id_ = id
     
