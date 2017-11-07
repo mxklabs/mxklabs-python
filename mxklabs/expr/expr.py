@@ -21,7 +21,7 @@ class Expression(object):
         nodestr=nodestr,
         children=" ".join([o._hash_str for o in children]))
 
-    if not et.is_type(type):
+    if not et.Type.is_type(type):
         raise Exception("the 'type' parameter of expression '{expr}' must inherit from type 'Type' (found type " "'{type}')".format(expr=self, type=type.__class__.__name__))
     
     try:
@@ -30,7 +30,7 @@ class Expression(object):
       raise Exception("the 'children' parameter must be a iterable collection of 'Expression' objects")
     
     for child in self._children:
-      if not is_expression(child):
+      if not Expression.is_expression(child):
         raise Exception("the 'children' parameter must be a iterable collection of 'Expression' objects")
 
   def type(self):
@@ -103,14 +103,14 @@ class Expression(object):
                       type=type(self), childstr=str(self._children[index]), exptype=type, 
                       childtype=type(self._children[index])))
 
-''' Helper function to decide if something is a subclass of Type. '''
-
-def is_expression(expr):
-  try:
-    return isinstance(expr, Expression)
-  except:
-    return False
-
+  ''' Helper function to decide if something is a subclass of Type. '''
+  @staticmethod
+  def is_expression(expr):
+    try:
+      return isinstance(expr, Expression)
+    except:
+      return False
+  
 ''' Constant. '''
 
 class Constant(Expression):

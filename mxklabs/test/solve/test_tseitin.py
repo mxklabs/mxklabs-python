@@ -46,7 +46,7 @@ class Test_Tseitin(unittest.TestCase):
     e_ = mxk.Variable(type=mxk.Bool(), id='x')    
     tseitin.add_constraint(e_)
     
-    exp_clauses = [[TRUE],[tseitin.cache_lookup(e_)]]
+    exp_clauses = [[TRUE],[tseitin.cache_lookup(e_)[0]]]
     self._test_clauses(tseitin, e_, exp_clauses)
 
   def test_tseitin_logical_and(self):

@@ -76,6 +76,7 @@ class Tseitin(ew.Visitor):
       for child in expr.children():
         self.add_constraint(child)
     elif expr.type() == et.Bool():    
+      littup = self.bottom_up_walk(expr)
       lit, = self.bottom_up_walk(expr)
       self._cache.add_clause(frozenset([lit]))
     else:

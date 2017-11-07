@@ -59,13 +59,13 @@ class Type(object):
   def value_to_littup(self, value):
     return (value,)
 
-''' Helper function to decide if something is a subclass of Type. '''
-
-def is_type(type):
-  try:
-    return isinstance(type, Type)
-  except Exception as e:
-    return False
+  ''' Helper function to decide if something is a subclass of Type. '''
+  @staticmethod
+  def is_type(type):
+    try:
+      return isinstance(type, Type)
+    except Exception as e:
+      return False
 
 ''' Unparameterised types. '''
 
