@@ -2,7 +2,7 @@ import unittest
 
 import mxklabs as mxk
 
-class Test_Type(unittest.TestCase):
+class Test_ExprType(unittest.TestCase):
 
   def test_Bool(self):   
     T = mxk.Bool()

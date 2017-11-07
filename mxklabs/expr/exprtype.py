@@ -7,7 +7,7 @@ import mxklabs.utils
 
 ''' Simple type. '''
 
-class Type(object):
+class ExprType(object):
   
   def __init__(self, typestr, values, num_values):
     
@@ -16,7 +16,7 @@ class Type(object):
     self._num_values = num_values
     
   def __eq__(self, other):
-    if not isinstance(other, Type):
+    if not isinstance(other, ExprType):
       return False
     return self._typestr == other._typestr
   
@@ -59,32 +59,32 @@ class Type(object):
   def value_to_littup(self, value):
     return (value,)
 
-  ''' Helper function to decide if something is a subclass of Type. '''
+  ''' Helper function to decide if something is a subclass of ExprType. '''
   @staticmethod
-  def is_type(type):
+  def is_exprtype(type):
     try:
-      return isinstance(type, Type)
+      return isinstance(type, ExprType)
     except Exception as e:
       return False
 
 ''' Unparameterised types. '''
 
-class Bool(Type):
+class Bool(ExprType):
 
   def __init__(self):
     super().__init__("bool", values=[(False,),(True,)], num_values=2)
 
 ''' Class for product of types. '''
 
-class Product(Type):
+class Product(ExprType):
   
   def __init__(self, subtypes, typestr=None):
 
     if len(subtypes) < 1:
       raise Exception("a product type must have at least one subtype")
     for subtype in subtypes:
-      if not isinstance(subtype, Type):
-        raise Exception("the 'subtype' parameter of type 'Product' must be an interable over 'Type' (found '{type}' subtype)".format(
+      if not isinstance(subtype, ExprType):
+        raise Exception("the 'subtype' parameter of type 'Product' must be an interable over 'ExprType' (found '{type}' subtype)".format(
                         type=subtype))
 
     super().__init__(
