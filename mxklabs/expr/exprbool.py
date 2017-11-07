@@ -11,7 +11,7 @@ class LogicalAnd(ex.Expression):
       self.ensure_child_is_type(i, et.Bool())
     
   def evaluate(self, args):
-    return all([args[c] for c in self.children()])
+    return (all([args[c][0] for c in self.children()]),)
     
 class LogicalOr(ex.Expression):
   
@@ -23,7 +23,7 @@ class LogicalOr(ex.Expression):
       self.ensure_child_is_type(i, et.Bool())
     
   def evaluate(self, args):
-    return any([args[c] for c in self.children()])
+    return (any([args[c][0] for c in self.children()]),)
 
 class LogicalNot(ex.Expression):
   
@@ -34,7 +34,7 @@ class LogicalNot(ex.Expression):
     self.ensure_child_is_type(0, et.Bool())
     
   def evaluate(self, args):
-    return not args[self.children()[0]]
+    return (not args[self.children()[0]][0],)
 
 class Implies(ex.Expression):
   
@@ -46,4 +46,4 @@ class Implies(ex.Expression):
     self.ensure_child_is_type(1, et.Bool())
     
   def evaluate(self, args):
-    return not args[self.children()[0]] or args[self.children()[1]]
+    return (not args[self.children()[0]] or args[self.children()[1]],)

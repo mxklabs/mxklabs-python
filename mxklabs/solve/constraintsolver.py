@@ -103,8 +103,9 @@ class BruteForceConstraintSolver(ConstraintSolver):
         for v in range(len(variable_list)):
           variable = variable_list[v]
           evalargs[variable] = variable_assignment[v]
-
-        if all([constraint.evaluate(evalargs) for constraint in self.constraints]):
+          
+        # TODO(mkkt): Evaluate isn't going to work more than one expression deep this way.
+        if all([constraint.evaluate(evalargs)[0] for constraint in self.constraints]):
           # All constraints hold under this variable assignment, SAT!
           self.logger("SAT")
           self._satisfying_assignment = lambda var : evalargs[var]
@@ -148,8 +149,8 @@ class TseitinConstraintSolver(ConstraintSolver):
             
       def sat_ass(variable):
         if variable.type() == et.Bool():
-          lit, = tseitin.cache_lookup(variable)
-          return bool(sat_solver.get_satisfying_assignment()(lit))
+          littup = tseitin.cache_lookup(variable)
+          return tuple(sat_solver.get_satisfying_assignment()(lit) for lit in littup)
         else:
           raise Exception("Only boolean variables are supported")
         

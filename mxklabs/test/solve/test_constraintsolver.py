@@ -18,8 +18,8 @@ class Test_ConstraintSolver(unittest.TestCase):
     
       self.assertEqual(mxk.ConstraintSolver.RESULT_SAT, solver.solve([x_or_y_, not_x_]))
       
-      self.assertFalse(solver.get_satisfying_assignment()(x_))
-      self.assertTrue(solver.get_satisfying_assignment()(y_))
+      self.assertFalse(solver.get_satisfying_assignment()(x_)[0])
+      self.assertTrue(solver.get_satisfying_assignment()(y_)[0])
     
   def test_constraint_solver_unsat(self):
     
