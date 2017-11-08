@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import mxklabs as mxk
 
 if __name__ == '__main__':

@@ -1,5 +1,8 @@
+from __future__ import print_function
+
 import itertools
 import operator
+
 import six
 
 from mxklabs.expr import expr as ex

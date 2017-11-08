@@ -1,0 +1,4 @@
+future==0.16.0
+six==1.11.0
+pycryptosat==0.1.4
+z3-solver==4.5.1.0.post2
