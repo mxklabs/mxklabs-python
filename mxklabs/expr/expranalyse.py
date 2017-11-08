@@ -57,7 +57,7 @@ class ConstantPropagator(ew.Visitor):
     return ConstantPropagator.Res(expr=expr, is_const=True)
     
   def visit_variable(self, expr, args):
-    return ConstantPropagator.Res(expr=expr, is_const=False)
+    return self.visit_default(expr, args)
   
   def visit_logical_and(self, expr, args):
     
@@ -81,6 +81,12 @@ class ConstantPropagator(ew.Visitor):
     if any([args[child].is_const and args[child].expr.value()[0] for child in expr.children()]):
       return ConstantPropagator.Res(expr=ex.Constant(et.Bool(), (True,)), is_const=True)  
 
+    return ConstantPropagator.Res(expr=expr, is_const=False)
+
+  def visit_logical_not(self, expr, args):
+    return self.visit_default(expr, args)
+  
+  def visit_default(self, expr, args):
     return ConstantPropagator.Res(expr=expr, is_const=False)
   
 ''' Quick version (avoid creating VariableHarvester). '''
