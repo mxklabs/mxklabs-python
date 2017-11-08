@@ -48,7 +48,7 @@ class ConstraintSolver(object):
     # Harvest variables.
     self.variables = set()    
     for constraint in self.constraints:
-      self.variables = self.variables.union(ea.harvest_variables(constraint))
+      self.variables = self.variables.union(ea.VariableHarvester.process(constraint))
     
     # Work out the number of variable assignments.
     self.statespace = six.moves.reduce(operator.mul, [v.type().num_values() for v in self.variables])

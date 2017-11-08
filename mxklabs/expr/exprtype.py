@@ -5,6 +5,8 @@ import six
 
 import mxklabs.utils
 
+from mxklabs.expr import exprvalue as ev
+
 ''' Simple type. '''
 
 class ExprType(object):
@@ -72,7 +74,7 @@ class ExprType(object):
 class Bool(ExprType):
 
   def __init__(self):
-    super().__init__("bool", values=[(False,),(True,)], num_values=2)
+    super().__init__("bool", values=[ev.ExprValue(self, False), ev.ExprValue(self, True)], num_values=2)
     
   def user_friendly_value_to_littup_value(self, user_friendly_value):
     return (user_friendly_value,)

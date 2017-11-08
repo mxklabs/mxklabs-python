@@ -4,7 +4,7 @@ import mxklabs as mxk
 
 class Test_SatSolver(unittest.TestCase):
   
-  def test_sat_solver_sat(self):
+  def test_satsolver_sat(self):
     
     for sat_solver_type in mxk.Utils.get_derived_classes(mxk, mxk.SatSolver):
 
@@ -21,7 +21,7 @@ class Test_SatSolver(unittest.TestCase):
       self.assertTrue(solver.get_satisfying_assignment()(1))
       self.assertFalse(solver.get_satisfying_assignment()(3))
   
-  def test_sat_solver_unsat(self):
+  def test_satsolver_unsat(self):
     
     for sat_solver_type in mxk.Utils.get_derived_classes(mxk, mxk.SatSolver):
 

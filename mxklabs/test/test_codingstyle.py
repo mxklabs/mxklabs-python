@@ -16,7 +16,7 @@ class Test_CodingStyle(unittest.TestCase):
       self.assertTrue(bool(regex.match(name)), assertMsg)
   
   ''' Check all classes in mxk are in CamelCase. '''
-  def test_CodingStyle_class_name(self):
+  def test_codingstyle_class_name(self):
     
     # Make a regex for what are acceptable class names.
     acceptable_classnames_regex = re.compile('^' + Test_CodingStyle.CAMEL_CASE_REGEX + '$')
@@ -28,7 +28,7 @@ class Test_CodingStyle(unittest.TestCase):
     self._check_names(classnames, acceptable_classnames_regex)
             
   ''' Check all method names in mxk are in 'snake_case' or '__snake_case__'. '''
-  def test_CodingStyle_classmethod_name(self):
+  def test_codingstyle_classmethod_name(self):
     
     # Make a regex for what are acceptable method names.
     aceptable_methodnames = re.compile('^(' + '(\_)?' + Test_CodingStyle.SNAKE_CASE_REGEX + 

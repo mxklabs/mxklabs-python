@@ -11,7 +11,7 @@ class VariableHarvester(ew.Visitor):
   
   Res = collections.namedtuple('Res', ['vars'])
   
-  def process(self, expr):
+  def _process(self, expr):
     return self.bottom_up_walk(expr).vars
   
   def visit_constant(self, expr, args):
@@ -38,11 +38,12 @@ class VariableHarvester(ew.Visitor):
   
     return VariableHarvester.Res(vars=result)
   
-''' Quick version (avoid creating VariableHarvester). '''
-def harvest_variables(expr):
+  ''' Quick version (avoid creating VariableHarvester). '''
+  @staticmethod
+  def process(expr):
     
     vh = VariableHarvester()
-    return vh.process(expr)
+    return vh._process(expr)
 
 ''' Help eliminate constants in expressions. '''
 
@@ -50,7 +51,7 @@ class ConstantPropagator(ew.Visitor):
   
   Res = collections.namedtuple('Res', ['expr', 'is_const'])
   
-  def process(self, expr):
+  def _process(self, expr):
     return self.bottom_up_walk(expr).expr
   
   def visit_constant(self, expr, args):
@@ -89,11 +90,43 @@ class ConstantPropagator(ew.Visitor):
   def visit_default(self, expr, args):
     return ConstantPropagator.Res(expr=expr, is_const=False)
   
-''' Quick version (avoid creating VariableHarvester). '''
-def propagate_constants(expr):
+  ''' Quick version (avoid creating VariableHarvester). '''
+  @staticmethod
+  def process(expr):
     
     cp = ConstantPropagator()
-    return cp.process(expr)
+    return cp._process(expr)
+  
+  ''' Help eliminate constants in expressions. '''
+
+class ExpressionEvaluator(ew.Visitor):
+  
+  Res = collections.namedtuple('Res', ['expr', 'is_const'])
+  
+  def _process(self, expr):
+    return self.bottom_up_walk(expr).expr
+  
+  def visit_constant(self, expr, args):
+    return expr.value()
+    
+  def visit_variable(self, expr, args):
+    return args[expr]
+  
+  def visit_logical_and(self, expr, args):
+    return ev.ExprValue(type=et.Bool(), all(args[child].logical_value() for child in expr.children()]))
+  
+  def visit_logical_or(self, expr, args):
+    return ev.ExprValue(type=et.Bool(), any(args[child].logical_value() for child in expr.children()]))
+
+  def visit_logical_not(self, expr, args):
+    return ev.ExprValue(type=et.Bool(), args[expr.child()].logical_value())
+  
+  ''' Quick version (avoid creating VariableHarvester). '''
+  @staticmethod
+  def process(expr):
+    
+    ee = ExpressionEvaluator()
+    return ee._process(expr)
 
   
   

@@ -4,7 +4,7 @@ import mxklabs as mxk
 
 class Test_ConstraintSolver(unittest.TestCase):
   
-  def test_constraint_solver_sat(self):
+  def test_constraintsolver_sat(self):
     
     for constraint_solver_type in mxk.Utils.get_derived_classes(mxk, mxk.ConstraintSolver):
 
@@ -21,7 +21,7 @@ class Test_ConstraintSolver(unittest.TestCase):
       self.assertFalse(solver.get_satisfying_assignment()(x_)[0])
       self.assertTrue(solver.get_satisfying_assignment()(y_)[0])
     
-  def test_constraint_solver_unsat(self):
+  def test_constraintsolver_unsat(self):
     
     for constraint_solver_type in mxk.Utils.get_derived_classes(mxk, mxk.ConstraintSolver):
 

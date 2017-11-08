@@ -57,3 +57,15 @@ class Test_ConstantPropagator(unittest.TestCase):
       const_prop.process(mxk.LogicalOr(
         mxk.Constant(mxk.Bool(), (False,)),
             mxk.Constant(mxk.Bool(), (False,)))))
+
+class Test_ExpressionEvaluator(unittest.TestCase):
+  
+  def test_and(self):              
+    ee = mxk.ExpressionEvaluator()
+    
+    # Check (logical-and (var v1) (const false)) simplifies to (const false)
+    self.assertEqual(
+      mxk.ExprValue(mxk.Bool(), False), 
+      ee.process(mxk.LogicalAnd(
+        mxk.Variable(mxk.Bool(), "v1"),
+        mxk.Constant(mxk.Bool(), (False,)))))
