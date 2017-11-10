@@ -109,6 +109,7 @@ class BruteForceConstraintSolver(ConstraintSolver):
           
         # TODO(mkkt): Evaluate isn't going to work more than one expression deep this way.
         if all([ea.ExpressionEvaluator.process(constraint, evalargs).user_value() for constraint in self.constraints]):
+          print(evalargs)
           # All constraints hold under this variable assignment, SAT!
           self.logger("SAT")
           self._satisfying_assignment = lambda var : evalargs[var].user_value()
@@ -151,7 +152,8 @@ class TseitinConstraintSolver(ConstraintSolver):
       self.logger("SAT")
             
       def sat_ass(variable):
-        littup_value = tseitin.cache_lookup(variable)
+        littup = tseitin.cache_lookup(variable)
+        littup_value = tuple([sat_solver.get_satisfying_assignment()(lit) for lit in littup])
         value = et.ExprValue(variable.type(), littup_value=littup_value)
         return value.user_value()
         

@@ -117,7 +117,7 @@ class ExpressionEvaluator(ew.Visitor):
     return et.ExprValue(type=et.Bool(), user_value=any([res[child].user_value() for child in expr.children()]))
 
   def visit_logical_not(self, expr, res, args):
-    return et.ExprValue(type=et.Bool(), user_value=res[expr.child()].user_value())
+    return et.ExprValue(type=et.Bool(), user_value=not res[expr.child()].user_value())
   
   ''' Quick version (avoid creating VariableHarvester). '''
   @staticmethod
