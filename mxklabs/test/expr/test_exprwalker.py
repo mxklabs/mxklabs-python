@@ -19,7 +19,7 @@ class Test_ExprWalker(unittest.TestCase):
     expr = mxk.LogicalAnd(
       mxk.Variable(type=mxk.Bool(), id="v1"),
       mxk.LogicalOr(
-        mxk.Constant(type=mxk.Bool(), user_value=False), 
+        mxk.Constant(type=mxk.Bool(), user_value=False),
         mxk.Variable(type=mxk.Bool(), id="v1")))
 
     printer = PrettyPrinter()
@@ -34,4 +34,6 @@ class Test_ExprWalker(unittest.TestCase):
       for expr_type in mxk.Utils.get_derived_classes(mxk, mxk.Expr):
 
         # Test that visitor_type handles expr_type.
-        self.assertTrue(mxk.utils.Utils.class_has_function(visitor_type, visit_method_name), error_msg)
+        visit_method_name = 'visit_' + mxk.Utils.camel_case_to_snake_case(expr_type.__name__)
+
+        self.assertTrue(mxk.utils.Utils.class_has_function(visitor_type, visit_method_name))

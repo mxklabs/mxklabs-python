@@ -62,11 +62,15 @@ class ExprType(object):
   
   def __init__(self, typestr):    
     self._typestr = typestr
-    
+
   def __eq__(self, other):
-    assert(isinstance(other, ExprType))
+    assert (isinstance(other, ExprType))
     return self._typestr == other._typestr
-  
+
+  def __ne__(self, other):
+    assert (isinstance(other, ExprType))
+    return self._typestr != other._typestr
+
   def __hash__(self):
     return hash(self._typestr)
   

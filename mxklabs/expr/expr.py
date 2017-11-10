@@ -69,29 +69,29 @@ class Expr(object):
   def ensure_number_of_children(self, n):
     if len(self._children) != n:
       raise Exception("type \"{type}\" requires exactly {num_children} operand(s)".format(
-                      type=type(self), num_children=n))
+                      type=str(type), num_children=n))
  
   def ensure_minimum_number_of_children(self, n):
     if len(self._children) < n:
       raise Exception("type \"{type}\" requires at least {min_num_children} operand(s)".format(
-                      type=type(self), min_num_children=n))
+                      type=str(type), min_num_children=n))
     
   def ensure_maximum_number_of_children(self, n):
     if len(self._children) > n:
       raise Exception("type \"{type}\" requires at most {max_num_children} operand(s)".format(
-                      type=type(self), max_num_children=n))
+                      type=str(type), max_num_children=n))
 
   def ensure_child_is_constant(self, index):
     if not isinstance(self._children[index], Constant):
       raise Exception("type \"{type}\" requires subexpression '{childstr}' to be constant".format(
-                      type=type(self), childstr=str(self._children[index])))
+                      type=str(type), childstr=str(self._children[index])))
 
   def ensure_child_is_type(self, index, type):
     if self._children[index].type() != type:
       raise Exception("type \"{type}\" requires subexpression '{childstr}' to be to be of type "
                       "'{exptype}' but it is of type '{childtype}')".format(
-                      type=type(self), childstr=str(self._children[index]), exptype=type, 
-                      childtype=type(self._children[index])))
+                      type=str(type), childstr=str(self._children[index]), exptype=type,
+                      childtype=str(self._children[index].type())))
 
   ''' Helper function to decide if something is a subclass of ExprType. '''
   @staticmethod

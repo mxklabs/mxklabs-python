@@ -80,7 +80,7 @@ class Tseitin(ew.Visitor):
         self.add_constraint(child)
     elif expr.type() == et.Bool():    
       littup = self.bottom_up_walk(expr)
-      lit, = self.bottom_up_walk(expr)
+      lit, = littup
       self._cache.add_clause(frozenset([lit]))
     else:
       raise("Cannot add an expression with type '{type_}' as a constraint".format(type_=expr.type()))
