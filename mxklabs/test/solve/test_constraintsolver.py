@@ -14,7 +14,7 @@ class Test_ConstraintSolver(unittest.TestCase):
       x_or_y_ = mxk.LogicalOr(x_, y_)
       not_x_ = mxk.LogicalNot(x_)
 
-      solver = constraint_solver_type() #logger=lambda msg : None)
+      solver = constraint_solver_type(logger=lambda msg : None)
     
       self.assertEqual(mxk.ConstraintSolver.RESULT_SAT, solver.solve([x_or_y_, not_x_]))
       
@@ -32,7 +32,7 @@ class Test_ConstraintSolver(unittest.TestCase):
       not_x_ = mxk.LogicalNot(x_)
       not_y_ = mxk.LogicalNot(y_)
 
-      solver = constraint_solver_type() #logger=lambda msg : None)
+      solver = constraint_solver_type(logger=lambda msg : None)
     
       self.assertEqual(mxk.ConstraintSolver.RESULT_UNSAT, solver.solve([x_or_y_, not_x_, not_y_]))
       
