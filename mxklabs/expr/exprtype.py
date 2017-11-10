@@ -5,21 +5,66 @@ import six
 
 import mxklabs.utils
 
-from mxklabs.expr import exprvalue as ev
+''' 
+    A container that holds the value of an expression. The value is represented with
+    both a user-facing logical value and a tuple of bools.
+    We rely on ExprType objects to convert from one representation to the other. The
+    logical representation can be given as the second unnamed argument whereas
+    the the tuple representation has to be named. The constructor for ExprValue expects 
+    exactly one representation.
+    
+    Examples:
+    
+    v1 = mxklabs.ExprValue(Bool(), False)
+    v1 = mxklabs.ExprValue(Bool(), littup_value=(False,))
+''' 
+class ExprValue(object):
 
-''' Simple type. '''
+  def __init__(self, type, user_value=None, littup_value=None):
+
+    assert(isinstance(type, ExprType))
+    assert((user_value == None) != (littup_value == None))
+    
+    if user_value != None:
+      assert(type.is_valid_user_value(user_value=user_value))
+      self._type = type
+      self._user_value = user_value
+      self._littup_value = self._type.user_value_to_littup_value(self._user_value)
+
+    if littup_value != None:
+      assert(type.is_valid_littup_value(littup_value=littup_value))
+      self._type = type
+      self._littup_value = littup_value
+      self._user_value = self._type.littup_value_to_user_value(self._littup_value)
+
+  def __eq__(self, other):
+    assert(isinstance(other, ExprValue))
+    return self._littup_value == other._littup_value
+  
+  def __hash__(self):
+    return hash(self._littup_value)
+  
+  def __str__(self):
+    return str(self._user_value)
+  
+  def __repr__(self):
+    return repr(self._user_value)
+
+  def user_value(self):
+    return self._user_value
+
+  def littup_value(self):
+    return self._littup_value
+    
+''' A class representing a type of an Expr object. Instances of this class are expected to '''
 
 class ExprType(object):
   
-  def __init__(self, typestr, values, num_values):
-    
+  def __init__(self, typestr):    
     self._typestr = typestr
-    self._values = values
-    self._num_values = num_values
     
   def __eq__(self, other):
-    if not isinstance(other, ExprType):
-      return False
+    assert(isinstance(other, ExprType))
     return self._typestr == other._typestr
   
   def __hash__(self):
@@ -30,36 +75,6 @@ class ExprType(object):
   
   def __repr__(self):
     return self._typestr
-  
-  ''' An iterable list of values. For large types with the number of values exceeding, say, 2^10, these values
-      must be constructed on-the-fly using e.g. six.moves.range. '''
-  def values(self):
-    return self._values
-  
-  ''' The number of values. '''
-  def num_values(self):
-    return self._num_values
-  
-  ''' Returns true if the value is in values(). For large types with the number of values exceeding, say, 2^10, 
-      this function must not rely on iterating over all values'''
-  def is_valid_value(self, value):
-    if self.num_values() <= (2 ** 10):
-      return value in self._values
-    else:
-      raise Exception("Not implemented for class {classname} (with {number_of_values} "
-                      "values)".format(classname=self.__class__.__name__, values=self.num_values()))
-  
-  ''' Number of booleans to encode value. '''
-  def littup_size(self):
-    return 1
-  
-  ''' '''
-  def littup_to_value(self, littup):
-    
-    pass
-  
-  def value_to_littup(self, value):
-    return (value,)
 
   ''' Helper function to decide if something is a subclass of ExprType. '''
   @staticmethod
@@ -74,12 +89,40 @@ class ExprType(object):
 class Bool(ExprType):
 
   def __init__(self):
-    super().__init__("bool", values=[ev.ExprValue(self, False), ev.ExprValue(self, True)], num_values=2)
-    
-  def user_friendly_value_to_littup_value(self, user_friendly_value):
-    return (user_friendly_value,)
+    self._values = [ExprValue(type=self, user_value=False), ExprValue(type=self, user_value=True)]
+    self._num_values = len(self._values)
+
+    super().__init__("bool")
+
+  ''' An iterable list of values. For large types with the number of values exceeding, say, 2^10, these values
+      must be constructed on-the-fly using e.g. six.moves.range. '''
+  def values(self):
+    return self._values
   
-  def littup_value_to_user_friendly_value(self, littup_value):
+  ''' The number of values. '''
+  def num_values(self):
+    return self._num_values
+  
+  ''' Number of elements in a boolean tuple. '''
+  def littup_size(self):
+    return 1
+  
+  ''' Any bool is a valid user_value. '''
+  def is_valid_user_value(self, user_value):
+    return type(user_value) == bool
+  
+  ''' Any tuple with a single element that is a bool is a valid littup_value. '''
+  def is_valid_littup_value(self, littup_value):
+    return type(littup_value) == tuple and len(littup_value) == 1 and type(littup_value[0]) == bool
+  
+  ''' Convert user_value to littup_value. '''
+  def user_value_to_littup_value(self, user_value):
+    assert(self.is_valid_user_value(user_value))
+    return (user_value,)
+  
+  ''' Convert littup_value to user_value. '''
+  def littup_value_to_user_value(self, littup_value):
+    assert(self.is_valid_littup_value(littup_value))
     return littup_value[0]
   
 

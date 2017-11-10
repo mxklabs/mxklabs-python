@@ -8,18 +8,18 @@ class Test_ExprWalker(unittest.TestCase):
   def test_expr_walker(self):
     
     class PrettyPrinter(mxk.Visitor):
-      def to_string(self, expr): return self.bottom_up_walk(expr);
+      def to_string(self, expr): return self.bottom_up_walk(expr, None);
       
-      def visit_variable(self, expr, args): return str(expr.id())
-      def visit_constant(self, expr, args): return str(expr.value()[0]).lower()
-      def visit_logical_and(self, expr, args): return "(" + " AND ".join([args[c] for c in expr.children()]) + ")"
-      def visit_logical_or(self, expr, args): return "(" + " OR ".join([args[c] for c in expr.children()]) + ")"
-      def visit_logical_not(self, expr, args): return "(NOT" + args[expr.children()[0]] + ")"
+      def visit_variable(self, expr, res, args): return str(expr.id())
+      def visit_constant(self, expr, res, args): return str(expr.value().user_value()).lower()
+      def visit_logical_and(self, expr, res, args): return "(" + " AND ".join([res[c] for c in expr.children()]) + ")"
+      def visit_logical_or(self, expr, res, args): return "(" + " OR ".join([res[c] for c in expr.children()]) + ")"
+      def visit_logical_not(self, expr, res, args): return "(NOT" + res[expr.children()[0]] + ")"
     
     expr = mxk.LogicalAnd(
       mxk.Variable(type=mxk.Bool(), id="v1"),
       mxk.LogicalOr(
-        mxk.Constant(type=mxk.Bool(), value=(False,)), 
+        mxk.Constant(type=mxk.Bool(), user_value=False), 
         mxk.Variable(type=mxk.Bool(), id="v1")))
 
     printer = PrettyPrinter()

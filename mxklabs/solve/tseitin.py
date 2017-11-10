@@ -22,8 +22,8 @@ class TseitinCache(object):
     # Map tuple of expression and bit to literal.
     self._cache = \
     { 
-      ex.Constant(type=et.Bool(), value=(True,)) : { 0 : TseitinCache.TRUE_LIT },
-      ex.Constant(type=et.Bool(), value=(False,)) : { 0 : TseitinCache.FALSE_LIT }
+      ex.Constant(type=et.Bool(), user_value=True) : { 0 : TseitinCache.TRUE_LIT },
+      ex.Constant(type=et.Bool(), user_value=False) : { 0 : TseitinCache.FALSE_LIT }
     }
     self._dimacs = dimacs.Dimacs(clauses=set([frozenset([TseitinCache.TRUE_LIT])]))
 
@@ -94,59 +94,59 @@ class Tseitin(ew.Visitor):
   def cache_lookup(self, expr):
     return self._cache.lookup_littup(expr)
 
-  def _memoise(self, impl, expr, args):
+  def _memoise(self, impl, expr, res):
     if self._cache.is_cached(expr):
       return self._cache.lookup_littup(expr)
     else:
-      return impl(expr, args)    
+      return impl(expr, res)
   
   ''' Return a representation of this expression in the form of literals. '''
-  def visit_variable(self, expr, args):
+  def visit_variable(self, expr, res, args):
     return self._cache.lookup_littup(expr)
 
   ''' Return a representation of this expression in the form of literals. '''
-  def visit_constant(self, expr, args):
-    return tuple(TseitinCache.TRUE_LIT if valbit else TseitinCache.FALSE_LIT for valbit in expr.value())
+  def visit_constant(self, expr, res, args):
+    return tuple(TseitinCache.TRUE_LIT if valbit else TseitinCache.FALSE_LIT for valbit in expr.value().littup_value())
 
   ''' Return a representation of this expression in the form of literals. '''
-  def visit_logical_and(self, expr, args):
+  def visit_logical_and(self, expr, res, args):
 
-    def impl(expr, args):
+    def impl(expr, res):
 
       littup = self._cache.lookup_littup(expr)
       lit, = littup
     
       # Ensure when the logical and is true, exprlit is true.
-      self._cache.add_clause(frozenset([lit]+[-args[child][0] for child in expr.children()]))
+      self._cache.add_clause(frozenset([lit]+[-res[child][0] for child in expr.children()]))
       
       # Ensure when any child causes the logical and to be false, exprlit is false, too.
       for child in expr.children():
-        childlit = args[child][0]
+        childlit = res[child][0]
         self._cache.add_clause(frozenset([-lit, childlit]))
         
       return littup
     
-    return self._memoise(impl, expr, args)
+    return self._memoise(impl, expr, res)
   
   ''' Return a representation of this expression in the form of literals. '''
-  def visit_logical_or(self, expr, args):
+  def visit_logical_or(self, expr, res, args):
 
-    def impl(expr, args):
+    def impl(expr, res):
 
       littup = self._cache.lookup_littup(expr)
       lit, = littup
       
       # Ensure when the logical or is false, exprlit is false.
-      self._cache.add_clause(frozenset([-lit]+[args[child][0] for child in expr.children()]))
+      self._cache.add_clause(frozenset([-lit]+[res[child][0] for child in expr.children()]))
       
       # Ensure when any child causes the logical and to be true, exprlit is true, too.
       for child in expr.children():
-        childlit = args[child][0]
+        childlit = res[child][0]
         self._cache.add_clause(frozenset([lit, -childlit]))
         
       return littup
     
-    return self._memoise(impl, expr, args)
+    return self._memoise(impl, expr, res)
   
-  def visit_logical_not(self, expr, args):
-    return (-args[expr.child()][0],)
+  def visit_logical_not(self, expr, res, args):
+    return (-res[expr.child()][0],)

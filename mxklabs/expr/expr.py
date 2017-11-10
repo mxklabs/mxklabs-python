@@ -66,16 +66,6 @@ class Expr(object):
   def codomain(self):
     return self._type
   
-  def visit(self, visitor, args):
-    visit_method_name = 'visit_' + mxklabs.utils.Utils.camel_case_to_snake_case(type(self).__name__)
-    visit_method = getattr(visitor, visit_method_name)
-    result = visit_method(self, args)
-    return result
-  
-  ''' Work out the value of the expression given a map from self.children to values. '''
-  def evaluate(self, args):
-    raise Exception("Not implemented for class {classname}".format(classname=self.__class__.__name__))
-
   def ensure_number_of_children(self, n):
     if len(self._children) != n:
       raise Exception("type \"{type}\" requires exactly {num_children} operand(s)".format(
@@ -115,17 +105,23 @@ class Expr(object):
 
 class Constant(Expr):
   
-  def __init__(self, type, value):
-    Expr.__init__(self, type=type, nodestr="(const {value})".format(value=str(value).lower()))
+  def __init__(self, type, user_value=None, littup_value=None):
     
-    if not type.is_valid_value(value=value):
-      raise Exception("'{value}' is not a valid value for a constant of type '{type}'".format(
-                      value=value, type=type))
+    assert(isinstance(type, et.ExprType))
+    assert((user_value == None) != (littup_value == None))
+    
+    if user_value != None:
+      assert(type.is_valid_user_value(user_value=user_value))
+    if littup_value != None:
+      assert(type.is_valid_littup_value(littup_value=littup_value))
+    
+    self._value = et.ExprValue(type, user_value=user_value, littup_value=littup_value)
+    
+    nodestr = "(const {type} {value})".format(
+      type=str(type).lower(),
+      value=str(self._value).lower())
 
-    self._value = value
-
-  def evaluate(self, args):
-    return self.value
+    Expr.__init__(self, type=type, nodestr=nodestr)
   
   def value(self):
     return self._value
@@ -138,9 +134,6 @@ class Variable(Expr):
     Expr.__init__(self, type=type, nodestr="(var {id})".format(id=id))
 
     self.id_ = id
-    
-  def evaluate(self, args):
-    return args[self]
 
   def id(self):
     return self.id_

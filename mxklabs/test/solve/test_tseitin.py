@@ -27,7 +27,7 @@ class Test_Tseitin(unittest.TestCase):
     
   def test_tseitin_constant_true(self):
     tseitin = mxk.Tseitin()
-    e_ = mxk.Constant(type=mxk.Bool(), value=(True,))    
+    e_ = mxk.Constant(type=mxk.Bool(), user_value=True)    
     tseitin.add_constraint(e_)
     
     exp_clauses = [[TRUE]]
@@ -35,7 +35,7 @@ class Test_Tseitin(unittest.TestCase):
 
   def test_tseitin_constant_false(self):
     tseitin = mxk.Tseitin()
-    e_ = mxk.Constant(type=mxk.Bool(), value=(False,))    
+    e_ = mxk.Constant(type=mxk.Bool(), user_value=False)    
     tseitin.add_constraint(e_)
     
     exp_clauses = [[TRUE],[FALSE]]

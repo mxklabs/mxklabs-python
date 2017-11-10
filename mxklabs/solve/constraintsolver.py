@@ -108,10 +108,10 @@ class BruteForceConstraintSolver(ConstraintSolver):
           evalargs[variable] = variable_assignment[v]
           
         # TODO(mkkt): Evaluate isn't going to work more than one expression deep this way.
-        if all([constraint.evaluate(evalargs)[0] for constraint in self.constraints]):
+        if all([ea.ExpressionEvaluator.process(constraint, evalargs).user_value() for constraint in self.constraints]):
           # All constraints hold under this variable assignment, SAT!
           self.logger("SAT")
-          self._satisfying_assignment = lambda var : evalargs[var]
+          self._satisfying_assignment = lambda var : evalargs[var].user_value()
           return ConstraintSolver.RESULT_SAT
         
       # No satisfiable assignment, UNSAT.
@@ -151,11 +151,9 @@ class TseitinConstraintSolver(ConstraintSolver):
       self.logger("SAT")
             
       def sat_ass(variable):
-        if variable.type() == et.Bool():
-          littup = tseitin.cache_lookup(variable)
-          return tuple(sat_solver.get_satisfying_assignment()(lit) for lit in littup)
-        else:
-          raise Exception("Only boolean variables are supported")
+        littup_value = tseitin.cache_lookup(variable)
+        value = et.ExprValue(variable.type(), littup_value=littup_value)
+        return value.user_value()
         
       self._satisfying_assignment = sat_ass
       return ConstraintSolver.RESULT_SAT
