@@ -58,7 +58,11 @@ class Utils(object):
   ''' Returns true if class object has a function of the specified name. Can be used for testing interfaces. '''
   @staticmethod
   def class_has_function(class_, function_name):
-    return hasattr(class_, function_name) and inspect.isfunction(getattr(class_, function_name))
+    if hasattr(class_, function_name):
+      return inspect.isfunction(getattr(class_, function_name)) \
+             or inspect.ismethod(getattr(class_, function_name))
+    else:
+      return False
     
   
 # NOTE: I'd have rather used functools.lru_cache to achieve memoisation but it's not available 

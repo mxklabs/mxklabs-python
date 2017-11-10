@@ -92,7 +92,7 @@ class Bool(ExprType):
     self._values = [ExprValue(type=self, user_value=False), ExprValue(type=self, user_value=True)]
     self._num_values = len(self._values)
 
-    super().__init__("bool")
+    ExprType.__init__(self, "bool")
 
   ''' An iterable list of values. For large types with the number of values exceeding, say, 2^10, these values
       must be constructed on-the-fly using e.g. six.moves.range. '''

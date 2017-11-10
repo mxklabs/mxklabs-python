@@ -34,12 +34,4 @@ class Test_ExprWalker(unittest.TestCase):
       for expr_type in mxk.Utils.get_derived_classes(mxk, mxk.Expr):
 
         # Test that visitor_type handles expr_type.
-        visit_method_name = 'visit_' + mxk.Utils.camel_case_to_snake_case(expr_type.__name__)
-        error_msg = "'{classname}' does not have a member function called {method_name} " \
-                    "(it is expected to because of parent class 'Visitor')".format(
-          classname=visitor_type.__name__,
-          method_name=visit_method_name)
-        
-        self.assertTrue(hasattr(visitor_type, visit_method_name), error_msg)
-        self.assertTrue(inspect.isfunction(getattr(visitor_type, visit_method_name)), error_msg)
-    
+        self.assertTrue(mxk.utils.Utils.class_has_function(visitor_type, visit_method_name), error_msg)

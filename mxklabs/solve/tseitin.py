@@ -67,7 +67,7 @@ class Tseitin(ew.Visitor):
   
   def __init__(self):
     self._cache = TseitinCache()
-    super().__init__()
+    ew.Visitor.__init__(self)
   
   def dimacs(self):
     return self._cache.dimacs()
