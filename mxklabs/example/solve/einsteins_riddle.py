@@ -296,3 +296,17 @@ def run_example(logger):
 
 if __name__ == '__main__':
     run_example(logger=print)
+
+import unittest
+
+class Test_EinsteinsRiddle(unittest.TestCase):
+
+    def test_example_solve_einsteins_riddle(self):
+
+        logs = []
+        logger = lambda msg : logs.append(msg)
+
+        run_example(logger=logger)
+
+        self.assertEqual(['Solution: Norwegian drinks the water, Japanese owns '
+                          't he zebra!'], logs)
