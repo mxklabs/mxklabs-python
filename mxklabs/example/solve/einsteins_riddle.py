@@ -309,4 +309,4 @@ class Test_EinsteinsRiddle(unittest.TestCase):
         run_example(logger=logger)
 
         self.assertEqual(['Solution: Norwegian drinks the water, Japanese owns '
-                          't he zebra!'], logs)
+                          'the zebra!'], logs)
