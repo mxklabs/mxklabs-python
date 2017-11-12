@@ -88,6 +88,8 @@ class BruteForceConstraintSolver(ConstraintSolver):
   MAX_STATESPACE = 2 ** 20
 
   def __init__(self, logger=lambda msg : print("@BruteForceConstraintSolve: {msg}".format(msg=msg))):
+    if logger is None:
+        logger = lambda msg: None
     super(BruteForceConstraintSolver, self).__init__(logger)
 
   def _solve_impl(self):
@@ -122,7 +124,7 @@ class BruteForceConstraintSolver(ConstraintSolver):
       # We're not patient enough to solve this problem using brute force.
       self.logger("ERROR")
       self.logger("state space is too large for '{classname}'".format(classname=self.__class__.__name__))
-      return Solver.RESULT_ERROR
+      return ConstraintSolver.RESULT_ERROR
 
 ''' 
     Solver that converts constraints to a boolean CNF using a Tseitin-like
@@ -131,8 +133,11 @@ class BruteForceConstraintSolver(ConstraintSolver):
 class TseitinConstraintSolver(ConstraintSolver):
   
   def __init__(self, sat_solver_type=sat.CryptoSatSolver, logger=lambda msg : print("@TseitinConstraintSolver: {msg}".format(msg=msg))):
-    self.sat_solver_type = sat_solver_type
-    super(TseitinConstraintSolver, self).__init__(logger)
+      if logger is None:
+          logger = lambda msg: None
+
+      self.sat_solver_type = sat_solver_type
+      super(TseitinConstraintSolver, self).__init__(logger)
   
   def _solve_impl(self):
     

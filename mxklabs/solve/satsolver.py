@@ -74,6 +74,8 @@ class SatSolver(object):
 class CryptoSatSolver(SatSolver):
 
   def __init__(self, logger=lambda msg : print("@CryptoSatSolver: {msg}".format(msg=msg))):
+    if logger is None:
+       logger = lambda msg: None
     super(CryptoSatSolver, self).__init__(logger)
 
   ''' Returns either Solver.RESULT_SAT (if satisfiable), Solver.RESULT_UNSAT (if
@@ -112,6 +114,8 @@ class CryptoSatSolver(SatSolver):
 class Z3SatSolver(SatSolver):
 
   def __init__(self, logger=lambda msg : print("@Z3SatSolver: {msg}".format(msg=msg))):
+    if logger is None:
+       logger = lambda msg: None
     super(Z3SatSolver, self).__init__(logger)
 
   ''' Returns either Solver.RESULT_SAT (if satisfiable), Solver.RESULT_UNSAT (if
