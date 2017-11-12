@@ -5,9 +5,9 @@ import collections
 import six
 
 from mxklabs.expr import expr as ex
+from mxklabs.expr import expranalyse as ea
 from mxklabs.expr import exprbool as eb
 from mxklabs.expr import exprtype as et
-from mxklabs.expr import exprwalker as ew
 
 from mxklabs import dimacs
 
@@ -63,11 +63,11 @@ class TseitinCache(object):
       print("'{exprstr}:{bit}' -> {lit}".format(exprstr=exprstr, lit=lit))
 
 
-class Tseitin(ew.Visitor):
+class Tseitin(ea.ExprWalker):
   
   def __init__(self):
     self._cache = TseitinCache()
-    ew.Visitor.__init__(self)
+    ea.ExprWalker.__init__(self)
   
   def dimacs(self):
     return self._cache.dimacs()

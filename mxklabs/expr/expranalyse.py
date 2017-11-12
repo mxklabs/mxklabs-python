@@ -2,12 +2,28 @@ import collections
 
 from mxklabs.expr import exprtype as et
 from mxklabs.expr import expr as ex
-from mxklabs.expr import exprwalker as ew
+from mxklabs import utils
 
+''' Walker object. '''
+class ExprWalker(object):
+  def __init__(self):
+    pass
+  
+  def bottom_up_walk(self, expr, args=None):
+
+    assert (isinstance(expr, ex.Expr))
+
+    visit_method_name = 'visit_' + utils.Utils.camel_case_to_snake_case(
+      expr.__class__.__name__)
+    visit_method = getattr(self, visit_method_name)
+
+    res = dict([(c, self.bottom_up_walk(c, args)) for c in expr.children()])
+
+    return visit_method(expr=expr, res=res, args=args)
 
 ''' Help eliminate constants in expressions. '''
 
-class VariableHarvester(ew.Visitor):
+class VariableHarvester(ExprWalker):
   
   Res = collections.namedtuple('Res', ['vars'])
   
@@ -47,7 +63,7 @@ class VariableHarvester(ew.Visitor):
 
 ''' Help propagate constant expressions. '''
 
-class ConstantPropagator(ew.Visitor):
+class ConstantPropagator(ExprWalker):
   
   Res = collections.namedtuple('Res', ['expr', 'is_const'])
   
@@ -99,7 +115,7 @@ class ConstantPropagator(ew.Visitor):
   
 ''' Evaluate the value of an expressions. '''
 
-class ExpressionEvaluator(ew.Visitor):
+class ExpressionEvaluator(ExprWalker):
   
   def _process(self, expr, variable_value_map):
     return self.bottom_up_walk(expr=expr, args=variable_value_map)
