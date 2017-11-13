@@ -2,9 +2,7 @@ from mxklabs.expr import expr as ex
 from mxklabs.expr import exprtype as et
 
 class Bool(et.ExprType):
-    """
-    An object that represents a boolean expression type.
-    """
+    """ An object that represents a boolean expression type. """
 
     def __init__(self):
         """ Initialise Bool object. """
@@ -46,8 +44,13 @@ class Bool(et.ExprType):
         return littup_value[0]
 
 class LogicalAnd(ex.Expr):
-  
+    """ An object that represents a logical AND expression. """
+
     def __init__(self, *args):
+        """
+        Construct a LogicalAnd object.
+        :param args: One or more Expr objects of type Bool (operands).
+        """
         ex.Expr.__init__(self, type=Bool(), nodestr="logical-and", children=args)
 
         self.ensure_minimum_number_of_children(1)
@@ -55,8 +58,13 @@ class LogicalAnd(ex.Expr):
             self.ensure_child_is_type(i, Bool())
 
 class LogicalOr(ex.Expr):
-  
+    """ An object that represents a logical OR expression. """
+
     def __init__(self, *args):
+        """
+        Construct a LogicalOr object.
+        :param args: One or more Expr objects of type Bool (operands).
+        """
         ex.Expr.__init__(self, type=Bool(), nodestr="logical-or", children=args)
 
         self.ensure_minimum_number_of_children(1)
@@ -64,8 +72,13 @@ class LogicalOr(ex.Expr):
             self.ensure_child_is_type(i, Bool())
 
 class LogicalNot(ex.Expr):
-  
+    """ An object that represents a logical NOT expression. """
+
     def __init__(self, arg):
+        """
+        Construct a LogicalNot object.
+        :param args: One or more Expr objects of type Bool (operands).
+        """
         ex.Expr.__init__(self, type=Bool(), nodestr="logical-not", children=[arg])
 
         self.ensure_number_of_children(1)
