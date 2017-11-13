@@ -1,4 +1,7 @@
+import abc
 import functools
+
+import six
 
 import mxklabs.utils
 
@@ -6,11 +9,10 @@ from mxklabs.expr import exprtype as et
 
 ''' Base class for all expression classes. '''
 
-@functools.total_ordering
+@six.add_metaclass(abc.ABCMeta)
 class Expr(object):
   
   def __init__(self, type, nodestr, children=[]):
-    
     self._type = type
     self._children = children
     
@@ -100,7 +102,8 @@ class Expr(object):
       return isinstance(expr, Expr)
     except:
       return False
-  
+
+
 ''' Constant. '''
 
 class Constant(Expr):

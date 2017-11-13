@@ -1,7 +1,8 @@
 import collections
 
-from mxklabs.expr import exprtype as et
 from mxklabs.expr import expr as ex
+from mxklabs.expr import exprbool as eb
+from mxklabs.expr import exprtype as et
 from mxklabs import utils
 
 ''' Walker object. '''
@@ -80,11 +81,11 @@ class ConstantPropagator(ExprWalker):
     
     # If ANY operand is false, return falsex.
     if any([res[child].is_const and not res[child].expr.value().user_value() for child in expr.children()]):
-      return ConstantPropagator.Res(expr=ex.Constant(et.Bool(), user_value=False), is_const=True)
+      return ConstantPropagator.Res(expr=ex.Constant(eb.Bool(), user_value=False), is_const=True)
     
     # If ALL operands are true, return truex.
     if all([res[child].is_const and res[child].expr.value().user_value() for child in expr.children()]):
-      return ConstantPropagator.Res(expr=ex.Constant(et.Bool(), user_value=True), is_const=True)
+      return ConstantPropagator.Res(expr=ex.Constant(eb.Bool(), user_value=True), is_const=True)
 
     return ConstantPropagator.Res(expr=expr, is_const=False, value=None)
   
@@ -92,11 +93,11 @@ class ConstantPropagator(ExprWalker):
     
     # If ALL operand are false, return false.
     if all([res[child].is_const and not res[child].expr.value().user_value() for child in expr.children()]):
-      return ConstantPropagator.Res(expr=ex.Constant(et.Bool(), user_value=False), is_const=True)
+      return ConstantPropagator.Res(expr=ex.Constant(eb.Bool(), user_value=False), is_const=True)
     
     # If ANY operand is true, return true.
     if any([res[child].is_const and res[child].expr.value().user_value() for child in expr.children()]):
-      return ConstantPropagator.Res(expr=ex.Constant(et.Bool(), user_value=True), is_const=True)  
+      return ConstantPropagator.Res(expr=ex.Constant(eb.Bool(), user_value=True), is_const=True)  
 
     return ConstantPropagator.Res(expr=expr, is_const=False)
 
@@ -127,13 +128,13 @@ class ExpressionEvaluator(ExprWalker):
     return args[expr]
   
   def visit_logical_and(self, expr, res, args):
-    return et.ExprValue(type=et.Bool(), user_value=all([res[child].user_value() for child in expr.children()]))
+    return et.ExprValue(type=eb.Bool(), user_value=all([res[child].user_value() for child in expr.children()]))
   
   def visit_logical_or(self, expr, res, args):
-    return et.ExprValue(type=et.Bool(), user_value=any([res[child].user_value() for child in expr.children()]))
+    return et.ExprValue(type=eb.Bool(), user_value=any([res[child].user_value() for child in expr.children()]))
 
   def visit_logical_not(self, expr, res, args):
-    return et.ExprValue(type=et.Bool(), user_value=not res[expr.child()].user_value())
+    return et.ExprValue(type=eb.Bool(), user_value=not res[expr.child()].user_value())
   
   ''' Quick version (avoid creating VariableHarvester). '''
   @staticmethod

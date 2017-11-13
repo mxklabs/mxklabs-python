@@ -1,134 +1,180 @@
+import abc
 import functools
 import itertools
 import operator
+
 import six
 
 import mxklabs.utils
 
-''' 
-    A container that holds the value of an expression. The value is represented with
-    both a user-facing logical value and a tuple of bools.
-    We rely on ExprType objects to convert from one representation to the other. The
-    logical representation can be given as the second unnamed argument whereas
-    the the tuple representation has to be named. The constructor for ExprValue expects 
-    exactly one representation.
-    
-    Examples:
-    
-    v1 = mxklabs.ExprValue(Bool(), False)
-    v1 = mxklabs.ExprValue(Bool(), littup_value=(False,))
-''' 
 class ExprValue(object):
+    """
+    A container that holds the value of an Expr object. This class is used by
+    the mxklabs module in various places but this type is not normally relevant
+    to end users of this module.
 
-  def __init__(self, type, user_value=None, littup_value=None):
+    Values are represented by both a 'user value' and a 'littup value'. We rely
+    on a ExprType object between these representations and to tell us what
+    are valid representations. Note that the user value is typically a Python
+    object that naturally represents the type (e.g. True for a boolean type or
+    12 for an integer type) whereas the littup value must be a tuple of booleans
+    (e.g. (True,) and (False, False, True, True)).
+    """
 
-    assert(isinstance(type, ExprType))
-    assert((user_value == None) != (littup_value == None))
+    def __init__(self, type, user_value=None, littup_value=None):
+        """
+        To construct a ExprValue you need to provide exactly one value
+        representation:
+
+        v1 = mxklabs.ExprValue(mxklabs.Bool(), user_value=False)
+        v1 = mxklabs.ExprValue(mxklabs.Bool(), littup_value=(False,))
+        """
+        assert(isinstance(type, ExprType))
+        assert((user_value == None) != (littup_value == None))
+
+        if user_value != None:
+            assert(type.is_valid_user_value(user_value=user_value))
+            self._type = type
+            self._user_value = user_value
+            self._littup_value = self._type.user_value_to_littup_value(self._user_value)
+
+        if littup_value != None:
+            assert(type.is_valid_littup_value(littup_value=littup_value))
+            self._type = type
+            self._littup_value = littup_value
+            self._user_value = self._type.littup_value_to_user_value(self._littup_value)
+
+    def __eq__(self, other):
+        assert(isinstance(other, ExprValue))
+        return self._littup_value == other._littup_value
+
+    def __hash__(self):
+        return hash(self._littup_value)
+
+    def __str__(self):
+        return str(self._user_value)
+
+    def __repr__(self):
+        return repr(self._user_value)
+
+    def user_value(self):
+        """ Return the 'user value' representation of this value. """
+        return self._user_value
+
+    def littup_value(self):
+        """ Return the 'user value' representation of this value. """
+        return self._littup_value
     
-    if user_value != None:
-      assert(type.is_valid_user_value(user_value=user_value))
-      self._type = type
-      self._user_value = user_value
-      self._littup_value = self._type.user_value_to_littup_value(self._user_value)
-
-    if littup_value != None:
-      assert(type.is_valid_littup_value(littup_value=littup_value))
-      self._type = type
-      self._littup_value = littup_value
-      self._user_value = self._type.littup_value_to_user_value(self._littup_value)
-
-  def __eq__(self, other):
-    assert(isinstance(other, ExprValue))
-    return self._littup_value == other._littup_value
-  
-  def __hash__(self):
-    return hash(self._littup_value)
-  
-  def __str__(self):
-    return str(self._user_value)
-  
-  def __repr__(self):
-    return repr(self._user_value)
-
-  def user_value(self):
-    return self._user_value
-
-  def littup_value(self):
-    return self._littup_value
-    
-''' A class representing a type of an Expr object. Instances of this class are expected to '''
-
+@six.add_metaclass(abc.ABCMeta)
 class ExprType(object):
-  
-  def __init__(self, typestr):    
-    self._typestr = typestr
+    """
+    A class representing a type of an Expr object. One of the most important
+    functions of an ExprType is to tell other classes what values an Expr is
+    allowed to have. Values come in the form of ExprValue objects and they have
+    two representations, a user_value and a littup_value. ExprType objects are
+    expected to have various utility functions to help other classes establish
+    what are valid such values and to convert between them.
+    """
 
-  def __eq__(self, other):
-    assert (isinstance(other, ExprType))
-    return self._typestr == other._typestr
+    def __init__(self, typestr):
+        self._typestr = typestr
 
-  def __ne__(self, other):
-    assert (isinstance(other, ExprType))
-    return self._typestr != other._typestr
+    def __eq__(self, other):
+        assert (isinstance(other, ExprType))
+        return self._typestr == other._typestr
 
-  def __hash__(self):
-    return hash(self._typestr)
-  
-  def __str__(self):
-    return self._typestr  
-  
-  def __repr__(self):
-    return self._typestr
+    def __ne__(self, other):
+        assert (isinstance(other, ExprType))
+        return self._typestr != other._typestr
 
-  ''' Helper function to decide if something is a subclass of ExprType. '''
-  @staticmethod
-  def is_exprtype(type):
-    try:
-      return isinstance(type, ExprType)
-    except Exception as e:
-      return False
+    def __hash__(self):
+        return hash(self._typestr)
 
-''' Unparameterised types. '''
+    def __str__(self):
+        return self._typestr
 
-class Bool(ExprType):
+    def __repr__(self):
+        return self._typestr
 
-  def __init__(self):
-    self._values = [ExprValue(type=self, user_value=False), ExprValue(type=self, user_value=True)]
-    self._num_values = len(self._values)
+    @abc.abstractmethod
+    def values(self):
+        """
+        :return: Derived classes should return an iterable container of ExprValue
+        objects. For example, a type for booleans could return a list of two
+        ExprValue objects, one representing True and one representing False.
 
-    ExprType.__init__(self, "bool")
+        Note that for types with a large numbers of values it is better not to
+        explicitly construct a list of values.
+        """
+        pass
 
-  ''' An iterable list of values. For large types with the number of values exceeding, say, 2^10, these values
-      must be constructed on-the-fly using e.g. six.moves.range. '''
-  def values(self):
-    return self._values
-  
-  ''' The number of values. '''
-  def num_values(self):
-    return self._num_values
-  
-  ''' Number of elements in a boolean tuple. '''
-  def littup_size(self):
-    return 1
-  
-  ''' Any bool is a valid user_value. '''
-  def is_valid_user_value(self, user_value):
-    return type(user_value) == bool
-  
-  ''' Any tuple with a single element that is a bool is a valid littup_value. '''
-  def is_valid_littup_value(self, littup_value):
-    return type(littup_value) == tuple and len(littup_value) == 1 and type(littup_value[0]) == bool
-  
-  ''' Convert user_value to littup_value. '''
-  def user_value_to_littup_value(self, user_value):
-    assert(self.is_valid_user_value(user_value))
-    return (user_value,)
-  
-  ''' Convert littup_value to user_value. '''
-  def littup_value_to_user_value(self, littup_value):
-    assert(self.is_valid_littup_value(littup_value))
-    return littup_value[0]
-  
+    @abc.abstractmethod
+    def num_values(self):
+        """
+        :return: Derived classes should return the result of len(values()) here. This is
+        primarily used to calculate the number possible variable assignments
+        without actually iterating over them.
+        """
+        pass
+
+    @abc.abstractmethod
+    def littup_size(self):
+        """
+        :return: Derived classes should return the number of booleans required to encode
+        a value. This is normally the smallest integer n such that 2^n >=
+        num_values() although this is not a requirement.
+        """
+        pass
+
+    @abc.abstractmethod
+    def is_valid_user_value(self, user_value):
+        """
+        :param user_value: The user value representation to consider.
+        :return: True if and only if the user_value parameter is a valid
+        user value representation of this ExprType.
+        """
+        pass
+
+    @abc.abstractmethod
+    def is_valid_littup_value(self, littup_value):
+        """
+        :param littup_value: The littup value representation to consider.
+        :return: True if and only if the littup_value parameter is a valid
+        littup value representation of this ExprType.
+        """
+        pass
+        return type(littup_value) == tuple and len(littup_value) == 1 and type(
+        littup_value[0]) == bool
+
+    @abc.abstractmethod
+    def user_value_to_littup_value(self, user_value):
+        """
+        :param user_value: The user value to convert to a littup value.
+        :return: A littup value representing the same value as user_value.
+        """
+        pass
+
+    @abc.abstractmethod
+    def littup_value_to_user_value(self, littup_value):
+        """
+        :param littup_value: The littup value to convert to a user value.
+        :return: A user value representing the same value as littup_value.
+        """
+
+    @staticmethod
+    def is_exprtype(type):
+        """
+        Call to see if type derives from ExprType.
+        :param type: The python object to consider.
+        :return: Return True if and only if type derives from ExprType.
+        """
+        try:
+            return isinstance(type, ExprType)
+        except Exception as e:
+            return False
+
+
+
 
 ''' Class for product of types. '''
 
