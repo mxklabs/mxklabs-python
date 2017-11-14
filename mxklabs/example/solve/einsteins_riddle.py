@@ -1,6 +1,6 @@
 from __future__ import print_function
 
-import mxklabs
+import mxklabs as mxk
 
 def run_example(logger):
     """
@@ -35,9 +35,9 @@ def run_example(logger):
     only boolean variables and by placing logical constraints over those 
     variables using only logical AND, OR and NOT expressions.
     """
-    # Use a Python dictionary to store variables (mxklabs.Variable objects).
+    # Use a Python dictionary to store variables (mxk.Variable objects).
     vars = dict()
-    # Use a Python list object to store constraints (mxklabs.Expr objects).
+    # Use a Python list object to store constraints (mxk.Expr objects).
     constraints = list()
 
     # Define some lists for house locations, nations, colours, pets, brands
@@ -67,7 +67,7 @@ def run_example(logger):
     # We're now in a position to create our variables. We could create each
     # variables as a separate Python object like this:
     #
-    #   house1_England = mxklabs.Variable(type='bool', 'house1_England')
+    #   house1_England = mxk.Variable(type='bool', 'house1_England')
     #
     # but that would require 125 such definitions. Instead, well loop over the
     # lists we have just defined and put the generated variables in vars.
@@ -79,7 +79,7 @@ def run_example(logger):
             # A variable name.
             id = "house{}_{}".format(l, a)
             # Add variable to vars.
-            vars[(l, a)] = mxklabs.Variable(type='bool', id=id)
+            vars[(l, a)] = mxk.Variable('bool', id)
 
     # Print our list of variables.
     #print("Variables:");
@@ -96,7 +96,7 @@ def run_example(logger):
         # Ensure this property holds at at least one location by
         # constraining valid solutions to a logical OR over all locations.
         constraints.append(
-            mxklabs.LogicalOr(
+            mxk.LogicalOr(
                 *[vars[(l, a)] for l in locs]))
 
     # Now, make sure each property is subscribed to at most one house location
@@ -110,8 +110,8 @@ def run_example(logger):
                     # Ensure this property doesn't both hold at location l1 and
                     # l2 at the same time using a logical NOT.
                     constraints.append(
-                        mxklabs.LogicalNot(
-                            mxklabs.LogicalAnd(
+                        mxk.LogicalNot(
+                            mxk.LogicalAnd(
                               vars[(l1, p)],
                               vars[(l2, p)])))
 
@@ -122,7 +122,7 @@ def run_example(logger):
             # For every property list and location ensure at least one property
             # in the list holds.
             constraints.append(
-                mxklabs.LogicalOr(
+                mxk.LogicalOr(
                     *[vars[(l, p)] for p in property_list]))
 
     # The constrains above are sufficient to encode the general rules of the
@@ -159,57 +159,57 @@ def run_example(logger):
     #   1.  The Englishman lives in the red house.
     for l in locs:
         constraints.append(
-            mxklabs.LogicalOr(
-                mxklabs.LogicalNot(vars[(l, 'Englishman')]),
+            mxk.LogicalOr(
+                mxk.LogicalNot(vars[(l, 'Englishman')]),
                 vars[(l, 'red')]))
 
     # 2.  The Spaniard owns the dog.
     for l in locs:
         constraints.append(
-            mxklabs.LogicalOr(
-                mxklabs.LogicalNot(vars[(l, 'Spaniard')]),
+            mxk.LogicalOr(
+                mxk.LogicalNot(vars[(l, 'Spaniard')]),
                 vars[(l, 'dog')]))
 
     # 3.  Coffee is drunk in the green house.
     for l in locs:
         constraints.append(
-            mxklabs.LogicalOr(
-                mxklabs.LogicalNot(vars[(l, 'coffee')]),
+            mxk.LogicalOr(
+                mxk.LogicalNot(vars[(l, 'coffee')]),
                 vars[(l, 'green')]))
 
     # 4.  The Ukrainian drinks tea.
     for l in locs:
         constraints.append(
-            mxklabs.LogicalOr(
-                mxklabs.LogicalNot(vars[(l, 'Ukranian')]),
+            mxk.LogicalOr(
+                mxk.LogicalNot(vars[(l, 'Ukranian')]),
                 vars[(l, 'tea')]))
 
     # 6.  The Old Gold smoker owns snails.
     for l in locs:
         constraints.append(
-            mxklabs.LogicalOr(
-                mxklabs.LogicalNot(vars[(l, 'Old Gold')]),
+            mxk.LogicalOr(
+                mxk.LogicalNot(vars[(l, 'Old Gold')]),
                 vars[(l, 'snail')]))
 
     # 7.  Kools are smoked in the yellow house.
     for l in locs:
         constraints.append(
-            mxklabs.LogicalOr(
-                mxklabs.LogicalNot(vars[(l, 'Kools')]),
+            mxk.LogicalOr(
+                mxk.LogicalNot(vars[(l, 'Kools')]),
                 vars[(l, 'yellow')]))
 
     # 12. The Lucky Strike smoker drinks orange juice.
     for l in locs:
         constraints.append(
-            mxklabs.LogicalOr(
-                mxklabs.LogicalNot(vars[(l, 'Lucy Strike')]),
+            mxk.LogicalOr(
+                mxk.LogicalNot(vars[(l, 'Lucy Strike')]),
                 vars[(l, 'orange juice')]))
 
     # 13. The Japanese smokes Parliaments.
     for l in locs:
         constraints.append(
-            mxklabs.LogicalOr(
-                mxklabs.LogicalNot(vars[(l, 'Japanese')]),
+            mxk.LogicalOr(
+                mxk.LogicalNot(vars[(l, 'Japanese')]),
                 vars[(l, 'Parliaments')]))
 
     # Hint 5. is slightly more difficult:
@@ -223,12 +223,12 @@ def run_example(logger):
     for l in locs[:-1]:
         # 5.  The green house is immediately to the right of the ivory house.
         constraints.append(
-            mxklabs.LogicalOr(
-                mxklabs.LogicalNot(vars[(l, 'ivory')]),
+            mxk.LogicalOr(
+                mxk.LogicalNot(vars[(l, 'ivory')]),
                 vars[(l + 1, 'green')]))
 
     # The right-most location can't be ivory.
-    constraints.append(mxklabs.LogicalNot(vars[5,'ivory']))
+    constraints.append(mxk.LogicalNot(vars[5,'ivory']))
 
     # 10. The man who smokes Chesterfields lives in the house next to the
     #     man with the fox.
@@ -240,8 +240,8 @@ def run_example(logger):
     for l1 in locs:
         neighbouring_locs = [l2 for l2 in locs if abs(l1 - l2) == 1]
         constraints.append(
-            mxklabs.LogicalOr(
-                mxklabs.LogicalNot(vars[(l1, 'Chesterfields')]),
+            mxk.LogicalOr(
+                mxk.LogicalNot(vars[(l1, 'Chesterfields')]),
                 *[vars[(l2, 'fox')] for l2 in neighbouring_locs]))
 
     # 11. Kools are smoked in the house next to the house where the horse
@@ -249,25 +249,25 @@ def run_example(logger):
     for l1 in locs:
         neighbouring_locs = [l2 for l2 in locs if abs(l1 - l2) == 1]
         constraints.append(
-            mxklabs.LogicalOr(
-                mxklabs.LogicalNot(vars[(l1, 'Kools')]),
+            mxk.LogicalOr(
+                mxk.LogicalNot(vars[(l1, 'Kools')]),
                 *[vars[(l2, 'horse')] for l2 in neighbouring_locs]))
 
     # 14. The Norwegian lives next to the blue house.
     for l1 in locs:
         neighbouring_locs = [l2 for l2 in locs if abs(l1 - l2) == 1]
         constraints.append(
-            mxklabs.LogicalOr(
-                mxklabs.LogicalNot(vars[(l1, 'Norwegian')]),
+            mxk.LogicalOr(
+                mxk.LogicalNot(vars[(l1, 'Norwegian')]),
                 *[vars[(l2, 'blue')] for l2 in neighbouring_locs]))
 
     # We're done! We got all the constraints. Let's use a constraint solver
     # to find an assignment to variables under which all constraints hold.
-    solver = mxklabs.TseitinConstraintSolver(logger=None)
+    solver = mxk.TseitinConstraintSolver(logger=None)
     result = solver.solve(constraints)
 
     # See if the solver was able to find a satisfying assignment.
-    if result == mxklabs.ConstraintSolver.RESULT_SAT:
+    if result == mxk.ConstraintSolver.RESULT_SAT:
 
         # Get the assignment of values to variables.
         assignment = solver.get_satisfying_assignment()
@@ -287,9 +287,9 @@ def run_example(logger):
         logger("Solution: {n_water} drinks the water, {n_zebra} owns the "
                "zebra!".format(n_water=n_water, n_zebra=n_zebra))
 
-    elif result == mxklabs.ConstraintSolver.RESULT_UNSAT:
+    elif result == mxk.ConstraintSolver.RESULT_UNSAT:
       logger("Unable to find a solution, sorry.")
-    elif result == mxklabs.ConstraintSolver.RESULT_ERROR:
+    elif result == mxk.ConstraintSolver.RESULT_ERROR:
       logger("Something went wrong, sorry.")
     else:
       raise Exception("Unable to interpret result from solver")
