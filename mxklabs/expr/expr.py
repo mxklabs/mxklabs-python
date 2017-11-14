@@ -109,7 +109,9 @@ class Expr(object):
 class Constant(Expr):
   
   def __init__(self, type, user_value=None, littup_value=None):
-    
+
+    type = et.ExprTypeRepository.get_expr_type_from_type_str(type)
+
     assert(isinstance(type, et.ExprType))
     assert((user_value == None) != (littup_value == None))
     
@@ -134,6 +136,9 @@ class Constant(Expr):
 class Variable(Expr):
   
   def __init__(self, type, id):
+
+    type = et.ExprTypeRepository.get_expr_type_from_type_str(type)
+
     Expr.__init__(self, type=type, nodestr="(var {id})".format(id=id))
 
     self.id_ = id

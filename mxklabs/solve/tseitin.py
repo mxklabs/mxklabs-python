@@ -22,8 +22,8 @@ class TseitinCache(object):
     # Map tuple of expression and bit to literal.
     self._cache = \
     { 
-      ex.Constant(type=eb.Bool(), user_value=True) : { 0 : TseitinCache.TRUE_LIT },
-      ex.Constant(type=eb.Bool(), user_value=False) : { 0 : TseitinCache.FALSE_LIT }
+      ex.Constant(type='bool', user_value=True) : { 0 : TseitinCache.TRUE_LIT },
+      ex.Constant(type='bool', user_value=False) : { 0 : TseitinCache.FALSE_LIT }
     }
     self._dimacs = dimacs.Dimacs(clauses=set([frozenset([TseitinCache.TRUE_LIT])]))
 
@@ -78,7 +78,7 @@ class Tseitin(ea.ExprWalker):
       # This is a small optimisation (avoid additional literals).
       for child in expr.children():
         self.add_constraint(child)
-    elif expr.type() == eb.Bool():
+    elif expr.type() == et.Bool():
       littup = self.bottom_up_walk(expr)
       lit, = littup
       self._cache.add_clause(frozenset([lit]))

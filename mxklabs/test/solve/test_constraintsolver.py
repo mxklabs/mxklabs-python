@@ -8,8 +8,8 @@ class Test_ConstraintSolver(unittest.TestCase):
     
     for constraint_solver_type in mxk.Utils.get_derived_classes(mxk, mxk.ConstraintSolver):
 
-      x_ = mxk.Variable(type=mxk.Bool(), id='x')  
-      y_ = mxk.Variable(type=mxk.Bool(), id='y')
+      x_ = mxk.Variable(type='bool', id='x')  
+      y_ = mxk.Variable(type='bool', id='y')
       
       x_or_y_ = mxk.LogicalOr(x_, y_)
       not_x_ = mxk.LogicalNot(x_)
@@ -25,8 +25,8 @@ class Test_ConstraintSolver(unittest.TestCase):
     
     for constraint_solver_type in mxk.Utils.get_derived_classes(mxk, mxk.ConstraintSolver):
 
-      x_ = mxk.Variable(type=mxk.Bool(), id='x')  
-      y_ = mxk.Variable(type=mxk.Bool(), id='y')
+      x_ = mxk.Variable(type='bool', id='x')  
+      y_ = mxk.Variable(type='bool', id='y')
       
       x_or_y_ = mxk.LogicalOr(x_, y_)
       not_x_ = mxk.LogicalNot(x_)

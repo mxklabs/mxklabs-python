@@ -2,7 +2,7 @@ import abc
 import functools
 import itertools
 import operator
-
+import re
 import six
 
 import mxklabs.utils
@@ -75,7 +75,6 @@ class ExprType(object):
     expected to have various utility functions to help other classes establish
     what are valid such values and to convert between them.
     """
-
     def __init__(self, typestr):
         self._typestr = typestr
 
@@ -174,6 +173,49 @@ class ExprType(object):
             return False
 
 
+class Bool(ExprType):
+    """ An object that represents a boolean expression type. """
+
+    def __init__(self):
+        """ Initialise Bool object. """
+        self._values = [ExprValue(type=self, user_value=False),
+                        ExprValue(type=self, user_value=True)]
+        self._num_values = len(self._values)
+        ExprType.__init__(self, "bool")
+
+    def values(self):
+        """ See ExprType.values. """
+        return self._values
+
+    def num_values(self):
+        """ See ExprType.num_values. """
+        return self._num_values
+
+    def littup_size(self):
+        """ See ExprType.littup_size. """
+        return 1
+
+    def is_valid_user_value(self, user_value):
+        """ See ExprType.is_valid_user_value. """
+        return type(user_value) == bool
+
+    def is_valid_littup_value(self, littup_value):
+        """ See ExprType.user_value_to_littup_value. """
+        return type(littup_value) == tuple \
+            and len(littup_value) == 1 \
+            and type(littup_value[0]) == bool
+
+    def user_value_to_littup_value(self, user_value):
+        """ See ExprType.user_value_to_littup_value. """
+        assert (self.is_valid_user_value(user_value))
+        return (user_value,)
+
+    def littup_value_to_user_value(self, littup_value):
+        """ See ExprType.littup_value_to_user_value. """
+        assert (self.is_valid_littup_value(littup_value))
+        return littup_value[0]
+
+
 
 
 ''' Class for product of types. '''
@@ -221,3 +263,36 @@ class ExprType(object):
 #  def value_to_int(bits, value):
 #    return sum([(1 << b) if value[b][0] else 0 for b in range(len(value))])
 
+
+class ExprTypeRepository(object):
+    """
+    A utility class that maps string like 'bool' into ExprType objects like
+    an instance of Bool. This serves two purposes. Firstly, it stops lots of
+    of representation of the same type being created (there's no need to have
+    more than one object to represent a boolean type). Secondly, it's more
+    convenient to the end-user to type 'bool' than mxklabs.Bool().
+    """
+    # Create one Bool object.
+    _BOOL = Bool()
+
+    # List of typestr regex and callable functions.
+    _type_str_regex_registry = [
+        (re.compile('^bool$'), lambda match: ExprTypeRepository._BOOL)
+    ]
+
+    @staticmethod
+    def get_expr_type_from_type_str(type_str):
+        """
+        Get a type using a name like 'bool'
+        :param type_str: A type string (as recognised by ExprType implementations).
+        :return: A ExprType object.
+        """
+        assert(type(type_str)==str)
+
+        for regex, callback in ExprTypeRepository._type_str_regex_registry:
+            match = regex.match(type_str)
+            if match:
+                return callback(match)
+                break
+
+        raise RuntimeError("Type '{}' is not known".format(type_str))

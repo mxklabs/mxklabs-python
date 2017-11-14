@@ -67,7 +67,7 @@ def run_example(logger):
     # We're now in a position to create our variables. We could create each
     # variables as a separate Python object like this:
     #
-    #   house1_England = mxklabs.Variable(type=mxklabs.Bool(), 'house1_England')
+    #   house1_England = mxklabs.Variable(type='bool', 'house1_England')
     #
     # but that would require 125 such definitions. Instead, well loop over the
     # lists we have just defined and put the generated variables in vars.
@@ -79,7 +79,7 @@ def run_example(logger):
             # A variable name.
             id = "house{}_{}".format(l, a)
             # Add variable to vars.
-            vars[(l, a)] = mxklabs.Variable(type=mxklabs.Bool(), id=id)
+            vars[(l, a)] = mxklabs.Variable(type='bool', id=id)
 
     # Print our list of variables.
     #print("Variables:");

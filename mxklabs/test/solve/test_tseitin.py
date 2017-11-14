@@ -27,7 +27,7 @@ class Test_Tseitin(unittest.TestCase):
     
   def test_tseitin_constant_true(self):
     tseitin = mxk.Tseitin()
-    e_ = mxk.Constant(type=mxk.Bool(), user_value=True)    
+    e_ = mxk.Constant(type='bool', user_value=True)    
     tseitin.add_constraint(e_)
     
     exp_clauses = [[TRUE]]
@@ -35,7 +35,7 @@ class Test_Tseitin(unittest.TestCase):
 
   def test_tseitin_constant_false(self):
     tseitin = mxk.Tseitin()
-    e_ = mxk.Constant(type=mxk.Bool(), user_value=False)    
+    e_ = mxk.Constant(type='bool', user_value=False)    
     tseitin.add_constraint(e_)
     
     exp_clauses = [[TRUE],[FALSE]]
@@ -43,7 +43,7 @@ class Test_Tseitin(unittest.TestCase):
 
   def test_tseitin_variable(self):
     tseitin = mxk.Tseitin()
-    e_ = mxk.Variable(type=mxk.Bool(), id='x')    
+    e_ = mxk.Variable(type='bool', id='x')    
     tseitin.add_constraint(e_)
     
     exp_clauses = [[TRUE],[tseitin.cache_lookup(e_)[0]]]
@@ -51,8 +51,8 @@ class Test_Tseitin(unittest.TestCase):
 
   def test_tseitin_logical_and(self):
     tseitin = mxk.Tseitin()
-    x_ = mxk.Variable(type=mxk.Bool(), id='x')
-    y_ = mxk.Variable(type=mxk.Bool(), id='y')
+    x_ = mxk.Variable(type='bool', id='x')
+    y_ = mxk.Variable(type='bool', id='y')
     e_ = mxk.LogicalAnd(x_, y_)
     tseitin.add_constraint(e_)
     
@@ -65,8 +65,8 @@ class Test_Tseitin(unittest.TestCase):
     
   def test_tseitin_logical_or(self):
     tseitin = mxk.Tseitin()
-    x_ = mxk.Variable(type=mxk.Bool(), id='x')
-    y_ = mxk.Variable(type=mxk.Bool(), id='y')
+    x_ = mxk.Variable(type='bool', id='x')
+    y_ = mxk.Variable(type='bool', id='y')
     e_ = mxk.LogicalOr(x_, y_)
     tseitin.add_constraint(e_)
     
@@ -81,7 +81,7 @@ class Test_Tseitin(unittest.TestCase):
 
   def test_tseitin_logical_not(self):
     tseitin = mxk.Tseitin()
-    x_ = mxk.Variable(type=mxk.Bool(), id='x')
+    x_ = mxk.Variable(type='bool', id='x')
     e_ = mxk.LogicalNot(x_)
     tseitin.add_constraint(e_)
     
