@@ -31,7 +31,8 @@ class Test_CodingStyle(unittest.TestCase):
   def test_codingstyle_classmethod_name(self):
     
     # Make a regex for what are acceptable method names.
-    aceptable_methodnames = re.compile('^(' + '(\_)?' + Test_CodingStyle.SNAKE_CASE_REGEX + 
+    aceptable_methodnames = re.compile('^(' + Test_CodingStyle.SNAKE_CASE_REGEX +
+                                        '|' + '\_' + '([A-Za-z0-9\_])+' +
                                         '|' + '\_\_' + Test_CodingStyle.SNAKE_CASE_REGEX + '\_\_' +
                                         ')$')
     # Predicate to decide what's a method.

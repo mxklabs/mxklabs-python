@@ -116,7 +116,7 @@ class ConstantPropagator(ExprWalker):
 ''' Evaluate the value of an expressions. '''
 
 class ExpressionEvaluator(ExprWalker):
-  
+
   def _process(self, expr, variable_value_map):
     return self.bottom_up_walk(expr=expr, args=variable_value_map)
   

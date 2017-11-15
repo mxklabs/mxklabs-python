@@ -216,52 +216,49 @@ class Bool(ExprType):
         return littup_value[0]
 
 
+class BitVec(ExprType):
+    """ An object that represents a bit vector type. """
 
+    def __init__(self, number_of_bits):
+        """ Initialise object. """
+        self._number_of_bits = number_of_bits
+        self._num_values = 2 ** number_of_bits
+        self._values = [ExprValue(type=self, user_value=i) for i in
+                        six.moves.range(2 ** number_of_bits)]
 
-''' Class for product of types. '''
+        ExprType.__init__(self, "uint{:d}".format(number_of_bits))
 
-#class Product(ExprType):
-#  
-#  def __init__(self, subtypes, typestr=None):
-#
-#    if len(subtypes) < 1:
-#      raise Exception("a product type must have at least one subtype")
-#    for subtype in subtypes:
-#      if not isinstance(subtype, ExprType):
-#        raise Exception("the 'subtype' parameter of type 'Product' must be an interable over 'ExprType' (found '{type}' subtype)".format(
-#                        type=subtype))
-#
-#    super().__init__(
-#        # Use the given typestr if there is one. If not, use something like "(Bool,Bool)".
-#        typestr="(" + ",".join([t._typestr for t in subtypes]) + ")" if typestr==None else typestr,
-#        # Produce a values iterator (don't be explicit due to combinatorial explosions).
-#        values=itertools.product(*([t.values() for t in subtypes])),
-#        # Compute number of values.
-#        num_values=functools.reduce(operator.mul, [s.num_values() for s in subtypes]))
-#    
-#    self._subtypes = subtypes
-#    
-#    
-#    def is_valid_value(self, value):
-#      if len(value) != len(self._subtypes):
-#        return False
-#      else:
-#        return all([self._subtypes[s].is_valid_value(value[s]) for s in range(len(self._subtypes))])
-#
-#''' Parameterised types. '''
-#
-#class BitVector(Product):
-#    
-#  def __init__(self, bits):
-#    super().__init__(subtypes=([Bool()] * bits), typestr=("uint%d" % bits))
-#
-#  @staticmethod
-#  def int_to_value(bits, n):
-#    return tuple([(((1 << b) & n) != 0,) for b in range(bits)])
-#
-#  @staticmethod
-#  def value_to_int(bits, value):
-#    return sum([(1 << b) if value[b][0] else 0 for b in range(len(value))])
+    def values(self):
+        """ See ExprType.values. """
+        return self._values
+
+    def num_values(self):
+        """ See ExprType.num_values. """
+        return self._num_values
+
+    def littup_size(self):
+        """ See ExprType.littup_size. """
+        return self._number_of_bits
+
+    def is_valid_user_value(self, user_value):
+        """ See ExprType.is_valid_user_value. """
+        return (type(user_value) == int) and (0 <= user_value < self._num_values)
+
+    def is_valid_littup_value(self, littup_value):
+        """ See ExprType.user_value_to_littup_value. """
+        return type(littup_value) == tuple \
+            and len(littup_value) == self._number_of_bits \
+            and all([type(lit_value) == bool for lit_value in littup_value])
+
+    def user_value_to_littup_value(self, user_value):
+        """ See ExprType.user_value_to_littup_value. """
+        assert (self.is_valid_user_value(user_value))
+        return tuple([(((1 << b) & user_value) != 0,) for b in range(self._number_of_bits)])
+
+    def littup_value_to_user_value(self, littup_value):
+        """ See ExprType.littup_value_to_user_value. """
+        assert (self.is_valid_littup_value(littup_value))
+        return sum([(1 << b) if littup_value[b] else 0 for b in range(self._number_of_bits)])
 
 
 class ExprTypeRepository(object):
@@ -274,10 +271,21 @@ class ExprTypeRepository(object):
     """
     # Create one Bool object.
     _BOOL = Bool()
+    _BITVECS = {}
+
+    @staticmethod
+    def _BITVEC(number_of_bits):
+        if number_of_bits in ExprTypeRepository._BITVECS.keys():
+            return ExprTypeRepository._BITVECS[number_of_bits]
+        else:
+            T = BitVec(number_of_bits=number_of_bits)
+            ExprTypeRepository._BITVECS[number_of_bits] = T
+            return T
 
     # List of typestr regex and callable functions.
     _type_str_regex_registry = [
-        (re.compile('^bool$'), lambda match: ExprTypeRepository._BOOL)
+        (re.compile('^bool$'), lambda match: ExprTypeRepository._BOOL),
+        (re.compile('^uint(\d)$'), lambda match: ExprTypeRepository._BOOL)
     ]
 
     @staticmethod

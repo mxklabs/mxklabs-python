@@ -3,7 +3,7 @@ import unittest
 
 import mxklabs as mxk
 
-class Test_ExprType(unittest.TestCase):
+class Test_Bool(unittest.TestCase):
 
   def test_expr_type_bool(self):
     T = mxk.ExprTypeRepository._BOOL
@@ -11,6 +11,17 @@ class Test_ExprType(unittest.TestCase):
     self.assertEqual([False, True], [value.user_value() for value in T.values()])
     self.assertEqual([(False,), (True,)], [value.littup_value() for value in T.values()])
     self.assertEqual(2, T.num_values())
+
+class Test_BitVector(unittest.TestCase):
+
+  def test_expr_type_bool(self):
+    T = mxk.ExprTypeRepository._BITVEC(8)
+    self.assertEqual("uint8", str(T))
+    self.assertEqual(list(range(256)), list([value.user_value()
+      for value in T.values()]))
+    #self.assertEqual([(False,), (True,)],
+    #                 [value.littup_value() for value in T.values()])
+    self.assertEqual(2**8, T.num_values())
     
   #def test_exprtype_product(self):    
   #  T = mxk.Product([mxk.BitVector(2),mxk.Bool()])
