@@ -17,11 +17,15 @@ class Test_BitVector(unittest.TestCase):
   def test_expr_type_bool(self):
     T = mxk.ExprTypeRepository._BITVEC(8)
     self.assertEqual("uint8", str(T))
-    self.assertEqual(list(range(256)), list([value.user_value()
-      for value in T.values()]))
-    #self.assertEqual([(False,), (True,)],
-    #                 [value.littup_value() for value in T.values()])
+    self.assertEqual(list(range(2**8)), list([value.user_value() for value in
+       T.values()]))
+    # TODO(mkkt): Test littup values?
     self.assertEqual(2**8, T.num_values())
+    self.assertEqual((False,False,False,False,False,True,True,True),
+       T.user_value_to_littup_value(224))
+    self.assertEqual(224, T.littup_value_to_user_value((False,False,False,False,
+       False,True,True,True)))
+
     
   #def test_exprtype_product(self):    
   #  T = mxk.Product([mxk.BitVector(2),mxk.Bool()])

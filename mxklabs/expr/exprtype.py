@@ -253,7 +253,7 @@ class BitVec(ExprType):
     def user_value_to_littup_value(self, user_value):
         """ See ExprType.user_value_to_littup_value. """
         assert (self.is_valid_user_value(user_value))
-        return tuple([(((1 << b) & user_value) != 0,) for b in range(self._number_of_bits)])
+        return tuple([(((1 << b) & user_value) != 0) for b in range(self._number_of_bits)])
 
     def littup_value_to_user_value(self, littup_value):
         """ See ExprType.littup_value_to_user_value. """
