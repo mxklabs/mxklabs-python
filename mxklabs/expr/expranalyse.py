@@ -127,13 +127,13 @@ class ExpressionEvaluator(ExprWalker):
     return args[expr]
   
   def visit_logical_and(self, expr, res, args):
-    return et.ExprValue(type=et.Bool(), user_value=all([res[child].user_value() for child in expr.children()]))
+    return et.ExprValue(type=et.ExprTypeRepository._BOOL, user_value=all([res[child].user_value() for child in expr.children()]))
   
   def visit_logical_or(self, expr, res, args):
-    return et.ExprValue(type=et.Bool(), user_value=any([res[child].user_value() for child in expr.children()]))
+    return et.ExprValue(type=et.ExprTypeRepository._BOOL, user_value=any([res[child].user_value() for child in expr.children()]))
 
   def visit_logical_not(self, expr, res, args):
-    return et.ExprValue(type=et.Bool(), user_value=not res[expr.child()].user_value())
+    return et.ExprValue(type=et.ExprTypeRepository._BOOL, user_value=not res[expr.child()].user_value())
   
   ''' Quick version (avoid creating VariableHarvester). '''
   @staticmethod

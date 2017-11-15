@@ -6,7 +6,7 @@ import mxklabs as mxk
 class Test_ExprType(unittest.TestCase):
 
   def test_expr_type_bool(self):
-    T = mxk.Bool()
+    T = mxk.ExprTypeRepository._BOOL
     self.assertEqual("bool", str(T))
     self.assertEqual([False, True], [value.user_value() for value in T.values()])
     self.assertEqual([(False,), (True,)], [value.littup_value() for value in T.values()])

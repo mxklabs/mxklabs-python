@@ -78,7 +78,7 @@ class Tseitin(ea.ExprWalker):
       # This is a small optimisation (avoid additional literals).
       for child in expr.children():
         self.add_constraint(child)
-    elif expr.type() == et.Bool():
+    elif expr.type() == et.ExprTypeRepository._BOOL:
       littup = self.bottom_up_walk(expr)
       lit, = littup
       self._cache.add_clause(frozenset([lit]))
