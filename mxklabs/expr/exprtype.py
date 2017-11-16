@@ -223,8 +223,14 @@ class BitVec(ExprType):
         """ Initialise object. """
         self._number_of_bits = number_of_bits
         self._num_values = 2 ** number_of_bits
-        self._values = [ExprValue(type=self, user_value=i) for i in
-                        six.moves.range(2 ** number_of_bits)]
+
+        littup_values_rev = itertools.product(*[[False, True] for b in
+            range(number_of_bits)])
+        littup_values = six.moves.map(lambda v : v[::-1], littup_values_rev)
+        self._values = six.moves.map(lambda v: ExprValue(type=self,
+            littup_value=v), littup_values)
+        #self._values = [ExprValue(type=self, user_value=i) for i in
+        #                six.moves.range(2 ** number_of_bits)]
 
         ExprType.__init__(self, "uint{:d}".format(number_of_bits))
 

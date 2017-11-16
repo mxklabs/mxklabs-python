@@ -14,7 +14,7 @@ class Test_Bool(unittest.TestCase):
 
 class Test_BitVector(unittest.TestCase):
 
-  def test_expr_type_bool(self):
+  def test_expr_type_bitvector(self):
     T = mxk.ExprTypeRepository._BITVEC(8)
     self.assertEqual("uint8", str(T))
     self.assertEqual(list(range(2**8)), list([value.user_value() for value in
@@ -26,6 +26,16 @@ class Test_BitVector(unittest.TestCase):
     self.assertEqual(224, T.littup_value_to_user_value((False,False,False,False,
        False,True,True,True)))
 
+    # Test we can instantiate a REALLY large bitvector. The worry is that
+    # the implementation instantiates all values. There should be 2^2048
+    # (a rediculously large number) values in a bitvector with a 2048 bit
+    # bitvector. So let's make one (to test it isn't explicitly instantiating
+    # all of those values, and iterate over a few.
+    T = mxk.ExprTypeRepository._BITVEC(2048)
+
+    values = T.values()
+    self.assertEqual(0, next(values).user_value())
+    self.assertEqual(1, next(values).user_value())
     
   #def test_exprtype_product(self):    
   #  T = mxk.Product([mxk.BitVector(2),mxk.Bool()])
