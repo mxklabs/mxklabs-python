@@ -291,7 +291,8 @@ class ExprTypeRepository(object):
     # List of typestr regex and callable functions.
     _type_str_regex_registry = [
         (re.compile('^bool$'), lambda match: ExprTypeRepository._BOOL),
-        (re.compile('^uint(\d)$'), lambda match: ExprTypeRepository._BOOL)
+        (re.compile('^uint(\d+)$'), lambda match: ExprTypeRepository._BITVEC(
+            int(match.group(1))))
     ]
 
     @staticmethod
