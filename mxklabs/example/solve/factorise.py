@@ -20,7 +20,7 @@ def find_divisor(logger, n):
     # Suppose n is a number representable with N bits. The question we want to
     # answer next is: how many bits do we need to use to represent a divisor of
     # n such that if there is a divisor one of those divisors is representable
-    # with this number of bits. We'll suggest using CEIL(N/2) bits.
+    # with this number of bits. It turns out CEIL(N/2) bits is sufficient.
     #
     # To see this number of bits is sufficient, recall that we only need to be
     # able to represent up to the largest integer that is smaller or equal to
@@ -34,7 +34,7 @@ def find_divisor(logger, n):
     #
     # Assume for the moment that N is even (and hence CEIL(N/2)=N/2).Recall that
     # if a divisor of n exists then one exists that is smaller or equal to
-    # sqrt(n) and, because of the inequality above, hence *strictly* smaller
+    # sqrt(n) and, because of the inequality above, it is *strictly* smaller
     # 2^(N/2). As 2^(N/2) is an integer and a divisor is guaranteed to be
     # strictly less than this integer, it must be at most 2^(N/2)-1 and hence
     # can be represented with CEIL(N/2)=N/2 bits.
