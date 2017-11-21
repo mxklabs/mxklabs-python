@@ -36,3 +36,5 @@ class Test_Utils(unittest.TestCase):
     
   def test_Utils_kebab_case_to_snake_case(self):
     self.assertEqual("test_word", mxk.Utils.kebab_case_to_snake_case("test-word"))
+
+  # TODO(mkkt): test other functions.

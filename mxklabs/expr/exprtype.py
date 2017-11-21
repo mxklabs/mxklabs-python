@@ -5,7 +5,7 @@ import operator
 import re
 import six
 
-import mxklabs.utils
+from mxklabs.utils import Utils
 
 class ExprValue(object):
     """
@@ -21,31 +21,58 @@ class ExprValue(object):
     (e.g. (True,) and (False, False, True, True)).
     """
 
-    def __init__(self, type, user_value=None, littup_value=None):
+    def __init__(self, expr_type, user_value=None, littup_value=None):
         """
         To construct a ExprValue you need to provide exactly one value
-        representation:
+        representation (not neither and not both). For example:
 
-        v1 = mxklabs.ExprValue(mxklabs.Bool(), user_value=False)
-        v1 = mxklabs.ExprValue(mxklabs.Bool(), littup_value=(False,))
+        v1 = mxklabs.ExprValue('bool', user_value=False)
+        v1 = mxklabs.ExprValue('bool', littup_value=(False,))
+
+        :param expr_type: Either an object derived from ExprType, representing
+        the type of this value or, preferably, a str that can be used to look-up
+        this ExprType object using ExprTypeRepository.lookup().
+        :param user_value: The user value (optional).
+        :param littup_value: The littup value (optional).
         """
-        assert(isinstance(type, ExprType))
-        assert((user_value == None) != (littup_value == None))
+        if type(expr_type) == str:
+            expr_type = ExprTypeRepository.lookup(expr_type)
 
-        if user_value != None:
-            assert(type.is_valid_user_value(user_value=user_value))
-            self._type = type
+        Utils.check_precondition(isinstance(expr_type, ExprType))
+        Utils.check_precondition((user_value is None) != (littup_value is None))
+
+        if user_value is not None:
+            Utils.check_precondition(
+                expr_type.is_valid_user_value(user_value))
+            self._expr_type = expr_type
             self._user_value = user_value
-            self._littup_value = self._type.user_value_to_littup_value(self._user_value)
+            self._littup_value = \
+                self._expr_type.user_value_to_littup_value(user_value)
 
-        if littup_value != None:
-            assert(type.is_valid_littup_value(littup_value=littup_value))
-            self._type = type
+        if littup_value is not None:
+            Utils.check_precondition(
+                expr_type.is_valid_littup_value(littup_value))
+
+            self._expr_type = expr_type
+            self._user_value = \
+                self._expr_type.littup_value_to_user_value(littup_value)
             self._littup_value = littup_value
-            self._user_value = self._type.littup_value_to_user_value(self._littup_value)
+
+    def type(self):
+        """
+        Return the ExprType object representing the type of this value.
+        :return: The ExprType object representing the type of this value.
+        """
+        return self._expr_type
 
     def __eq__(self, other):
-        assert(isinstance(other, ExprValue))
+        """
+        Implements an equivalence on ExprValue objects based on their littup
+        values.
+        :param other: The ExprValue object to compare to.
+        :return: True if equal to other.
+        """
+        Utils.check_precondition(isinstance(other, ExprValue))
         return self._littup_value == other._littup_value
 
     def __hash__(self):
@@ -79,11 +106,11 @@ class ExprType(object):
         self._typestr = typestr
 
     def __eq__(self, other):
-        assert (isinstance(other, ExprType))
+        Utils.check_precondition(isinstance(other, ExprType))
         return self._typestr == other._typestr
 
     def __ne__(self, other):
-        assert (isinstance(other, ExprType))
+        Utils.check_precondition(isinstance(other, ExprType))
         return self._typestr != other._typestr
 
     def __hash__(self):
@@ -178,8 +205,8 @@ class Bool(ExprType):
 
     def __init__(self):
         """ Initialise Bool object. """
-        self._values = [ExprValue(type=self, user_value=False),
-                        ExprValue(type=self, user_value=True)]
+        self._values = [ExprValue(expr_type=self, user_value=False),
+                        ExprValue(expr_type=self, user_value=True)]
         self._num_values = len(self._values)
         ExprType.__init__(self, "bool")
 
@@ -207,12 +234,12 @@ class Bool(ExprType):
 
     def user_value_to_littup_value(self, user_value):
         """ See ExprType.user_value_to_littup_value. """
-        assert (self.is_valid_user_value(user_value))
+        Utils.check_precondition(self.is_valid_user_value(user_value))
         return (user_value,)
 
     def littup_value_to_user_value(self, littup_value):
         """ See ExprType.littup_value_to_user_value. """
-        assert (self.is_valid_littup_value(littup_value))
+        Utils.check_precondition(self.is_valid_littup_value(littup_value))
         return littup_value[0]
 
 
@@ -227,9 +254,9 @@ class BitVec(ExprType):
         littup_values_rev = itertools.product(*[[False, True] for b in
             range(number_of_bits)])
         littup_values = six.moves.map(lambda v : v[::-1], littup_values_rev)
-        self._values = six.moves.map(lambda v: ExprValue(type=self,
+        self._values = six.moves.map(lambda v: ExprValue(expr_type=self,
             littup_value=v), littup_values)
-        #self._values = [ExprValue(type=self, user_value=i) for i in
+        #self._values = [ExprValue(expr_type=self, user_value=i) for i in
         #                six.moves.range(2 ** number_of_bits)]
 
         ExprType.__init__(self, "uint{:d}".format(number_of_bits))
@@ -258,12 +285,12 @@ class BitVec(ExprType):
 
     def user_value_to_littup_value(self, user_value):
         """ See ExprType.user_value_to_littup_value. """
-        assert (self.is_valid_user_value(user_value))
+        Utils.check_precondition(self.is_valid_user_value(user_value))
         return tuple([(((1 << b) & user_value) != 0) for b in range(self._number_of_bits)])
 
     def littup_value_to_user_value(self, littup_value):
         """ See ExprType.littup_value_to_user_value. """
-        assert (self.is_valid_littup_value(littup_value))
+        Utils.check_precondition(self.is_valid_littup_value(littup_value))
         return sum([(1 << b) if littup_value[b] else 0 for b in range(self._number_of_bits)])
 
 
@@ -296,13 +323,13 @@ class ExprTypeRepository(object):
     ]
 
     @staticmethod
-    def get_expr_type_from_type_str(type_str):
+    def lookup(type_str):
         """
         Get a type using a name like 'bool'
         :param type_str: A type string (as recognised by ExprType implementations).
         :return: A ExprType object.
         """
-        assert(type(type_str)==str)
+        Utils.check_precondition(type(type_str) == str)
 
         for regex, callback in ExprTypeRepository._type_str_regex_registry:
             match = regex.match(type_str)

@@ -12,10 +12,10 @@ import mxklabs as mxk
 #    
 #  def test_Index(self):
 #    uint8 = e.BitVector(8)    
-#    bitvector = e.Const(type=uint8, value=5)
-#    index_0 = e.Const(type=uint8, value=0)
-#    index_1 = e.Const(type=uint8, value=1)
-#    index_2 = e.Const(type=uint8, value=2)
+#    bitvector = e.Const(expr_type=uint8, value=5)
+#    index_0 = e.Const(expr_type=uint8, value=0)
+#    index_1 = e.Const(expr_type=uint8, value=1)
+#    index_2 = e.Const(expr_type=uint8, value=2)
 #    
 #    values = \
 #    {

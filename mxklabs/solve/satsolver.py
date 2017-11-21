@@ -18,7 +18,7 @@ from mxklabs.expr import expr as ex
     
     If solve returns SatSolver.RESULT_SAT then call get_satisfying_assignment 
     for a callable representing a satisfying assignment of values to variables.
-    Variables in this context are integers and values are True or False.
+    Vars in this context are integers and values are True or False.
 '''
 class SatSolver(object):
   
@@ -54,7 +54,7 @@ class SatSolver(object):
   ''' 
       To be implemented by derived classes. This function must look at self.constraints and
       decide if this set of constraints is satisfiable. For convenience, self.variable has
-      is an iterable collection of all Variable objects in self.constraints. Function must
+      is an iterable collection of all Var objects in self.constraints. Function must
       return either RESULT_SAT, RESULT_UNSAT or RESULT_ERROR. If satisfiable a callable
       representing a satisfying assignment must be stored in self.satisfying_assignment.
   '''

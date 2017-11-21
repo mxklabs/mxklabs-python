@@ -4,28 +4,28 @@ import mxklabs as mxk
 
 class Test_Expr(unittest.TestCase):
 
-    def test_hashstr(self):
+    def test_expr_str(self):
         self.assertEqual(
-            mxk.LogicalAnd(
-                mxk.Variable(type='bool', id="v1"),
-                mxk.Variable(type='bool', id="v2")).hash_str(),
-            "(logical-and (var v1) (var v2))")
+            str(mxk.LogicalAnd(
+                mxk.Var(expr_type='bool', id="v1"),
+                mxk.Var(expr_type='bool', id="v2"))),
+            "(logical-and (var bool v1) (var bool v2))")
 
         self.assertEqual(
-            mxk.LogicalAnd(
-                mxk.Variable(type='bool', id="v1"),
-                mxk.Constant(type='bool', user_value=True)).hash_str(),
-            "(logical-and (var v1) (const bool true))")
+            str(mxk.LogicalAnd(
+                mxk.Var(expr_type='bool', id="v1"),
+                mxk.Const(expr_type='bool', user_value=True))),
+            "(logical-and (var bool v1) (const bool true))")
 
         self.assertEqual(
-            mxk.LogicalAnd(
-                mxk.Variable(type='bool', id="v2"),
-                mxk.Variable(type='bool', id="v1")).hash_str(),
-            "(logical-and (var v2) (var v1))")
+            str(mxk.LogicalAnd(
+                mxk.Var(expr_type='bool', id="v2"),
+                mxk.Var(expr_type='bool', id="v1"))),
+            "(logical-and (var bool v2) (var bool v1))")
 
         self.assertEqual(
-            mxk.LogicalOr(
-                mxk.Constant(type='bool', user_value=False),
-                mxk.Variable(type='bool', id="v1")).hash_str(),
-            "(logical-or (const bool false) (var v1))")
+            str(mxk.LogicalOr(
+                mxk.Const(expr_type='bool', user_value=False),
+                mxk.Var(expr_type='bool', id="v1"))),
+            "(logical-or (const bool false) (var bool v1))")
     

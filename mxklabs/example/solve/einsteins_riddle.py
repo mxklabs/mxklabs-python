@@ -35,7 +35,7 @@ def run_example(logger):
     only boolean variables and by placing logical constraints over those 
     variables using only logical AND, OR and NOT expressions.
     """
-    # Use a Python dictionary to store variables (mxk.Variable objects).
+    # Use a Python dictionary to store variables (mxk.Var objects).
     vars = dict()
     # Use a Python list object to store constraints (mxk.Expr objects).
     constraints = list()
@@ -67,7 +67,7 @@ def run_example(logger):
     # We're now in a position to create our variables. We could create each
     # variables as a separate Python object like this:
     #
-    #   house1_England = mxk.Variable(type='bool', 'house1_England')
+    #   house1_England = mxk.Var('bool', 'house1_England')
     #
     # but that would require 125 such definitions. Instead, well loop over the
     # lists we have just defined and put the generated variables in vars.
@@ -79,10 +79,10 @@ def run_example(logger):
             # A variable name.
             id = "house{}_{}".format(l, a)
             # Add variable to vars.
-            vars[(l, a)] = mxk.Variable('bool', id)
+            vars[(l, a)] = mxk.Var('bool', id)
 
     # Print our list of variables.
-    #print("Variables:");
+    #print("Vars:");
     #for value in vars.values():
     #    print(" - {}".format(value))
 

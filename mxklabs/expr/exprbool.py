@@ -10,7 +10,7 @@ class LogicalAnd(ex.Expr):
         Construct a LogicalAnd object.
         :param args: One or more Expr objects of type Bool (operands).
         """
-        ex.Expr.__init__(self, type=et.ExprTypeRepository._BOOL, nodestr="logical-and", children=args)
+        ex.Expr.__init__(self, expr_type='bool', children=args)
 
         self.ensure_minimum_number_of_children(1)
         for i in range(len(self.children())):
@@ -24,7 +24,7 @@ class LogicalOr(ex.Expr):
         Construct a LogicalOr object.
         :param args: One or more Expr objects of type Bool (operands).
         """
-        ex.Expr.__init__(self, type=et.ExprTypeRepository._BOOL, nodestr="logical-or", children=args)
+        ex.Expr.__init__(self, expr_type='bool', children=args)
 
         self.ensure_minimum_number_of_children(1)
         for i in range(len(self.children())):
@@ -38,7 +38,7 @@ class LogicalNot(ex.Expr):
         Construct a LogicalNot object.
         :param args: One or more Expr objects of type Bool (operands).
         """
-        ex.Expr.__init__(self, type=et.ExprTypeRepository._BOOL, nodestr="logical-not", children=[arg])
+        ex.Expr.__init__(self, expr_type='bool', children=[arg])
 
         self.ensure_number_of_children(1)
         self.ensure_child_is_type(0, et.ExprTypeRepository._BOOL)
