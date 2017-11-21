@@ -23,18 +23,21 @@ class ExprWalker(object):
 
 ''' Help eliminate constants in expressions. '''
 
-class VariableHarvester(ExprWalker):
+class VarHarvester(ExprWalker):
+  """
+  TODO: Document how to extend.
+  """
   
   Res = collections.namedtuple('Res', ['vars'])
   
   def _process(self, expr):
     return self.bottom_up_walk(expr=expr, args=None).vars
   
-  def visit_constant(self, expr, res, args):
+  def visit_const(self, expr, res, args):
     return self.visit_default(expr, res, args)
   
-  def visit_variable(self, expr, res, args):
-    return VariableHarvester.Res(vars=set([expr]))
+  def visit_var(self, expr, res, args):
+    return VarHarvester.Res(vars=set([expr]))
   
   def visit_logical_and(self, expr, res, args):
     return self.visit_default(expr, res, args)
@@ -44,7 +47,10 @@ class VariableHarvester(ExprWalker):
   
   def visit_logical_not(self, expr, res, args):
     return self.visit_default(expr, res, args)
-  
+
+  def visit_equals(self, expr, res, args):
+    return self.visit_default(expr, res, args)
+
   def visit_default(self, expr, res, args):
     
     result = set()
@@ -52,65 +58,75 @@ class VariableHarvester(ExprWalker):
     for child in expr.children():
       result = result.union(res[child].vars)
   
-    return VariableHarvester.Res(vars=result)
+    return VarHarvester.Res(vars=result)
   
-  ''' Quick version (avoid creating VariableHarvester). '''
+  ''' Quick version (avoid creating VarHarvester). '''
   @staticmethod
   def process(expr):
     
-    vh = VariableHarvester()
+    vh = VarHarvester()
     return vh._process(expr)
 
 ''' Help propagate constant expressions. '''
 
-class ConstantPropagator(ExprWalker):
+class ConstProp(ExprWalker):
   
   Res = collections.namedtuple('Res', ['expr', 'is_const'])
   
   def _process(self, expr):
     return self.bottom_up_walk(expr=expr, args=None).expr
   
-  def visit_constant(self, expr, res, args):
-    return ConstantPropagator.Res(expr=expr, is_const=True)
+  def visit_const(self, expr, res, args):
+    return ConstProp.Res(expr=expr, is_const=True)
     
-  def visit_variable(self, expr, res, args):
+  def visit_var(self, expr, res, args):
     return self.visit_default(expr, res, args)
   
   def visit_logical_and(self, expr, res, args):
     
     # If ANY operand is false, return falsex.
     if any([res[child].is_const and not res[child].expr.value().user_value() for child in expr.children()]):
-      return ConstantPropagator.Res(expr=ex.Constant(type='bool', user_value=False), is_const=True)
+      return ConstProp.Res(expr=ex.Const(expr_type='bool', user_value=False), is_const=True)
     
     # If ALL operands are true, return truex.
     if all([res[child].is_const and res[child].expr.value().user_value() for child in expr.children()]):
-      return ConstantPropagator.Res(expr=ex.Constant(type='bool', user_value=True), is_const=True)
+      return ConstProp.Res(expr=ex.Const(expr_type='bool', user_value=True), is_const=True)
 
-    return ConstantPropagator.Res(expr=expr, is_const=False, value=None)
+    return ConstProp.Res(expr=expr, is_const=False, value=None)
   
   def visit_logical_or(self, expr, res, args):
     
     # If ALL operand are false, return false.
     if all([res[child].is_const and not res[child].expr.value().user_value() for child in expr.children()]):
-      return ConstantPropagator.Res(expr=ex.Constant(type='bool', user_value=False), is_const=True)
+      return ConstProp.Res(expr=ex.Const(expr_type='bool', user_value=False), is_const=True)
     
     # If ANY operand is true, return true.
     if any([res[child].is_const and res[child].expr.value().user_value() for child in expr.children()]):
-      return ConstantPropagator.Res(expr=ex.Constant(type='bool', user_value=True), is_const=True)
+      return ConstProp.Res(expr=ex.Const(expr_type='bool', user_value=True), is_const=True)
 
-    return ConstantPropagator.Res(expr=expr, is_const=False)
+    return ConstProp.Res(expr=expr, is_const=False)
 
   def visit_logical_not(self, expr, res, args):
     return self.visit_default(expr, res, args)
+
+  def visit_equals(self, expr, res, args):
+    if all([res[child].is_const for child in expr.children()]):
+      is_equal = (res[expr.child(0)].expr.value() == res[expr.child(1)].expr.value())
+      return ConstProp.Res(expr=ex.Const(expr_type='bool', user_value=(is_equal)), is_const=True)
+    elif expr.child(0) == expr.child(1):
+      # If we're comparing an expression to itself, it must be true, right?
+      return ConstProp.Res(expr=expr, is_const=True)
+    else:
+      return ConstProp.Res(expr=expr, is_const=False)
   
   def visit_default(self, expr, res, args):
-    return ConstantPropagator.Res(expr=expr, is_const=False)
+    return ConstProp.Res(expr=expr, is_const=False)
   
-  ''' Quick version (avoid creating VariableHarvester). '''
+  ''' Quick version (avoid creating VarHarvester). '''
   @staticmethod
   def process(expr):
     
-    cp = ConstantPropagator()
+    cp = ConstProp()
     return cp._process(expr)
   
 ''' Evaluate the value of an expressions. '''
@@ -120,22 +136,25 @@ class ExpressionEvaluator(ExprWalker):
   def _process(self, expr, variable_value_map):
     return self.bottom_up_walk(expr=expr, args=variable_value_map)
   
-  def visit_constant(self, expr, res, args):
+  def visit_const(self, expr, res, args):
     return expr.value()
     
-  def visit_variable(self, expr, res, args):
+  def visit_var(self, expr, res, args):
     return args[expr]
   
   def visit_logical_and(self, expr, res, args):
-    return et.ExprValue(type=et.ExprTypeRepository._BOOL, user_value=all([res[child].user_value() for child in expr.children()]))
+    return et.ExprValue(expr_type=et.ExprTypeRepository._BOOL, user_value=all([res[child].user_value() for child in expr.children()]))
   
   def visit_logical_or(self, expr, res, args):
-    return et.ExprValue(type=et.ExprTypeRepository._BOOL, user_value=any([res[child].user_value() for child in expr.children()]))
+    return et.ExprValue(expr_type=et.ExprTypeRepository._BOOL, user_value=any([res[child].user_value() for child in expr.children()]))
 
   def visit_logical_not(self, expr, res, args):
-    return et.ExprValue(type=et.ExprTypeRepository._BOOL, user_value=not res[expr.child()].user_value())
+    return et.ExprValue(expr_type='bool', user_value=not res[expr.child()].user_value())
+
+  def visit_equals(self, expr, res, args):
+    return et.ExprValue(expr_type='bool', user_value=(res[child(0)] == res[child(1)]))
   
-  ''' Quick version (avoid creating VariableHarvester). '''
+  ''' Quick version (avoid creating VarHarvester). '''
   @staticmethod
   def process(expr, variable_value_map):
     

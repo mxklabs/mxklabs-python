@@ -45,7 +45,15 @@ class Utils(object):
   @staticmethod
   def kebab_case_to_snake_case(string):
     return "_".join([noun for noun in string.split('-')])
-  
+
+  @staticmethod
+  def is_iterable(obj):
+    try:
+      it = iter(obj)
+      return True
+    except:
+      return False
+
   ''' Return classes in module that inherit from base_class, but not base_class itself. '''
   @staticmethod
   def get_derived_classes(module, base_class):
@@ -63,6 +71,11 @@ class Utils(object):
              or inspect.ismethod(getattr(class_, function_name))
     else:
       return False
+
+  @staticmethod
+  def check_precondition(precondition):
+    if not precondition:
+      raise RuntimeError('precondition violated')
     
   
 # NOTE: I'd have rather used functools.lru_cache to achieve memoisation but it's not available 

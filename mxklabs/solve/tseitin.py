@@ -22,8 +22,8 @@ class TseitinCache(object):
     # Map tuple of expression and bit to literal.
     self._cache = \
     { 
-      ex.Constant(type='bool', user_value=True) : { 0 : TseitinCache.TRUE_LIT },
-      ex.Constant(type='bool', user_value=False) : { 0 : TseitinCache.FALSE_LIT }
+      ex.Const(expr_type='bool', user_value=True) : { 0 : TseitinCache.TRUE_LIT },
+      ex.Const(expr_type='bool', user_value=False) : { 0 : TseitinCache.FALSE_LIT }
     }
     self._dimacs = dimacs.Dimacs(clauses=set([frozenset([TseitinCache.TRUE_LIT])]))
 
@@ -35,7 +35,7 @@ class TseitinCache(object):
     if bit is not None:
       return expr in self._cache.keys() and bit in self._cache[expr].keys()
     else:
-      return all(self.is_cached(expr, bit) for bit in range(expr.type().littup_size()))
+      return all(self.is_cached(expr, bit) for bit in range(expr.expr_type().littup_size()))
 
   ''' Lookup (returns just a literal number by default, or a LookupResult if specified. '''
   def lookup_lit(self, expr, bit):
@@ -51,7 +51,7 @@ class TseitinCache(object):
     
   ''' Lookup (returns just a literal number by default, or a LookupResult if specified. '''
   def lookup_littup(self, expr):
-    return tuple(self.lookup_lit(expr, bit) for bit in range(expr.type().littup_size()))
+    return tuple(self.lookup_lit(expr, bit) for bit in range(expr.expr_type().littup_size()))
     
   ''' Add a CNF clause. ''' 
   def add_clause(self, clause):
@@ -78,12 +78,12 @@ class Tseitin(ea.ExprWalker):
       # This is a small optimisation (avoid additional literals).
       for child in expr.children():
         self.add_constraint(child)
-    elif expr.type() == et.ExprTypeRepository._BOOL:
+    elif expr.expr_type() == et.ExprTypeRepository._BOOL:
       littup = self.bottom_up_walk(expr)
       lit, = littup
       self._cache.add_clause(frozenset([lit]))
     else:
-      raise("Cannot add an expression with type '{type_}' as a constraint".format(type_=expr.type()))
+      raise("Cannot add an expression with type '{type_}' as a constraint".format(type_=expr.expr_type()))
     
   ''' Evaluate a number of boolean expressions and ensure they are asserted. '''
   def add_constraints(self, exprs):
@@ -101,11 +101,11 @@ class Tseitin(ea.ExprWalker):
       return impl(expr, res)
   
   ''' Return a representation of this expression in the form of literals. '''
-  def visit_variable(self, expr, res, args):
+  def visit_var(self, expr, res, args):
     return self._cache.lookup_littup(expr)
 
   ''' Return a representation of this expression in the form of literals. '''
-  def visit_constant(self, expr, res, args):
+  def visit_const(self, expr, res, args):
     return tuple(TseitinCache.TRUE_LIT if valbit else TseitinCache.FALSE_LIT for valbit in expr.value().littup_value())
 
   ''' Return a representation of this expression in the form of literals. '''
@@ -150,3 +150,35 @@ class Tseitin(ea.ExprWalker):
   
   def visit_logical_not(self, expr, res, args):
     return (-res[expr.child()][0],)
+
+  def visit_equals(self, expr, res, args):
+
+    def impl(expr, res):
+      littup = self._cache.lookup_littup(expr)
+      lit, = littup
+
+      c0_littup = res[expr.child(0)]
+      c1_littup = res[expr.child(1)]
+
+      assert(len(c0_littup) == len(c1_littup))
+
+      lits = len(c0_littup)
+
+      for b in range(lits):
+        # For each bit, if operands disagree this implies -lit.
+        self._cache.add_clause(frozenset([c0_littup[b], -c1_littup[b], -lit]))
+        self._cache.add_clause(frozenset([-c0_littup[b], c1_littup[b], -lit]))
+
+      # For all bits, if they are all unset then this implies lit.
+      self._cache.add_clause([c0_littup[b] for b in range(lits)] +
+                             [c1_littup[b] for b in range(lits)] + [lit])
+
+      # For all bits, if they are all set then this implies lit.
+      self._cache.add_clause([-c0_littup[b] for b in range(lits)] +
+                             [-c1_littup[b] for b in range(lits)] + [lit])
+
+      return littup
+
+    return self._memoise(impl, expr, res)
+
+

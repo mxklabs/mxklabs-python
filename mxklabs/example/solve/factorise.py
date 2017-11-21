@@ -54,17 +54,63 @@ def find_divisor(logger, n):
     # As a side note, note that one of the inequalities above only holds for
     # N>=3. However, we've checked CEIL(N/2) is sufficient for N<3 manually.
 
-    # Work out bit length for n.
-    N = n.bit_length()
-    logger("N={}".format(N))
+    n_bit_length = n.bit_length()
+    divisor_bit_length = (n_bit_length // 2) if (n_bit_length % 2) == 0 else (n_bit_length // 2) + 1
 
-    # Work out bit length for divisor.
-    DIVISOR_BIT_LENGTH = (N // 2) if (N % 2) == 0 else (N // 2) + 1
-    logger("CEIL(N/2)={}".format(DIVISOR_BIT_LENGTH))
+    logger("N={}".format(n_bit_length))
+    logger("CEIL(N/2)={}".format(divisor_bit_length))
 
-    n_ = mxk.Constant('uint%d' % N, n)
-    divisor_ = mxk.Variable('uint%d' % DIVISOR_BIT_LENGTH, n)
+    # Const representing n and a variable for the divisor.
+    n_typestr = 'uint%d' % n_bit_length
+    divisor_typestr = 'uint%d' % divisor_bit_length
 
+    n_ = mxk.Const(n_typestr, n)
+    divisor_ = mxk.Var(divisor_typestr, 'd')
+
+    # Make sure divisor is non-trivial.
+    constraints.append(mxk.LogicalNot(
+        mxk.Equals(n_, mxk.Const(divisor_typestr, 0))))
+    constraints.append(mxk.LogicalNot(
+        mxk.Equals(n_, mxk.Const(divisor_typestr, 1))))
+
+    # Now all that remains is to formulate constraints on n_ and divisor_ that
+    # ensure that if the constraints are met then divisor_ divides n_. This is
+    # easier said than done. We basically have to calculate the remainder of
+    # the integer division n_ / divisor_ and ensure there is no remainder.
+    #
+    # We're going to use a shift and subtract division.
+    rng = n_bit_length - divisor_bit_length
+    remainder_ = n_
+
+    for r in range(rng+1):
+        remainder_part_start = rng - r
+        remainder_part_end = remainder_part_start + divisor_bit_length
+
+        print("[{},{}[".format(remainder_part_start, remainder_part_end))
+
+        remainder_part_ =  mxk.Extract(remainder_,
+                           mxk.Const('int', remainder_part_start),
+                           mxk.Const('int', remainder_part_end))
+
+        # See if subtraction is possible.
+        can_subtract_ = mxk.LessThanEquals(divisor_, remainder_part_)
+
+        # Work out what n_part_ looks like after subtraction.
+        remainder_part_new_ = mxk.IfThenElse(can_subtract_,
+                                             mxk.Subtract(remainder_part_,
+                                                          divisor_),
+                                             remainder_part_)
+
+        # Update n_ with the revised n_part_new_.
+        remainder_ = mxk.Insert(remainder_,
+                                remainder_part_new_,
+                                mxk.Const('int', remainder_part_start),
+                                mxk.Const('int', remainder_part_end))
+
+    # Ensure the remainder is 0!
+    constraints.append(mxk.Equals(remainder_, mxk.Const(divisor_typestr, 0)))
+
+    # TODO(mkkt): Extract, Insert, LessThanEquals, Equals, IfThenElse, Subtract.
 
 
     # We're done! We got all the constraints. Let's use a constraint solver
@@ -75,14 +121,18 @@ def find_divisor(logger, n):
     # See if the solver was able to find a satisfying assignment.
     if result == mxk.ConstraintSolver.RESULT_SAT:
 
-        # Get the assignment of values to variables.
+        # We found a divisor, return it!
         assignment = solver.get_satisfying_assignment()
-
+        return assignment(divisor_)
 
     elif result == mxk.ConstraintSolver.RESULT_UNSAT:
-        logger("Unable to find a solution, sorry.")
+        logger("Unable to find a divisor.")
+        return None
+
     elif result == mxk.ConstraintSolver.RESULT_ERROR:
         logger("Something went wrong, sorry.")
+        return None
+
     else:
         raise Exception("Unable to interpret result from solver")
 

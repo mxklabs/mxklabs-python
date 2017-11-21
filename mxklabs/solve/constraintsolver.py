@@ -48,10 +48,10 @@ class ConstraintSolver(object):
     # Harvest variables.
     self.variables = set()    
     for constraint in self.constraints:
-      self.variables = self.variables.union(ea.VariableHarvester.process(constraint))
+      self.variables = self.variables.union(ea.VarHarvester.process(constraint))
     
     # Work out the number of variable assignments.
-    self.statespace = six.moves.reduce(operator.mul, [v.type().num_values() for v in self.variables], 1)
+    self.statespace = six.moves.reduce(operator.mul, [v.expr_type().num_values() for v in self.variables], 1)
 
     # Log some stats.
     self.logger("constraint solver: '{classname}'".format(classname=self.__class__.__name__))
@@ -64,7 +64,7 @@ class ConstraintSolver(object):
   ''' 
       To be implemented by derived classes. This function must look at self.constraints and
       decide if this set of constraints is satisfiable. For convenience, self.variable has
-      is an iterable collection of all Variable objects in self.constraints. Function must
+      is an iterable collection of all Var objects in self.constraints. Function must
       return either RESULT_SAT, RESULT_UNSAT or RESULT_ERROR. If satisfiable a callable
       representing a satisfying assignment must be stored in self.satisfying_assignment.
   '''
@@ -99,7 +99,7 @@ class BruteForceConstraintSolver(ConstraintSolver):
       variable_list = list(self.variables)
       
       # Get an iterator over all variable assignments.
-      variable_assignments = itertools.product(*[v.type().values() for v in variable_list])
+      variable_assignments = itertools.product(*[v.expr_type().values() for v in variable_list])
       # Iterate over them.
       for variable_assignment in variable_assignments:
         # For this assignment, create a mapping from variables to values so we can 
@@ -158,7 +158,7 @@ class TseitinConstraintSolver(ConstraintSolver):
       def sat_ass(variable):
         littup = tseitin.cache_lookup(variable)
         littup_value = tuple([sat_solver.get_satisfying_assignment()(lit) for lit in littup])
-        value = et.ExprValue(variable.type(), littup_value=littup_value)
+        value = et.ExprValue(variable.expr_type(), littup_value=littup_value)
         return value.user_value()
         
       self._satisfying_assignment = sat_ass

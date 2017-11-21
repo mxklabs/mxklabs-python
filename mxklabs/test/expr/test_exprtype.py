@@ -28,7 +28,7 @@ class Test_BitVector(unittest.TestCase):
 
     # Check 'bool' maps to _BOOL.
     self.assertEqual(mxk.ExprTypeRepository._BOOL,
-        mxk.ExprTypeRepository.get_expr_type_from_type_str('bool'))
+        mxk.ExprTypeRepository.lookup('bool'))
 
     # Test we can instantiate a REALLY large bitvector. The worry is that
     # the implementation instantiates all values. There should be 2^2048
@@ -43,9 +43,9 @@ class Test_BitVector(unittest.TestCase):
 
     # Check 'uintN' maps to _BITVEC(N).
     self.assertEqual(mxk.ExprTypeRepository._BITVEC(8),
-        mxk.ExprTypeRepository.get_expr_type_from_type_str('uint8'))
+        mxk.ExprTypeRepository.lookup('uint8'))
     self.assertEqual(mxk.ExprTypeRepository._BITVEC(64),
-        mxk.ExprTypeRepository.get_expr_type_from_type_str('uint64'))
+        mxk.ExprTypeRepository.lookup('uint64'))
 
   #def test_exprtype_product(self):
   #  T = mxk.Product([mxk.BitVector(2),mxk.Bool()])
@@ -74,4 +74,4 @@ class Test_BitVector(unittest.TestCase):
 class Test_ExprTypeRepository(unittest.TestCase):
 
   def test_expr_type_repository(self):
-    self.assertTrue(isinstance(mxk.ExprTypeRepository.get_expr_type_from_type_str('bool'), mxk.Bool))
+    self.assertTrue(isinstance(mxk.ExprTypeRepository.lookup('bool'), mxk.Bool))
