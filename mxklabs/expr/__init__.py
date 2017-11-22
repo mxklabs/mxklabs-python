@@ -1,5 +1,6 @@
 from mxklabs.expr.expr import *
 from mxklabs.expr.expranalyse import *
+from mxklabs.expr.expreval import *
 from mxklabs.expr.exprbitvec import *
 from mxklabs.expr.exprbool import *
 from mxklabs.expr.exprcomp import *

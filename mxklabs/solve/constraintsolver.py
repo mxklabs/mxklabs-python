@@ -6,6 +6,7 @@ import operator
 import six
 
 from mxklabs.expr import expr as ex
+from mxklabs.expr import expreval as ee
 from mxklabs.expr import exprtype as et
 from mxklabs.expr import expranalyse as ea
 
@@ -110,7 +111,7 @@ class BruteForceConstraintSolver(ConstraintSolver):
           evalargs[variable] = variable_assignment[v]
           
         # TODO(mkkt): Evaluate isn't going to work more than one expression deep this way.
-        if all([ea.ExpressionEvaluator.process(constraint, evalargs).user_value() for constraint in self.constraints]):
+        if all([ee.ExpressionEvaluator.process(constraint, evalargs).user_value() for constraint in self.constraints]):
           # All constraints hold under this variable assignment, SAT!
           self.logger("SAT")
           self._satisfying_assignment = lambda var : evalargs[var].user_value()
