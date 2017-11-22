@@ -8,7 +8,21 @@ TRUE = mxk.TseitinCache.TRUE_LIT
 FALSE = mxk.TseitinCache.FALSE_LIT
 
 class Test_Tseitin(unittest.TestCase):
-    
+
+  def _TEST_SAT(self, constraints):
+    t = mxk.Tseitin()
+    s = mxk.CryptoSatSolver()
+    for c in constraints:
+      t.add_constraint(c)
+    self.assertEqual(mxk.SatSolver.RESULT_SAT, s.solve(t.dimacs()))
+
+  def _TEST_UNSAT(self, constraints):
+    t = mxk.Tseitin()
+    s = mxk.CryptoSatSolver()
+    for c in constraints:
+      t.add_constraint(c)
+    self.assertEqual(mxk.SatSolver.RESULT_UNSAT, s.solve(t.dimacs()))
+
   def _to_set(self, list_of_lists):
     return set([frozenset(list) for list in list_of_lists])
 
@@ -87,3 +101,14 @@ class Test_Tseitin(unittest.TestCase):
     
     exp_clauses = [[TRUE],[-tseitin.cache_lookup(x_)[0]]]    
     self._test_clauses(tseitin, e_, exp_clauses)
+
+  def test_tseitin_equals(self):
+    c1_ = mxk.Const('uint3', 5)
+    c2_ = mxk.Const('uint3', 5)
+    c3_ = mxk.Const('uint3', 2)
+
+    self._TEST_SAT([mxk.Equals(c1_, c2_)])
+    self._TEST_UNSAT([mxk.LogicalNot(mxk.Equals(c1_, c2_))])
+    self._TEST_UNSAT([mxk.Equals(c2_, c3_)])
+    self._TEST_SAT([mxk.LogicalNot(mxk.Equals(c2_, c3_))])
+
