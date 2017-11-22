@@ -170,12 +170,12 @@ class Tseitin(ea.ExprWalker):
         self._cache.add_clause(frozenset([-c0_littup[b], c1_littup[b], -lit]))
 
       # For all bits, if they are all unset then this implies lit.
-      self._cache.add_clause([c0_littup[b] for b in range(lits)] +
-                             [c1_littup[b] for b in range(lits)] + [lit])
+      self._cache.add_clause(frozenset([c0_littup[b] for b in range(lits)] +
+                                       [c1_littup[b] for b in range(lits)] + [lit]))
 
       # For all bits, if they are all set then this implies lit.
-      self._cache.add_clause([-c0_littup[b] for b in range(lits)] +
-                             [-c1_littup[b] for b in range(lits)] + [lit])
+      self._cache.add_clause(frozenset([-c0_littup[b] for b in range(lits)] +
+                                       [-c1_littup[b] for b in range(lits)] + [lit]))
 
       return littup
 
