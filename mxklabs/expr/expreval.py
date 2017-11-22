@@ -1,7 +1,8 @@
 from mxklabs.expr import expranalyse as ea
 from mxklabs.expr import exprtype as et
 
-class ExpressionEvaluator(ea.ExprWalker):
+class ExprEvaluator(ea.ExprWalker):
+
     def _process(self, expr, variable_value_map):
         return self.bottom_up_walk(expr=expr, args=variable_value_map)
 
@@ -33,5 +34,5 @@ class ExpressionEvaluator(ea.ExprWalker):
 
     @staticmethod
     def process(expr, variable_value_map):
-        ee = ExpressionEvaluator()
+        ee = ExprEvaluator()
         return ee._process(expr, variable_value_map)

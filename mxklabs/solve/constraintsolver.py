@@ -111,7 +111,7 @@ class BruteForceConstraintSolver(ConstraintSolver):
           evalargs[variable] = variable_assignment[v]
           
         # TODO(mkkt): Evaluate isn't going to work more than one expression deep this way.
-        if all([ee.ExpressionEvaluator.process(constraint, evalargs).user_value() for constraint in self.constraints]):
+        if all([ee.ExprEvaluator.process(constraint, evalargs).user_value() for constraint in self.constraints]):
           # All constraints hold under this variable assignment, SAT!
           self.logger("SAT")
           self._satisfying_assignment = lambda var : evalargs[var].user_value()
