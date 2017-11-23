@@ -129,7 +129,7 @@ class Expr(object):
             self.__class__.__name__)
         visit_method = getattr(visitor, visit_method_name)
 
-        return visit_method(expr=self, **kwargs)
+        return visit_method(self, **kwargs)
 
     def ensure_number_of_children(self, n):
         if len(self._children) != n:

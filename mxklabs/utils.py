@@ -78,18 +78,25 @@ class Utils(object):
       raise RuntimeError('precondition violated')
     
   
-# NOTE: I'd have rather used functools.lru_cache to achieve memoisation but it's not available 
-# in Python 2.x. Hence, I'm using a solution from stack overflow: 
-# https://stackoverflow.com/questions/815110/is-there-a-decorator-to-simply-cache-function-return-values
+
 
 ''' Memoise decorator. '''
+
 def memoise(function):
-  memo = {}
-  def wrapper(*args):
-    if args in memo:
-      return memo[args]
-    else:
-      rv = function(*args)
-      memo[args] = rv
-      return rv
-  return wrapper
+
+    """
+    You can use this function to memoise calls to the function (avoid repeat
+    calculations for the same parameter by storing them).
+
+    NOTE: I'd have rather used functools.lru_cache to achieve memoisation but
+    it's not available in Python 2.x. Instead we're using a custom implementation.
+    """
+    stored_results = {}
+    def memoise_wrapper(*args):
+        if args in stored_results:
+            return stored_results[args]
+        else:
+            result = function(*args)
+            stored_results[args] = result
+            return result
+    return memoise_wrapper
