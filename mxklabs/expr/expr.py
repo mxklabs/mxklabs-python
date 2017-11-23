@@ -125,7 +125,7 @@ class Expr(object):
         :param args: The parameter to pass to the visitor method.
         :return: The result of the visitor method.
         """
-        visit_method_name = 'visit_' + Utils.camel_case_to_snake_case(
+        visit_method_name = '_visit_' + Utils.camel_case_to_snake_case(
             self.__class__.__name__)
         visit_method = getattr(visitor, visit_method_name)
 

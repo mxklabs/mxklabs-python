@@ -7,41 +7,6 @@ class ExprEvaluator(ea.ExprVisitor):
     This class can be used to 'compute' the value of an expression under a
     specific assignment of values to variables in said expression.
     """
-    def __init__(self, variable_assignment):
-        self._variable_assignment = variable_assignment
-        ea.ExprVisitor.__init__(self)
-
-    @utils.memoise
-    def visit_const(self, expr):
-        return expr.expr_value()
-
-    @utils.memoise
-    def visit_var(self, expr):
-        return self._variable_assignment(expr)
-
-    @utils.memoise
-    def visit_logical_and(self, expr):
-        children_res = [c.visit(self).user_value() for c in expr.children()]
-        return et.ExprValue(expr_type='bool', user_value=all(children_res))
-
-    @utils.memoise
-    def visit_logical_or(self, expr):
-        children_res = [c.visit(self).user_value() for c in expr.children()]
-        return et.ExprValue(expr_type='bool', user_value=any(children_res))
-
-    @utils.memoise
-    def visit_logical_not(self, expr):
-        child0_res = expr.child(0).visit(self).user_value()
-        return et.ExprValue(expr_type='bool', user_value=not child0_res)
-
-    @utils.memoise
-    def visit_equals(self, expr):
-        child0_res = expr.child(0).visit(self).user_value()
-        child1_res = expr.child(1).visit(self).user_value()
-        return et.ExprValue(expr_type='bool',
-                            user_value=(child0_res == child1_res))
-
-    ''' Quick version (avoid creating VarHarvester). '''
 
     @staticmethod
     def eval(expr, variable_assignment):
@@ -56,4 +21,77 @@ class ExprEvaluator(ea.ExprVisitor):
         """
         ee = ExprEvaluator(variable_assignment)
         return expr.visit(ee)
+
+    def __init__(self, variable_assignment):
+        """
+        There is no need to instantiate this class manually. Use the eval method
+        instead. This constructor is called internally.
+        :param variable_assignment: A callable object that takes a Var parameter
+        and produces a ExprValue of the same ExprType representing the
+        variable's value.
+        """
+        self._variable_assignment = variable_assignment
+        ea.ExprVisitor.__init__(self)
+
+    @utils.memoise
+    def _visit_const(self, expr):
+        '''
+        Internal method for working out the value of a constant.
+        :param expr: A Const object.
+        :return: An ExprValue object.
+        '''
+        return expr.expr_value()
+
+    @utils.memoise
+    def _visit_var(self, expr):
+        '''
+        Internal method for working out the value of a variable.
+        :param expr: A Var object.
+        :return: An ExprValue object.
+        '''
+        return self._variable_assignment(expr)
+
+    @utils.memoise
+    def _visit_logical_and(self, expr):
+        '''
+        Internal method for working out the value of a logical AND expression.
+        :param expr: A LogicalAnd object.
+        :return: An ExprValue object.
+        '''
+        children_res = [c.visit(self).user_value() for c in expr.children()]
+        return et.ExprValue(expr_type='bool', user_value=all(children_res))
+
+    @utils.memoise
+    def _visit_logical_or(self, expr):
+        '''
+        Internal method for working out the value of a logical OR expression.
+        :param expr: A LogicalOr object.
+        :return: An ExprValue object.
+        '''
+        children_res = [c.visit(self).user_value() for c in expr.children()]
+        return et.ExprValue(expr_type='bool', user_value=any(children_res))
+
+    @utils.memoise
+    def _visit_logical_not(self, expr):
+        '''
+        Internal method for working out the value of a logical NOT expression.
+        :param expr: A LogicalNot object.
+        :return: An ExprValue object.
+        '''
+        child0_res = expr.child(0).visit(self).user_value()
+        return et.ExprValue(expr_type='bool', user_value=not child0_res)
+
+    @utils.memoise
+    def _visit_equals(self, expr):
+        '''
+        Internal method for working out the value of an equivalence expression.
+        :param expr: A Equals object.
+        :return: An ExprValue object.
+        '''
+        child0_res = expr.child(0).visit(self).user_value()
+        child1_res = expr.child(1).visit(self).user_value()
+        return et.ExprValue(expr_type='bool',
+                            user_value=(child0_res == child1_res))
+
+
 
