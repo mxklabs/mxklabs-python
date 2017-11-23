@@ -117,6 +117,20 @@ class Expr(object):
         """
         return self._children
 
+    def visit(self, visitor, **kwargs):
+        """
+        Call a method corresponding to our Expr class name on the visitor with
+        **kwargs and return the value. For a class called SomeExpr we call the
+        function visitor.visit_some_expr(self, **kwargs) and return the result.
+        :param args: The parameter to pass to the visitor method.
+        :return: The result of the visitor method.
+        """
+        visit_method_name = 'visit_' + Utils.camel_case_to_snake_case(
+            self.__class__.__name__)
+        visit_method = getattr(visitor, visit_method_name)
+
+        return visit_method(expr=self, **kwargs)
+
     def ensure_number_of_children(self, n):
         if len(self._children) != n:
             raise Exception("type \"{type}\" requires exactly {num_children} operand(s)".format(
@@ -207,7 +221,7 @@ class Const(Expr):
         aux = [str(expr_type), str(self._expr_value).lower()]
         Expr.__init__(self, expr_type=expr_type, aux=aux)
   
-    def value(self):
+    def expr_value(self):
         """
         Return the constant's value as an ExprValue object.
         :return: The constant's value as an ExprValue object.
