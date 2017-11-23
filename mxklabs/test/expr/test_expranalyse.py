@@ -13,7 +13,7 @@ class Test_ExprAnalyse(unittest.TestCase):
       def visit_var(self, expr, res, args): return str(expr.id())
 
       def visit_const(self, expr, res, args): return str(
-        expr.value().user_value()).lower()
+        expr.expr_value().user_value()).lower()
 
       def visit_logical_and(self, expr, res, args): return "(" + " AND ".join(
         [res[c] for c in expr.children()]) + ")"

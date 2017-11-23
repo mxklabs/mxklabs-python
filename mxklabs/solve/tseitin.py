@@ -106,7 +106,7 @@ class Tseitin(ea.ExprWalker):
 
   ''' Return a representation of this expression in the form of literals. '''
   def visit_const(self, expr, res, args):
-    return tuple(TseitinCache.TRUE_LIT if valbit else TseitinCache.FALSE_LIT for valbit in expr.value().littup_value())
+    return tuple(TseitinCache.TRUE_LIT if valbit else TseitinCache.FALSE_LIT for valbit in expr.expr_value().littup_value())
 
   ''' Return a representation of this expression in the form of literals. '''
   def visit_logical_and(self, expr, res, args):

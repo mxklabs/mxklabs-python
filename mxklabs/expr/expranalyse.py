@@ -21,6 +21,18 @@ class ExprWalker(object):
 
     return visit_method(expr=expr, res=res, args=args)
 
+  def simple_bottom_up_walk(self, expr):
+
+    assert (isinstance(expr, ex.Expr))
+
+    visit_method_name = 'visit_' + utils.Utils.camel_case_to_snake_case(
+      expr.__class__.__name__)
+    visit_method = getattr(self, visit_method_name)
+
+    res = dict([(c, self.bottom_up_walk(c)) for c in expr.children()])
+
+    return visit_method(expr=expr, children_res=res)
+
 ''' Help eliminate constants in expressions. '''
 
 class VarHarvester(ExprWalker):
@@ -85,11 +97,11 @@ class ConstProp(ExprWalker):
   def visit_logical_and(self, expr, res, args):
     
     # If ANY operand is false, return falsex.
-    if any([res[child].is_const and not res[child].expr.value().user_value() for child in expr.children()]):
+    if any([res[child].is_const and not res[child].expr.expr_value().user_value() for child in expr.children()]):
       return ConstProp.Res(expr=ex.Const(expr_type='bool', user_value=False), is_const=True)
     
     # If ALL operands are true, return truex.
-    if all([res[child].is_const and res[child].expr.value().user_value() for child in expr.children()]):
+    if all([res[child].is_const and res[child].expr.expr_value().user_value() for child in expr.children()]):
       return ConstProp.Res(expr=ex.Const(expr_type='bool', user_value=True), is_const=True)
 
     return ConstProp.Res(expr=expr, is_const=False, value=None)
@@ -97,11 +109,11 @@ class ConstProp(ExprWalker):
   def visit_logical_or(self, expr, res, args):
     
     # If ALL operand are false, return false.
-    if all([res[child].is_const and not res[child].expr.value().user_value() for child in expr.children()]):
+    if all([res[child].is_const and not res[child].expr.expr_value().user_value() for child in expr.children()]):
       return ConstProp.Res(expr=ex.Const(expr_type='bool', user_value=False), is_const=True)
     
     # If ANY operand is true, return true.
-    if any([res[child].is_const and res[child].expr.value().user_value() for child in expr.children()]):
+    if any([res[child].is_const and res[child].expr.expr_value().user_value() for child in expr.children()]):
       return ConstProp.Res(expr=ex.Const(expr_type='bool', user_value=True), is_const=True)
 
     return ConstProp.Res(expr=expr, is_const=False)
@@ -111,7 +123,7 @@ class ConstProp(ExprWalker):
 
   def visit_equals(self, expr, res, args):
     if all([res[child].is_const for child in expr.children()]):
-      is_equal = (res[expr.child(0)].expr.value() == res[expr.child(1)].expr.value())
+      is_equal = (res[expr.child(0)].expr.expr_value() == res[expr.child(1)].expr.expr_value())
       return ConstProp.Res(expr=ex.Const(expr_type='bool', user_value=(is_equal)), is_const=True)
     elif expr.child(0) == expr.child(1):
       # If we're comparing an expression to itself, it must be true, right?

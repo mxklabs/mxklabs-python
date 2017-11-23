@@ -97,24 +97,25 @@ class BruteForceConstraintSolver(ConstraintSolver):
     
     if self.statespace <= BruteForceConstraintSolver.MAX_STATESPACE:
       
+      # Turn the variable set into a list.
       variable_list = list(self.variables)
+
+      # Create a dict mapping variables to indexes in variable_list.
+      var_index = dict((variable_list[v], v) for v in range(len(variable_list)))
       
       # Get an iterator over all variable assignments.
       variable_assignments = itertools.product(*[v.expr_type().values() for v in variable_list])
+
       # Iterate over them.
       for variable_assignment in variable_assignments:
-        # For this assignment, create a mapping from variables to values so we can 
-        # evaluate the constraints.
-        evalargs = {}        
-        for v in range(len(variable_list)):
-          variable = variable_list[v]
-          evalargs[variable] = variable_assignment[v]
+        # A callable variable assignment
+        assignment = lambda var: variable_assignment[var_index[var]]
           
         # TODO(mkkt): Evaluate isn't going to work more than one expression deep this way.
-        if all([ee.ExprEvaluator.process(constraint, evalargs).user_value() for constraint in self.constraints]):
+        if all([ee.ExprEvaluator.eval(constraint, assignment).user_value() for constraint in self.constraints]):
           # All constraints hold under this variable assignment, SAT!
           self.logger("SAT")
-          self._satisfying_assignment = lambda var : evalargs[var].user_value()
+          self._satisfying_assignment = lambda var: assignment(var).user_value()
           return ConstraintSolver.RESULT_SAT
         
       # No satisfiable assignment, UNSAT.
