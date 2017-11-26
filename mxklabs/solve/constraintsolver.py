@@ -9,6 +9,7 @@ from mxklabs.expr import expr as ex
 from mxklabs.expr import expreval as ee
 from mxklabs.expr import exprtype as et
 from mxklabs.expr import expranalyse as ea
+from mxklabs.expr import varextract as ve
 
 from mxklabs.solve import tseitin as st
 from mxklabs.solve import satsolver as sat
@@ -49,7 +50,7 @@ class ConstraintSolver(object):
     # Harvest variables.
     self.variables = set()    
     for constraint in self.constraints:
-      self.variables = self.variables.union(ea.VarHarvester.process(constraint))
+      self.variables = self.variables.union(ve.VarExtractor.extract(constraint))
     
     # Work out the number of variable assignments.
     self.statespace = six.moves.reduce(operator.mul, [v.expr_type().num_values() for v in self.variables], 1)

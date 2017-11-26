@@ -5,3 +5,4 @@ from mxklabs.test.expr.test_exprcomp import *
 from mxklabs.test.expr.test_exprcond import *
 from mxklabs.test.expr.test_expreval import *
 from mxklabs.test.expr.test_exprtype import *
+from mxklabs.test.expr.test_varextract import *

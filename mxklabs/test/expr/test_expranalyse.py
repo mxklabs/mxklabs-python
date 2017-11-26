@@ -67,25 +67,6 @@ class Test_ExprAnalyse(unittest.TestCase):
             visitor_type.__name__, visit_method_name))
 
 
-class Test_VarHarvester(unittest.TestCase):
-  
-  def test_and(self):              
-    getvars = mxk.VarHarvester()
-    
-    # Check (logical-and (var v1) (const false)) simplifies to (const false)
-    self.assertEqual(
-      set([mxk.Var(expr_type='bool', id="v1")]),
-      getvars.process(mxk.LogicalAnd(
-        mxk.Var(expr_type='bool', id="v1"),
-        mxk.Const(expr_type='bool', user_value=False))))
-
-    # Check (logical-and (const true) (const true)) simplifies to (const false)
-    self.assertEqual(
-      set([mxk.Var(expr_type='bool', id="v1"),mxk.Var(expr_type='bool', id="v2")]),
-      getvars.process(mxk.LogicalAnd(
-        mxk.Var(expr_type='bool', id="v1"),
-        mxk.Var(expr_type='bool', id="v2"),
-        mxk.LogicalNot(mxk.Var(expr_type='bool', id="v1")))))
 
 
 class Test_ConstProp(unittest.TestCase):
