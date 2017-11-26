@@ -6,3 +6,4 @@ from mxklabs.expr.exprcomp import *
 from mxklabs.expr.exprcond import *
 from mxklabs.expr.expreval import *
 from mxklabs.expr.exprtype import *
+from mxklabs.expr.varextract import *

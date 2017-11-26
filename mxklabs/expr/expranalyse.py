@@ -40,49 +40,7 @@ class ExprWalker(object):
 
 ''' Help eliminate constants in expressions. '''
 
-class VarHarvester(ExprWalker):
-  """
-  TODO: Document how to extend.
-  """
-  
-  Res = collections.namedtuple('Res', ['vars'])
-  
-  def _process(self, expr):
-    return self.bottom_up_walk(expr=expr, args=None).vars
-  
-  def visit_const(self, expr, res, args):
-    return self.visit_default(expr, res, args)
-  
-  def visit_var(self, expr, res, args):
-    return VarHarvester.Res(vars=set([expr]))
-  
-  def visit_logical_and(self, expr, res, args):
-    return self.visit_default(expr, res, args)
-  
-  def visit_logical_or(self, expr, res, args):
-    return self.visit_default(expr, res, args)
-  
-  def visit_logical_not(self, expr, res, args):
-    return self.visit_default(expr, res, args)
 
-  def visit_equals(self, expr, res, args):
-    return self.visit_default(expr, res, args)
-
-  def visit_default(self, expr, res, args):
-    
-    result = set()
-    
-    for child in expr.children():
-      result = result.union(res[child].vars)
-  
-    return VarHarvester.Res(vars=result)
-  
-  ''' Quick version (avoid creating VarHarvester). '''
-  @staticmethod
-  def process(expr):
-    
-    vh = VarHarvester()
-    return vh._process(expr)
 
 ''' Help propagate constant expressions. '''
 
