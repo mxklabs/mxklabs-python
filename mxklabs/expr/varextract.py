@@ -18,30 +18,65 @@ class VarExtractor(ea.ExprVisitor):
 
     @utils.memoise
     def _visit_const(self, expr):
+        '''
+        Internal method for working the variables used in a Const object.
+        :param expr: A Const object.
+        :return: A empty set object.
+        '''
         return self._visit_default(expr)
 
     @utils.memoise
     def _visit_var(self, expr):
+        '''
+        Internal method for working the variables used in a Var object.
+        :param expr: A Var object.
+        :return: A set object containing just expr.
+        '''
         return set([expr])
 
     @utils.memoise
     def _visit_logical_and(self, expr):
+        '''
+        Internal method for working the variables used in a LogicalAnd object.
+        :param expr: A LogicalAnd object.
+        :return: A set object containing variables used in expr.
+        '''
         return self._visit_default(expr)
 
     @utils.memoise
     def _visit_logical_or(self, expr):
+        '''
+        Internal method for working the variables used in a LogicalOr object.
+        :param expr: A LogicalOr object.
+        :return: A set object containing variables used in expr.
+        '''
         return self._visit_default(expr)
 
     @utils.memoise
     def _visit_logical_not(self, expr):
+        '''
+        Internal method for working the variables used in a LogicalNot object.
+        :param expr: A LogicalNot object.
+        :return: A set object containing variables used in expr.
+        '''
         return self._visit_default(expr)
 
     @utils.memoise
     def _visit_equals(self, expr):
+        '''
+        Internal method for working the variables used in a Equals object.
+        :param expr: An Equals object.
+        :return: A set object containing variables used in expr.
+        '''
         return self._visit_default(expr)
 
     @utils.memoise
     def _visit_default(self, expr):
+        '''
+        Internal method for working out the variables used in an expression.
+        :param expr: An Expr object.
+        :return: A set object containing variables used in expr.
+        '''
         result = set()
 
         for child in expr.children():

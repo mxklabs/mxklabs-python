@@ -1,3 +1,4 @@
+from mxklabs.expr.constprop import *
 from mxklabs.expr.expr import *
 from mxklabs.expr.expranalyse import *
 from mxklabs.expr.exprbitvec import *
