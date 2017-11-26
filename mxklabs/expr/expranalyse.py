@@ -42,68 +42,6 @@ class ExprWalker(object):
 
 
 
-''' Help propagate constant expressions. '''
-
-class ConstProp(ExprWalker):
-  
-  Res = collections.namedtuple('Res', ['expr', 'is_const'])
-  
-  def _process(self, expr):
-    return self.bottom_up_walk(expr=expr, args=None).expr
-  
-  def visit_const(self, expr, res, args):
-    return ConstProp.Res(expr=expr, is_const=True)
-    
-  def visit_var(self, expr, res, args):
-    return self.visit_default(expr, res, args)
-  
-  def visit_logical_and(self, expr, res, args):
-    
-    # If ANY operand is false, return falsex.
-    if any([res[child].is_const and not res[child].expr.expr_value().user_value() for child in expr.children()]):
-      return ConstProp.Res(expr=ex.Const(expr_type='bool', user_value=False), is_const=True)
-    
-    # If ALL operands are true, return truex.
-    if all([res[child].is_const and res[child].expr.expr_value().user_value() for child in expr.children()]):
-      return ConstProp.Res(expr=ex.Const(expr_type='bool', user_value=True), is_const=True)
-
-    return ConstProp.Res(expr=expr, is_const=False, value=None)
-  
-  def visit_logical_or(self, expr, res, args):
-    
-    # If ALL operand are false, return false.
-    if all([res[child].is_const and not res[child].expr.expr_value().user_value() for child in expr.children()]):
-      return ConstProp.Res(expr=ex.Const(expr_type='bool', user_value=False), is_const=True)
-    
-    # If ANY operand is true, return true.
-    if any([res[child].is_const and res[child].expr.expr_value().user_value() for child in expr.children()]):
-      return ConstProp.Res(expr=ex.Const(expr_type='bool', user_value=True), is_const=True)
-
-    return ConstProp.Res(expr=expr, is_const=False)
-
-  def visit_logical_not(self, expr, res, args):
-    return self.visit_default(expr, res, args)
-
-  def visit_equals(self, expr, res, args):
-    if all([res[child].is_const for child in expr.children()]):
-      is_equal = (res[expr.child(0)].expr.expr_value() == res[expr.child(1)].expr.expr_value())
-      return ConstProp.Res(expr=ex.Const(expr_type='bool', user_value=(is_equal)), is_const=True)
-    elif expr.child(0) == expr.child(1):
-      # If we're comparing an expression to itself, it must be true, right?
-      return ConstProp.Res(expr=expr, is_const=True)
-    else:
-      return ConstProp.Res(expr=expr, is_const=False)
-  
-  def visit_default(self, expr, res, args):
-    return ConstProp.Res(expr=expr, is_const=False)
-  
-  ''' Quick version (avoid creating VarHarvester). '''
-  @staticmethod
-  def process(expr):
-    
-    cp = ConstProp()
-    return cp._process(expr)
-  
 ''' Evaluate the value of an expressions. '''
 
 
