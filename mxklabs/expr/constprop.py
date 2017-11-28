@@ -7,23 +7,45 @@ from mxklabs.expr import exprtype as et
 from mxklabs import utils
 
 class ConstPropagator(ea.ExprVisitor):
+    """
+    This class can be used to propagate constants in an expression.
+    """
 
     @staticmethod
     def propagate(expr):
+        """
+        Return an equivalent expression (with constants propagated).
+        :param expr: The Expr object to consider.
+        :return: An Expr object equivalent to expr.
+        """
         cp = ConstPropagator()
         return expr.visit(cp)
 
     @utils.memoise
     def _visit_const(self, expr):
+        '''
+        Internal method for propagating constant in a Const object.
+        :param expr: A Const object.
+        :return: expr.
+        '''
         return expr
 
     @utils.memoise
     def _visit_var(self, expr):
+        '''
+        Internal method for propagating constant in a Var object.
+        :param expr: A Var object.
+        :return: expr.
+        '''
         return expr
 
     @utils.memoise
     def _visit_logical_and(self, expr):
-
+        '''
+        Internal method for propagating constant in a LogicalAnd object.
+        :param expr: A LogicalAnd object.
+        :return: An expression equi-satisfiable to expr.
+        '''
         ops = [child.visit(self) for child in expr.children()]
 
         # If ANY operand is false, return false.
@@ -38,6 +60,11 @@ class ConstPropagator(ea.ExprVisitor):
 
     @utils.memoise
     def _visit_logical_or(self, expr):
+        '''
+        Internal method for propagating constant in a LogicalOr object.
+        :param expr: A LogicalOr object.
+        :return: An expression equi-satisfiable to expr.
+        '''
         ops = [child.visit(self) for child in expr.children()]
 
         # If ALL operand are false, return false.
@@ -52,6 +79,12 @@ class ConstPropagator(ea.ExprVisitor):
 
     @utils.memoise
     def _visit_logical_not(self, expr):
+        '''
+        Internal method for propagating constant in a LogicalNot object.
+        :param expr: A LogicalNot object.
+        :return: An expression equi-satisfiable to expr.
+        '''
+
         op = expr.child().visit(self)
 
         if isinstance(op, ex.Const):
@@ -61,6 +94,12 @@ class ConstPropagator(ea.ExprVisitor):
 
     @utils.memoise
     def _visit_equals(self, expr):
+        '''
+        Internal method for propagating constant in a Equals object.
+        :param expr: A Equals object.
+        :return: An expression equi-satisfiable to expr.
+        '''
+
         ops = [child.visit(self) for child in expr.children()]
 
         if ops[0] == ops[1]:
