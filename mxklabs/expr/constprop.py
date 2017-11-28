@@ -1,5 +1,7 @@
 from mxklabs.expr import expr as ex
 from mxklabs.expr import expranalyse as ea
+from mxklabs.expr import exprbool as eb
+from mxklabs.expr import exprcomp as ec
 from mxklabs.expr import exprtype as et
 
 from mxklabs import utils
@@ -32,11 +34,10 @@ class ConstPropagator(ea.ExprVisitor):
         if all([self._is_value(op, True) for op in ops]):
             return ex.Const('bool', True)
 
-        return self._visit_default(expr)
+        return eb.LogicalAnd(*ops)
 
     @utils.memoise
     def _visit_logical_or(self, expr):
-
         ops = [child.visit(self) for child in expr.children()]
 
         # If ALL operand are false, return false.
@@ -47,14 +48,16 @@ class ConstPropagator(ea.ExprVisitor):
         if any([self._is_value(op, True) for op in ops]):
             return ex.Const('bool', True)
 
-        return self._visit_default(expr)
+        return eb.LogicalOr(*ops)
 
     @utils.memoise
     def _visit_logical_not(self, expr):
-        if isinstance(expr, ex.Const):
-            return ex.Const('bool', not expr.value().user_value())
+        op = expr.child().visit(self)
+
+        if isinstance(op, ex.Const):
+            return ex.Const('bool', not op.expr_value().user_value())
         else:
-            return self._visit_default(expr)
+            return eb.LogicalNot(op)
 
     @utils.memoise
     def _visit_equals(self, expr):
@@ -69,18 +72,7 @@ class ConstPropagator(ea.ExprVisitor):
             is_equal = (ops[0].expr_value() == ops[1].expr_value())
             return ex.Const('bool', is_equal)
 
-        return self._visit_default(expr)
-
-    @utils.memoise
-    def _visit_default(self, expr):
-        '''
-        Internal helper function which returns expr with constant propagation
-        applied to the child expressions.
-        :param expr: The expr to return.
-        :return: The expr with constant propagation applied to children.
-        '''
-        ops = [child.visit(self) for child in expr.children()]
-        return expr.__class__(ops)
+        return ec.Equals(*ops)
 
     @utils.memoise
     def _is_value(self, expr, user_value):
@@ -93,6 +85,6 @@ class ConstPropagator(ea.ExprVisitor):
         user_value.
         '''
         if isinstance(expr, ex.Const):
-            return expr.value() == et.ExprValue(expr.expr_type(), user_value)
+            return expr.expr_value() == et.ExprValue(expr.expr_type(), user_value)
         else:
             return False
