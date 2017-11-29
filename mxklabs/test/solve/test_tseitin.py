@@ -75,10 +75,36 @@ class Test_Tseitin(unittest.TestCase):
 #      [tseitin.cache_lookup(y_)[0]]
 #    ]
 #    self._test_clauses(tseitin, e_, exp_clauses)
-#
-    def test_tseitin_logical_or(self):
-        tseitin = mxk.Tseitin()
 
+    def test_tseitin_const(self):
+        true_ = mxk.Const('bool', True)
+        false_ = mxk.Const('bool', False)
+        v_ = mxk.Var('bool', 'v')
+
+        self._TEST_SAT([mxk.Equals(v_, true_)])
+        self._TEST_SAT([mxk.Equals(v_, false_)])
+
+    def test_tseitin_const(self):
+        true_ = mxk.Const('bool', True)
+        false_ = mxk.Const('bool', False)
+
+        self._TEST_UNSAT([false_])
+        self._TEST_SAT([true_])
+
+    def test_tseitin_logical_and(self):
+        true_ = mxk.Const('bool', True)
+        false_ = mxk.Const('bool', False)
+
+        x_ = mxk.Var('bool', 'x')
+        y_ = mxk.Var('bool', 'y')
+        e_ = mxk.LogicalAnd(x_, y_)
+
+        self._TEST_UNSAT([e_, mxk.Equals(x_, false_), mxk.Equals(y_, false_)])
+        self._TEST_UNSAT([e_, mxk.Equals(x_, false_), mxk.Equals(y_, true_)])
+        self._TEST_UNSAT([e_, mxk.Equals(x_, true_), mxk.Equals(y_, false_)])
+        self._TEST_SAT([e_, mxk.Equals(x_, true_), mxk.Equals(y_, true_)])
+
+    def test_tseitin_logical_or(self):
         true_ = mxk.Const('bool', True)
         false_ = mxk.Const('bool', False)
 
@@ -91,6 +117,15 @@ class Test_Tseitin(unittest.TestCase):
         self._TEST_SAT([e_, mxk.Equals(x_, true_), mxk.Equals(y_, false_)])
         self._TEST_SAT([e_, mxk.Equals(x_, true_), mxk.Equals(y_, true_)])
 
+    def test_tseitin_logical_not(self):
+        true_ = mxk.Const('bool', True)
+        false_ = mxk.Const('bool', False)
+
+        x_ = mxk.Var('bool', 'x')
+        e_ = mxk.LogicalNot(x_)
+
+        self._TEST_SAT([e_, mxk.Equals(x_, false_)])
+        self._TEST_UNSAT([e_, mxk.Equals(x_, true_)])
 
 #  def test_tseitin_logical_not(self):
 #    tseitin = mxk.Tseitin()
