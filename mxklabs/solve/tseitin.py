@@ -86,7 +86,7 @@ class Tseitin(ea.ExprVisitor):
         self._true_lit, = self.cache_lookup(ex.Const('bool', True))
         self._false_lit, = self.cache_lookup(ex.Const('bool', False))
 
-        ea.ExprWalker.__init__(self)
+        ea.ExprVisitor.__init__(self)
     
     def dimacs(self):
         return self._cache.dimacs()
