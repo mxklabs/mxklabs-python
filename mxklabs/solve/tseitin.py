@@ -8,177 +8,201 @@ from mxklabs.expr import expr as ex
 from mxklabs.expr import expranalyse as ea
 from mxklabs.expr import exprbool as eb
 from mxklabs.expr import exprtype as et
-
 from mxklabs import dimacs
+from mxklabs import utils
 
-class TseitinCache(object):
+class Tseitin(ea.ExprVisitor):
+    """
 
-  LookupResult = collections.namedtuple('LookupResult', ['littup', 'cache_hit'])
+    """
 
-  TRUE_LIT  = 1
-  FALSE_LIT = -1
+    class _Cache(object):
 
-  def __init__(self):
-    # Map tuple of expression and bit to literal.
-    self._cache = \
-    { 
-      ex.Const(expr_type='bool', user_value=True) : { 0 : TseitinCache.TRUE_LIT },
-      ex.Const(expr_type='bool', user_value=False) : { 0 : TseitinCache.FALSE_LIT }
-    }
-    self._dimacs = dimacs.Dimacs(clauses=set([frozenset([TseitinCache.TRUE_LIT])]))
+        """
+        Internal class.
+        """
 
-  def dimacs(self):
-    return self._dimacs
+        # Literal corresponding to true.
+        TRUE_LIT = 1
+        # Literal corresponding to false.
+        FALSE_LIT = -1
 
-  ''' Test to see if bit is cached. '''
-  def is_cached(self, expr, bit=None):
-    if bit is not None:
-      return expr in self._cache.keys() and bit in self._cache[expr].keys()
-    else:
-      return all(self.is_cached(expr, bit) for bit in range(expr.expr_type().littup_size()))
+        def __init__(self):
+            # Map tuple of expression and bit to literal.
+            self._cache = {
+                ex.Const('bool', True): {0: Tseitin._Cache.TRUE_LIT},
+                ex.Const('bool', False): {0: Tseitin._Cache.FALSE_LIT}
+            }
+            self._dimacs = dimacs.Dimacs(
+                clauses=set([frozenset([Tseitin._Cache.TRUE_LIT])]))
 
-  ''' Lookup (returns just a literal number by default, or a LookupResult if specified. '''
-  def lookup_lit(self, expr, bit):
-    if expr not in self._cache.keys():
-      self._dimacs.num_vars += 1
-      self._cache[expr] = { bit : self._dimacs.num_vars }
-      return self._dimacs.num_vars
-    elif bit not in self._cache[expr]:
-      self._dimacs.num_vars += 1
-      self._cache[expr][bit] = self._dimacs.num_vars
-    else:
-      return self._cache[expr][bit]
+        def dimacs(self):
+            return self._dimacs
+
+        ''' Test to see if bit is cached. '''
+
+        def is_cached(self, expr, bit=None):
+            if bit is not None:
+                return expr in self._cache.keys() and bit in self._cache[expr].keys()
+            else:
+                return all(self.is_cached(expr, bit) for bit in
+                                     range(expr.expr_type().littup_size()))
+
+        def make_lit(self):
+            self._dimacs.num_vars += 1
+            return self._dimacs.num_vars
+
+        def make_lits(self, bits):
+            return tuple([self.make_lit() for b in range(bits)])
+
+        def lookup_lit(self, expr, bit):
+            if expr not in self._cache.keys():
+                lit = self.make_lit()
+                self._cache[expr] = { bit: lit }
+                return lit
+            elif bit not in self._cache[expr]:
+                lit = self.make_lit()
+                self._cache[expr][bit] = lit
+            else:
+                return self._cache[expr][bit]
+
+        def lookup_littup(self, expr):
+            return tuple(self.lookup_lit(expr, bit) for bit in
+                                     range(expr.expr_type().littup_size()))
+
+        ''' Add a CNF clause. '''
+
+        def add_clause(self, clause):
+            self._dimacs.clauses.add(clause)
+
+        ''' Print cache. '''
+
+        def print(self):
+            for exprstr, lit in self._cache.items():
+                print("'{exprstr}:{bit}' -> {lit}".format(exprstr=exprstr, lit=lit))
+
+    def __init__(self):
+        self._cache = Tseitin._Cache()
+        self._true_lit, = self.cache_lookup(ex.Const('bool', True))
+        self._false_lit, = self.cache_lookup(ex.Const('bool', False))
+
+        ea.ExprWalker.__init__(self)
     
-  ''' Lookup (returns just a literal number by default, or a LookupResult if specified. '''
-  def lookup_littup(self, expr):
-    return tuple(self.lookup_lit(expr, bit) for bit in range(expr.expr_type().littup_size()))
-    
-  ''' Add a CNF clause. ''' 
-  def add_clause(self, clause):
-    self._dimacs.clauses.add(clause)
+    def dimacs(self):
+        return self._cache.dimacs()
 
-  ''' Print cache. '''
-  def print(self):
-    for exprstr, lit in self._cache.items():
-      print("'{exprstr}:{bit}' -> {lit}".format(exprstr=exprstr, lit=lit))
+    ''' Evaluate a number of boolean expressions and ensure they are asserted. '''
+    def add_constraints(self, exprs):
+        for expr in exprs:
+            self.add_constraint(expr)
+
+    ''' Evaluate a boolean expression and ensure it is asserted to hold. '''
+    def add_constraint(self, expr):
+        if isinstance(expr, eb.LogicalAnd):
+            # This is a small optimisation to avoid additional literals.
+            for child in expr.children():
+                self.add_constraint(child)
+        elif expr.expr_type() == et.ExprTypeRepository._BOOL:
+            littup = expr.visit(self)
+            lit, = littup
+            self._cache.add_clause(frozenset([lit]))
+        else:
+            raise("Cannot add an expression with type '{expr_type}' as a "
+                  "constraint".format(expr_type=expr.expr_type()))
+
+    ''' Can be used to established what literals belong to an expression. '''    
+    def cache_lookup(self, expr):
+        return self._cache.lookup_littup(expr)
 
 
-class Tseitin(ea.ExprWalker):
-  
-  def __init__(self):
-    self._cache = TseitinCache()
-    ea.ExprWalker.__init__(self)
-  
-  def dimacs(self):
-    return self._cache.dimacs()
-  
-  ''' Evaluate a boolean expression and ensure it is asserted to hold. '''
-  def add_constraint(self, expr):
-    if isinstance(expr, eb.LogicalAnd):
-      # This is a small optimisation (avoid additional literals).
-      for child in expr.children():
-        self.add_constraint(child)
-    elif expr.expr_type() == et.ExprTypeRepository._BOOL:
-      littup = self.bottom_up_walk(expr)
-      lit, = littup
-      self._cache.add_clause(frozenset([lit]))
-    else:
-      raise("Cannot add an expression with type '{type_}' as a constraint".format(type_=expr.expr_type()))
-    
-  ''' Evaluate a number of boolean expressions and ensure they are asserted. '''
-  def add_constraints(self, exprs):
-    for expr in exprs:
-      self.add_constraint(expr)
-      
-  ''' Can be used to established what literals belong to an expression. '''  
-  def cache_lookup(self, expr):
-    return self._cache.lookup_littup(expr)
+    @utils.memoise
+    def _visit_var(self, expr):
+        return self._cache.lookup_littup(expr)
 
-  def _memoise(self, impl, expr, res):
-    if self._cache.is_cached(expr):
-      return self._cache.lookup_littup(expr)
-    else:
-      return impl(expr, res)
-  
-  ''' Return a representation of this expression in the form of literals. '''
-  def visit_var(self, expr, res, args):
-    return self._cache.lookup_littup(expr)
+    @utils.memoise
+    def _visit_const(self, expr):
+        return tuple(self._true_lit if b else self._false_lit for b \
+                in expr.expr_value().littup_value())
 
-  ''' Return a representation of this expression in the form of literals. '''
-  def visit_const(self, expr, res, args):
-    return tuple(TseitinCache.TRUE_LIT if valbit else TseitinCache.FALSE_LIT for valbit in expr.expr_value().littup_value())
+    @utils.memoise
+    def _visit_logical_and(self, expr):
 
-  ''' Return a representation of this expression in the form of literals. '''
-  def visit_logical_and(self, expr, res, args):
+        ops = [child.visit(self) for child in expr.children()]
 
-    def impl(expr, res):
+        littup = self._cache.lookup_littup(expr)
+        lit, = littup
 
-      littup = self._cache.lookup_littup(expr)
-      lit, = littup
-    
-      # Ensure when the logical and is true, exprlit is true.
-      self._cache.add_clause(frozenset([lit]+[-res[child][0] for child in expr.children()]))
-      
-      # Ensure when any child causes the logical and to be false, exprlit is false, too.
-      for child in expr.children():
-        childlit = res[child][0]
-        self._cache.add_clause(frozenset([-lit, childlit]))
-        
-      return littup
-    
-    return self._memoise(impl, expr, res)
-  
-  ''' Return a representation of this expression in the form of literals. '''
-  def visit_logical_or(self, expr, res, args):
+        # Ensure when the logical and is true, exprlit is true.
+        self._cache.add_clause(frozenset([lit]+[-op for op, in ops]))
 
-    def impl(expr, res):
+        # Ensure when any child causes the logical and to be false, exprlit is false, too.
+        for op, in ops:
+            self._cache.add_clause(frozenset([-lit, op]))
 
-      littup = self._cache.lookup_littup(expr)
-      lit, = littup
-      
-      # Ensure when the logical or is false, exprlit is false.
-      self._cache.add_clause(frozenset([-lit]+[res[child][0] for child in expr.children()]))
-      
-      # Ensure when any child causes the logical and to be true, exprlit is true, too.
-      for child in expr.children():
-        childlit = res[child][0]
-        self._cache.add_clause(frozenset([lit, -childlit]))
-        
-      return littup
-    
-    return self._memoise(impl, expr, res)
-  
-  def visit_logical_not(self, expr, res, args):
-    return (-res[expr.child()][0],)
+        return littup
 
-  def visit_equals(self, expr, res, args):
+    @utils.memoise
+    def _visit_logical_or(self, expr):
 
-    def impl(expr, res):
-      littup = self._cache.lookup_littup(expr)
-      lit, = littup
+        ops = [child.visit(self) for child in expr.children()]
 
-      c0_littup = res[expr.child(0)]
-      c1_littup = res[expr.child(1)]
+        littup = self._cache.lookup_littup(expr)
+        lit, = littup
 
-      assert(len(c0_littup) == len(c1_littup))
+        # Ensure when the logical or is false, exprlit is false.
+        self._cache.add_clause(frozenset([-lit]+[op for op, in ops]))
 
-      lits = len(c0_littup)
+        # Ensure when any child causes the logical and to be true, exprlit is true, too.
+        for op, in ops:
+            self._cache.add_clause(frozenset([lit, -op]))
 
-      for b in range(lits):
-        # For each bit, if operands disagree this implies -lit.
-        self._cache.add_clause(frozenset([c0_littup[b], -c1_littup[b], -lit]))
-        self._cache.add_clause(frozenset([-c0_littup[b], c1_littup[b], -lit]))
+        return littup
 
-      # For all bits, if they are all unset then this implies lit.
-      self._cache.add_clause(frozenset([c0_littup[b] for b in range(lits)] +
-                                       [c1_littup[b] for b in range(lits)] + [lit]))
+    @utils.memoise
+    def _visit_logical_not(self, expr):
 
-      # For all bits, if they are all set then this implies lit.
-      self._cache.add_clause(frozenset([-c0_littup[b] for b in range(lits)] +
-                                       [-c1_littup[b] for b in range(lits)] + [lit]))
+        op, = expr.child().visit(self)
+        return (-op,)
 
-      return littup
+    @utils.memoise
+    def _visit_equals(self, expr):
 
-    return self._memoise(impl, expr, res)
+        ops = [child.visit(self) for child in expr.children()]
 
+        littup = self._cache.lookup_littup(expr)
+        lit, = littup
+
+        assert(len(ops)==2)
+        assert(len(ops[0]) == len(ops[1]))
+
+        bits = len(ops[0])
+
+        # TODO: Cache these somehow. The tmp_lits are one literal per bit
+        # and is true if and only if this bit of the operands agree.
+        tmp_lits = self._cache.make_lits(bits)
+
+        for b in range(bits):
+            # For each bit, if operands disagree this implies -lit.
+            self._cache.add_clause(frozenset([ ops[0][b], -ops[1][b], -tmp_lits[b]]))
+            self._cache.add_clause(frozenset([-ops[0][b],  ops[1][b], -tmp_lits[b]]))
+            self._cache.add_clause(frozenset([ ops[0][b],  ops[1][b],  tmp_lits[b]]))
+            self._cache.add_clause(frozenset([-ops[0][b], -ops[1][b],  tmp_lits[b]]))
+
+        # Ensure when the every bit agrees, exprlit is true.
+        self._cache.add_clause(
+            frozenset([-tmp_lits[b] for b in range(bits)] + [lit]))
+
+        # Ensure when any child causes the logical and to be false, exprlit is false, too.
+        for b in range(bits):
+            self._cache.add_clause(frozenset([tmp_lits[b], -lit]))
+
+        ## For all bits, if they are all unset then this implies lit.
+        #self._cache.add_clause(frozenset([c0_littup[b] for b in range(lits)] +
+        #                                                                 [c1_littup[b] for b in range(lits)] + [lit]))
+        #
+        ## For all bits, if they are all set then this implies lit.
+        #self._cache.add_clause(frozenset([-c0_littup[b] for b in range(lits)] +
+        #                                                                 [-c1_littup[b] for b in range(lits)] + [lit]))
+        #
+        return littup
 
