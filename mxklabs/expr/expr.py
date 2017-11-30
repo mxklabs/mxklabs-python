@@ -1,6 +1,6 @@
 from mxklabs.expr.exprbase import Expr
 from mxklabs.expr import exprtype as et
-from mxklabs.utils import Utils#
+from mxklabs.utils import Utils
 
 class Const(Expr):
     """
