@@ -5,10 +5,10 @@ import operator
 
 import six
 
-from mxklabs.expr import expr as ex
+from mxklabs.expr import exprbase as ex
 from mxklabs.expr import expreval as ee
 from mxklabs.expr import exprtype as et
-from mxklabs.expr import expranalyse as ea
+from mxklabs.expr import exprvisitor as ev
 from mxklabs.expr import varextract as ve
 
 from mxklabs.solve import tseitin as st

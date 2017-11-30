@@ -3,6 +3,7 @@ import unittest
 import mxklabs as mxk
 
 class Test_VarExtract(unittest.TestCase):
+
     def test_and(self):
 
         # Check (logical-and (var v1) (const false)) simplifies to (const false)

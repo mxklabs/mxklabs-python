@@ -1,12 +1,10 @@
-from mxklabs.expr import expr as ex
-from mxklabs.expr import expranalyse as ea
-from mxklabs.expr import exprbool as eb
-from mxklabs.expr import exprcomp as ec
-from mxklabs.expr import exprtype as et
+from mxklabs.expr.expr import LogicalAnd, LogicalOr, LogicalNot, Equals, \
+    Const, Var
+from mxklabs.expr.exprtype import ExprValue
+from mxklabs.expr.exprvisitor import ExprVisitor
+from mxklabs.utils import memoise
 
-from mxklabs import utils
-
-class ConstPropagator(ea.ExprVisitor):
+class ConstPropagator(ExprVisitor):
     """
     This class can be used to propagate constants in an expression.
     """
@@ -21,7 +19,7 @@ class ConstPropagator(ea.ExprVisitor):
         cp = ConstPropagator()
         return expr.visit(cp)
 
-    @utils.memoise
+    @memoise
     def _visit_const(self, expr):
         '''
         Internal method for propagating constant in a Const object.
@@ -30,7 +28,7 @@ class ConstPropagator(ea.ExprVisitor):
         '''
         return expr
 
-    @utils.memoise
+    @memoise
     def _visit_var(self, expr):
         '''
         Internal method for propagating constant in a Var object.
@@ -39,7 +37,7 @@ class ConstPropagator(ea.ExprVisitor):
         '''
         return expr
 
-    @utils.memoise
+    @memoise
     def _visit_logical_and(self, expr):
         '''
         Internal method for propagating constant in a LogicalAnd object.
@@ -50,15 +48,15 @@ class ConstPropagator(ea.ExprVisitor):
 
         # If ANY operand is false, return false.
         if any([self._is_value(op, False) for op in ops]):
-            return ex.Const('bool', False)
+            return Const('bool', False)
 
         # If ALL operands are true, return true.
         if all([self._is_value(op, True) for op in ops]):
-            return ex.Const('bool', True)
+            return Const('bool', True)
 
-        return eb.LogicalAnd(*ops)
+        return LogicalAnd(*ops)
 
-    @utils.memoise
+    @memoise
     def _visit_logical_or(self, expr):
         '''
         Internal method for propagating constant in a LogicalOr object.
@@ -69,15 +67,15 @@ class ConstPropagator(ea.ExprVisitor):
 
         # If ALL operand are false, return false.
         if all([self._is_value(op, False) for op in ops]):
-            return ex.Const('bool', False)
+            return Const('bool', False)
 
         # If ANY operand is true, return true.
         if any([self._is_value(op, True) for op in ops]):
-            return ex.Const('bool', True)
+            return Const('bool', True)
 
-        return eb.LogicalOr(*ops)
+        return LogicalOr(*ops)
 
-    @utils.memoise
+    @memoise
     def _visit_logical_not(self, expr):
         '''
         Internal method for propagating constant in a LogicalNot object.
@@ -87,12 +85,12 @@ class ConstPropagator(ea.ExprVisitor):
 
         op = expr.child().visit(self)
 
-        if isinstance(op, ex.Const):
-            return ex.Const('bool', not op.expr_value().user_value())
+        if isinstance(op, Const):
+            return Const('bool', not op.expr_value().user_value())
         else:
-            return eb.LogicalNot(op)
+            return LogicalNot(op)
 
-    @utils.memoise
+    @memoise
     def _visit_equals(self, expr):
         '''
         Internal method for propagating constant in a Equals object.
@@ -104,16 +102,16 @@ class ConstPropagator(ea.ExprVisitor):
 
         if ops[0] == ops[1]:
             # Comparing an expression against itself?
-            return ex.Const('bool', True)
+            return Const('bool', True)
 
-        elif isinstance(ops[0], ex.Const) and isinstance(ops[1], ex.Const):
+        elif isinstance(ops[0], Const) and isinstance(ops[1], Const):
             # When comparing two Const objects we can work out the result.
             is_equal = (ops[0].expr_value() == ops[1].expr_value())
-            return ex.Const('bool', is_equal)
+            return Const('bool', is_equal)
 
-        return ec.Equals(*ops)
+        return Equals(*ops)
 
-    @utils.memoise
+    @memoise
     def _is_value(self, expr, user_value):
         '''
         Internal helper function which returns True iff expr is a Const with
@@ -123,7 +121,7 @@ class ConstPropagator(ea.ExprVisitor):
         :return: True iff expr is a Const with ExprValue that matches
         user_value.
         '''
-        if isinstance(expr, ex.Const):
-            return expr.expr_value() == et.ExprValue(expr.expr_type(), user_value)
+        if isinstance(expr, Const):
+            return expr.expr_value() == ExprValue(expr.expr_type(), user_value)
         else:
             return False

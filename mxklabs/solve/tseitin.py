@@ -1,17 +1,12 @@
 from __future__ import print_function
 
-import collections
+from mxklabs.dimacs import Dimacs
+from mxklabs.expr.expr import LogicalAnd, Const
+from mxklabs.expr.exprvisitor import ExprVisitor
+from mxklabs.expr.exprtype import ExprTypeRepository, ExprValue
+from mxklabs.utils import memoise
 
-import six
-
-from mxklabs.expr import expr as ex
-from mxklabs.expr import expranalyse as ea
-from mxklabs.expr import exprbool as eb
-from mxklabs.expr import exprtype as et
-from mxklabs import dimacs
-from mxklabs import utils
-
-class Tseitin(ea.ExprVisitor):
+class Tseitin(ExprVisitor):
     """
 
     """
@@ -30,10 +25,10 @@ class Tseitin(ea.ExprVisitor):
         def __init__(self):
             # Map tuple of expression and bit to literal.
             self._cache = {
-                ex.Const('bool', True): {0: Tseitin._Cache.TRUE_LIT},
-                ex.Const('bool', False): {0: Tseitin._Cache.FALSE_LIT}
+                Const('bool', True): {0: Tseitin._Cache.TRUE_LIT},
+                Const('bool', False): {0: Tseitin._Cache.FALSE_LIT}
             }
-            self._dimacs = dimacs.Dimacs(
+            self._dimacs = Dimacs(
                 clauses=set([frozenset([Tseitin._Cache.TRUE_LIT])]))
 
         def dimacs(self):
@@ -83,10 +78,10 @@ class Tseitin(ea.ExprVisitor):
 
     def __init__(self):
         self._cache = Tseitin._Cache()
-        self._true_lit, = self.cache_lookup(ex.Const('bool', True))
-        self._false_lit, = self.cache_lookup(ex.Const('bool', False))
+        self._true_lit, = self.cache_lookup(Const('bool', True))
+        self._false_lit, = self.cache_lookup(Const('bool', False))
 
-        ea.ExprVisitor.__init__(self)
+        ExprVisitor.__init__(self)
     
     def dimacs(self):
         return self._cache.dimacs()
@@ -98,11 +93,11 @@ class Tseitin(ea.ExprVisitor):
 
     ''' Evaluate a boolean expression and ensure it is asserted to hold. '''
     def add_constraint(self, expr):
-        if isinstance(expr, eb.LogicalAnd):
+        if isinstance(expr, LogicalAnd):
             # This is a small optimisation to avoid additional literals.
             for child in expr.children():
                 self.add_constraint(child)
-        elif expr.expr_type() == et.ExprTypeRepository._BOOL:
+        elif expr.expr_type() == ExprTypeRepository._BOOL:
             littup = expr.visit(self)
             lit, = littup
             self._cache.add_clause(frozenset([lit]))
@@ -115,16 +110,16 @@ class Tseitin(ea.ExprVisitor):
         return self._cache.lookup_littup(expr)
 
 
-    @utils.memoise
+    @memoise
     def _visit_var(self, expr):
         return self._cache.lookup_littup(expr)
 
-    @utils.memoise
+    @memoise
     def _visit_const(self, expr):
         return tuple(self._true_lit if b else self._false_lit for b \
                 in expr.expr_value().littup_value())
 
-    @utils.memoise
+    @memoise
     def _visit_logical_and(self, expr):
 
         ops = [child.visit(self) for child in expr.children()]
@@ -141,7 +136,7 @@ class Tseitin(ea.ExprVisitor):
 
         return littup
 
-    @utils.memoise
+    @memoise
     def _visit_logical_or(self, expr):
 
         ops = [child.visit(self) for child in expr.children()]
@@ -158,13 +153,13 @@ class Tseitin(ea.ExprVisitor):
 
         return littup
 
-    @utils.memoise
+    @memoise
     def _visit_logical_not(self, expr):
 
         op, = expr.child().visit(self)
         return (-op,)
 
-    @utils.memoise
+    @memoise
     def _visit_equals(self, expr):
 
         ops = [child.visit(self) for child in expr.children()]
