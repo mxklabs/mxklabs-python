@@ -2,7 +2,7 @@ from __future__ import print_function
 
 import six
 
-from mxklabs.expr import expr as ex
+from mxklabs.expr import exprbase as ex
 
 ''' 
     Base class for SAT solvers. SAT solvers can be used to decide if a boolean 

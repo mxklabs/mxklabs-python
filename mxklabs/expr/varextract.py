@@ -1,7 +1,8 @@
-from mxklabs.expr import expranalyse as ea
-from mxklabs import utils
+from mxklabs.expr.exprvisitor import ExprVisitor
+from mxklabs.utils import memoise
 
-class VarExtractor(ea.ExprVisitor):
+
+class VarExtractor(ExprVisitor):
     """
     This class can be used to find all variables used in an expression.
     """
@@ -16,7 +17,14 @@ class VarExtractor(ea.ExprVisitor):
         ee = VarExtractor()
         return expr.visit(ee)
 
-    @utils.memoise
+    def __init__(self):
+        """
+        There is no need to instantiate this class manually. Use the extract
+        method instead. This constructor is called internally.
+        """
+        ExprVisitor.__init__(self)
+
+    @memoise
     def _visit_const(self, expr):
         '''
         Internal method for working the variables used in a Const object.
@@ -25,7 +33,7 @@ class VarExtractor(ea.ExprVisitor):
         '''
         return self._visit_default(expr)
 
-    @utils.memoise
+    @memoise
     def _visit_var(self, expr):
         '''
         Internal method for working the variables used in a Var object.
@@ -34,7 +42,7 @@ class VarExtractor(ea.ExprVisitor):
         '''
         return set([expr])
 
-    @utils.memoise
+    @memoise
     def _visit_logical_and(self, expr):
         '''
         Internal method for working the variables used in a LogicalAnd object.
@@ -43,7 +51,7 @@ class VarExtractor(ea.ExprVisitor):
         '''
         return self._visit_default(expr)
 
-    @utils.memoise
+    @memoise
     def _visit_logical_or(self, expr):
         '''
         Internal method for working the variables used in a LogicalOr object.
@@ -52,7 +60,7 @@ class VarExtractor(ea.ExprVisitor):
         '''
         return self._visit_default(expr)
 
-    @utils.memoise
+    @memoise
     def _visit_logical_not(self, expr):
         '''
         Internal method for working the variables used in a LogicalNot object.
@@ -61,7 +69,7 @@ class VarExtractor(ea.ExprVisitor):
         '''
         return self._visit_default(expr)
 
-    @utils.memoise
+    @memoise
     def _visit_equals(self, expr):
         '''
         Internal method for working the variables used in a Equals object.
@@ -70,7 +78,7 @@ class VarExtractor(ea.ExprVisitor):
         '''
         return self._visit_default(expr)
 
-    @utils.memoise
+    @memoise
     def _visit_default(self, expr):
         '''
         Internal method for working out the variables used in an expression.

@@ -1,8 +1,8 @@
-from mxklabs.expr import expranalyse as ea
-from mxklabs.expr import exprtype as et
-from mxklabs import utils
+from mxklabs.expr.exprvisitor import ExprVisitor
+from mxklabs.expr.exprtype import ExprValue
+from mxklabs.utils import memoise
 
-class ExprEvaluator(ea.ExprVisitor):
+class ExprEvaluator(ExprVisitor):
     """
     This class can be used to 'compute' the value of an expression under a
     specific assignment of values to variables in said expression.
@@ -31,9 +31,9 @@ class ExprEvaluator(ea.ExprVisitor):
         variable's value.
         """
         self._variable_assignment = variable_assignment
-        ea.ExprVisitor.__init__(self)
+        ExprVisitor.__init__(self)
 
-    @utils.memoise
+    @memoise
     def _visit_const(self, expr):
         '''
         Internal method for working out the value of a constant.
@@ -42,7 +42,7 @@ class ExprEvaluator(ea.ExprVisitor):
         '''
         return expr.expr_value()
 
-    @utils.memoise
+    @memoise
     def _visit_var(self, expr):
         '''
         Internal method for working out the value of a variable.
@@ -51,7 +51,7 @@ class ExprEvaluator(ea.ExprVisitor):
         '''
         return self._variable_assignment(expr)
 
-    @utils.memoise
+    @memoise
     def _visit_logical_and(self, expr):
         '''
         Internal method for working out the value of a logical AND expression.
@@ -59,9 +59,9 @@ class ExprEvaluator(ea.ExprVisitor):
         :return: An ExprValue object.
         '''
         children_res = [c.visit(self).user_value() for c in expr.children()]
-        return et.ExprValue(expr_type='bool', user_value=all(children_res))
+        return ExprValue(expr_type='bool', user_value=all(children_res))
 
-    @utils.memoise
+    @memoise
     def _visit_logical_or(self, expr):
         '''
         Internal method for working out the value of a logical OR expression.
@@ -69,9 +69,9 @@ class ExprEvaluator(ea.ExprVisitor):
         :return: An ExprValue object.
         '''
         children_res = [c.visit(self).user_value() for c in expr.children()]
-        return et.ExprValue(expr_type='bool', user_value=any(children_res))
+        return ExprValue(expr_type='bool', user_value=any(children_res))
 
-    @utils.memoise
+    @memoise
     def _visit_logical_not(self, expr):
         '''
         Internal method for working out the value of a logical NOT expression.
@@ -79,9 +79,9 @@ class ExprEvaluator(ea.ExprVisitor):
         :return: An ExprValue object.
         '''
         child0_res = expr.child(0).visit(self).user_value()
-        return et.ExprValue(expr_type='bool', user_value=not child0_res)
+        return ExprValue(expr_type='bool', user_value=not child0_res)
 
-    @utils.memoise
+    @memoise
     def _visit_equals(self, expr):
         '''
         Internal method for working out the value of an equivalence expression.
@@ -90,8 +90,8 @@ class ExprEvaluator(ea.ExprVisitor):
         '''
         child0_res = expr.child(0).visit(self).user_value()
         child1_res = expr.child(1).visit(self).user_value()
-        return et.ExprValue(expr_type='bool',
-                            user_value=(child0_res == child1_res))
+        return ExprValue(expr_type='bool',
+            user_value=(child0_res == child1_res))
 
 
 

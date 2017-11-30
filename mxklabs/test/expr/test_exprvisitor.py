@@ -3,9 +3,9 @@ import unittest
 
 import mxklabs as mxk
 
-class Test_ExprAnalyse(unittest.TestCase):
+class Test_ExprVisitor(unittest.TestCase):
 
-    def test_expranalysis_expr_visitor_functions(self):
+    def test_exprvisitor_expr_visitor_functions(self):
 
         # For all classes, visitor_type, that derive from mxk.ExprWalker...
         for visitor_type in mxk.Utils.get_derived_classes(mxk,

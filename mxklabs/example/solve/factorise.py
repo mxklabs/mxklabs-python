@@ -88,9 +88,9 @@ def find_divisor(logger, n):
 
         print("[{},{}[".format(remainder_part_start, remainder_part_end))
 
-        remainder_part_ =  mxk.Extract(remainder_,
-                           mxk.Const('int', remainder_part_start),
-                           mxk.Const('int', remainder_part_end))
+        remainder_part_ = mxk.Extract(remainder_,
+                          mxk.Const('int', remainder_part_start),
+                          mxk.Const('int', remainder_part_end))
 
         # See if subtraction is possible.
         can_subtract_ = mxk.LessThanEquals(divisor_, remainder_part_)
