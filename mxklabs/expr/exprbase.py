@@ -158,9 +158,13 @@ class Expr(object):
                             type=str(type), childstr=str(self._children[index]), exptype=type,
                             childtype=str(self._children[index].expr_type())))
 
-    def ensure_children_types_match(self):
-        for i in range(1,len(self.children())):
-            if self._children[i].expr_type() != self._children[0].expr_type():
+    def ensure_children_types_match(self, indices=None):
+        if indices is None:
+            indices = range(len(self.children()))
+
+        for i in indices[1:]:
+            if self._children[i].expr_type() != \
+               self._children[indices[0]].expr_type():
                 raise Exception("expression '{expr}' requires the type of subexpression "
                                 "'{childstr1}' to match the type of subexpression '{childstr2}' but "
                                 "this is not the case (types are '{childtype1}' and '{childtype2}', "

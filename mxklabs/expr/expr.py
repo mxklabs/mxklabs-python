@@ -125,15 +125,25 @@ class LogicalNot(Expr):
 
 
 class Equals(Expr):
+    """ An object that represents an equivalence expression. """
 
     def __init__(self, op0, op1):
-        Expr.__init__(self, expr_type=et.ExprTypeRepository._BOOL, children=[op0, op1])
+        Expr.__init__(self, expr_type='bool', children=[op0, op1])
 
-        self.ensure_minimum_number_of_children(2)
+        self.ensure_number_of_children(2)
         self.ensure_children_types_match()
 
 
-#class IfThenElse(Expr):
+class IfThenElse(Expr):
+    """ An object that represents an equivalence expression. """
+
+    def __init__(self, op0, op1):
+        Expr.__init__(self, expr_type='bool', children=[op0, op1])
+
+        self.ensure_number_of_children(3)
+        self.ensure_children_types_match([1,2])
+
+            #class IfThenElse(Expr):
 #
 #    def __init__(self, args):
 #        pass

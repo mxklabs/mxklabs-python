@@ -165,10 +165,12 @@ class Tseitin(ExprVisitor):
         ops = [child.visit(self) for child in expr.children()]
 
         littup = self._cache.lookup_littup(expr)
-        lit, = littup
 
+        assert(len(littup) == 1)
         assert(len(ops)==2)
         assert(len(ops[0]) == len(ops[1]))
+
+        lit, = littup
 
         bits = len(ops[0])
 
@@ -191,13 +193,30 @@ class Tseitin(ExprVisitor):
         for b in range(bits):
             self._cache.add_clause(frozenset([tmp_lits[b], -lit]))
 
-        ## For all bits, if they are all unset then this implies lit.
-        #self._cache.add_clause(frozenset([c0_littup[b] for b in range(lits)] +
-        #                                                                 [c1_littup[b] for b in range(lits)] + [lit]))
-        #
-        ## For all bits, if they are all set then this implies lit.
-        #self._cache.add_clause(frozenset([-c0_littup[b] for b in range(lits)] +
-        #                                                                 [-c1_littup[b] for b in range(lits)] + [lit]))
-        #
+        return littup
+
+    @memoise
+    def _visit_if_then_else(self, expr):
+
+        ops = [child.visit(self) for child in expr.children()]
+
+        littup = self._cache.lookup_littup(expr)
+
+        assert(len(ops)==3)
+        assert(len(ops[0]) == 1)
+        assert(len(ops[1]) == len(ops[2]) == len(littup))
+
+        cond, = ops[0]
+        bits = len(littup)
+
+        for b in range(bits):
+            # Literal cond implies littup[b] == ops[1][b]
+            self._cache.add_clause(frozenset([-cond, -littup[b], ops[1][b]]))
+            self._cache.add_clause(frozenset([-cond, littup[b], -ops[1][b]]))
+
+            # Literal -cond implies littup[b] != ops[1][b]
+            self._cache.add_clause(frozenset([cond, littup[b], ops[1][b]]))
+            self._cache.add_clause(frozenset([cond, -littup[b], -ops[1][b]]))
+
         return littup
 
