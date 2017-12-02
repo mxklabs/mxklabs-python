@@ -79,6 +79,15 @@ class VarExtractor(ExprVisitor):
         return self._visit_default(expr)
 
     @memoise
+    def _visit_if_then_else(self, expr):
+        '''
+        Internal method for working the variables used in a IfThenElse object.
+        :param expr: An IfThenElse object.
+        :return: A set object containing variables used in expr.
+        '''
+        return self._visit_default(expr)
+
+    @memoise
     def _visit_default(self, expr):
         '''
         Internal method for working out the variables used in an expression.

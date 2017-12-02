@@ -1,5 +1,5 @@
 from mxklabs.expr.expr import LogicalAnd, LogicalOr, LogicalNot, Equals, \
-    Const, Var
+    Const, Var, IfThenElse
 from mxklabs.expr.exprtype import ExprValue
 from mxklabs.expr.exprvisitor import ExprVisitor
 from mxklabs.utils import memoise
@@ -110,6 +110,30 @@ class ConstPropagator(ExprVisitor):
             return Const('bool', is_equal)
 
         return Equals(*ops)
+
+    @memoise
+    def _visit_if_then_else(self, expr):
+        '''
+        Internal method for propagating constant in a IfThenElse object.
+        :param expr: A IfThenElse object.
+        :return: An expression equi-satisfiable to expr.
+        '''
+
+        ops = [child.visit(self) for child in expr.children()]
+
+        if ops[1] == ops[2]:
+            # Both branches the same?
+            return ops[1]
+
+        elif self._is_value(ops[0], True):
+            # Condition constant.
+            return ops[1]
+
+        elif self._is_value(ops[0], False):
+            # Condition constant.
+            return ops[2]
+
+        return IfThenElse(*ops)
 
     @memoise
     def _is_value(self, expr, user_value):
