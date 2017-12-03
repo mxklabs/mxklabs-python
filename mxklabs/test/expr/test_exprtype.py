@@ -6,7 +6,7 @@ import mxklabs as mxk
 
 class Test_Bool(unittest.TestCase):
 
-    def test_expr_type_bool(self):
+    def test_exprtype_bool(self):
         T = mxk.ExprTypeRepository._BOOL
         self.assertEqual("bool", str(T))
         self.assertEqual([False, True], [value.user_value() for value in T.values()])
@@ -16,7 +16,7 @@ class Test_Bool(unittest.TestCase):
 
 class Test_BitVector(unittest.TestCase):
 
-    def test_expr_type_bitvector(self):
+    def test_exprtype_bitvector(self):
         T = mxk.ExprTypeRepository._BITVEC(8)
         self.assertEqual("uint8", str(T))
         self.assertEqual(list(range(2**8)), list([value.user_value() for value in
@@ -50,9 +50,18 @@ class Test_BitVector(unittest.TestCase):
             mxk.ExprTypeRepository.lookup('uint64'))
 
 
+class Test_Product(unittest.TestCase):
+    def test_exprtype_bitvector(self):
+        T1 = mxk.ExprTypeRepository._BITVEC(8)
+        T2 = mxk.ExprTypeRepository._BOOL
+        T = mxk.ExprTypeRepository._PROD(T1, T2)
+
+
+
+
 class Test_ExprType(unittest.TestCase):
 
-    def test_expr_type_functions(self):
+    def test_exprtype_functions(self):
 
         # For all classes, exprtype_type, that derive from mxk.ExprType...
         for exprtype_type in mxk.Utils.get_derived_classes(mxk, mxk.ExprType):
@@ -65,5 +74,17 @@ class Test_ExprType(unittest.TestCase):
 
 class Test_ExprTypeRepository(unittest.TestCase):
 
-    def test_expr_type_repository(self):
-        self.assertTrue(isinstance(mxk.ExprTypeRepository.lookup('bool'), mxk.Bool))
+    def test_exprtype_repository(self):
+        type_bool = mxk.ExprTypeRepository.lookup('bool')
+        self.assertTrue(isinstance(type_bool, mxk.Bool))
+
+        type_uint7 = mxk.ExprTypeRepository.lookup('uint7')
+        self.assertTrue(isinstance(type_uint7, mxk.BitVec))
+        self.assertEqual(7, type_uint7.littup_size())
+
+        type_prod = mxk.ExprTypeRepository.lookup('(bool,uint54)')
+        self.assertTrue(isinstance(type_prod, mxk.Product))
+        self.assertEquals(2, len(type_prod.subtypes()))
+        self.assertTrue(isinstance(type_prod.subtypes()[0], mxk.Bool))
+        self.assertTrue(isinstance(type_prod.subtypes()[1], mxk.BitVec))
+        self.assertEqual(54, type_prod.subtypes()[1].littup_size())

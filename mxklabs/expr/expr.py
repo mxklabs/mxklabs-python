@@ -1,5 +1,6 @@
 from mxklabs.expr.exprbase import Expr
-from mxklabs.expr import exprtype as et
+from mxklabs.expr.exprtype import ExprType, ExprTypeRepository, ExprValue, \
+    Product
 from mxklabs.utils import Utils
 
 class Const(Expr):
@@ -21,9 +22,9 @@ class Const(Expr):
         constant for this ExprType (see ExprValue for more details).
         """
         if type(expr_type) == str:
-            expr_type = et.ExprTypeRepository.lookup(expr_type)
+            expr_type = ExprTypeRepository.lookup(expr_type)
 
-        Utils.check_precondition(isinstance(expr_type, et.ExprType))
+        Utils.check_precondition(isinstance(expr_type, ExprType))
         Utils.check_precondition((user_value is None) != (littup_value is None))
 
         if user_value is not None:
@@ -32,9 +33,9 @@ class Const(Expr):
             Utils.check_precondition(
                 expr_type.is_valid_littup_value(littup_value))
 
-        self._expr_value = et.ExprValue(expr_type=expr_type,
-                                        user_value=user_value,
-                                        littup_value=littup_value)
+        self._expr_value = ExprValue(expr_type=expr_type,
+                                     user_value=user_value,
+                                     littup_value=littup_value)
 
         aux = [str(expr_type), str(self._expr_value).lower()]
         Expr.__init__(self, expr_type=expr_type, aux=aux)
@@ -62,9 +63,9 @@ class Var(Expr):
         :param id: A str object representing the variable's identifier.
         """
         if type(expr_type) == str:
-            expr_type = et.ExprTypeRepository.lookup(expr_type)
+            expr_type = ExprTypeRepository.lookup(expr_type)
 
-        Utils.check_precondition(isinstance(expr_type, et.ExprType))
+        Utils.check_precondition(isinstance(expr_type, ExprType))
         Utils.check_precondition(type(id) == str)
 
         self.id_ = id
@@ -83,45 +84,43 @@ class Var(Expr):
 class LogicalAnd(Expr):
     """ An object that represents a logical AND expression. """
 
-    def __init__(self, *args):
+    def __init__(self, *ops):
         """
         Construct a LogicalAnd object.
-        :param args: One or more Expr objects of type Bool (operands).
+        :param ops: One or more Expr objects of type Bool (operands).
         """
-        Expr.__init__(self, expr_type='bool', children=args)
+        Expr.__init__(self, expr_type='bool', children=ops)
 
         self.ensure_minimum_number_of_children(1)
-        for i in range(len(self.children())):
-            self.ensure_child_is_type(i, et.ExprTypeRepository._BOOL)
+        self.ensure_all_children_are_type('bool')
 
 
 class LogicalOr(Expr):
     """ An object that represents a logical OR expression. """
 
-    def __init__(self, *args):
+    def __init__(self, *ops):
         """
         Construct a LogicalOr object.
-        :param args: One or more Expr objects of type Bool (operands).
+        :param ops: One or more Expr objects of type Bool (operands).
         """
-        Expr.__init__(self, expr_type='bool', children=args)
+        Expr.__init__(self, expr_type='bool', children=ops)
 
         self.ensure_minimum_number_of_children(1)
-        for i in range(len(self.children())):
-            self.ensure_child_is_type(i, et.ExprTypeRepository._BOOL)
+        self.ensure_all_children_are_type('bool')
 
 
 class LogicalNot(Expr):
     """ An object that represents a logical NOT expression. """
 
-    def __init__(self, arg):
+    def __init__(self, op):
         """
         Construct a LogicalNot object.
-        :param args: One or more Expr objects of type Bool (operands).
+        :param ops: One or more Expr objects of type Bool (operands).
         """
-        Expr.__init__(self, expr_type='bool', children=[arg])
+        Expr.__init__(self, expr_type='bool', children=[op])
 
         self.ensure_number_of_children(1)
-        self.ensure_child_is_type(0, et.ExprTypeRepository._BOOL)
+        self.ensure_child_is_type(0, 'bool')
 
 
 class Equals(Expr):
@@ -131,49 +130,53 @@ class Equals(Expr):
         Expr.__init__(self, expr_type='bool', children=[op0, op1])
 
         self.ensure_number_of_children(2)
-        self.ensure_children_types_match()
+        self.ensure_children_types_match([0,1])
 
 
 class IfThenElse(Expr):
     """ An object that represents an equivalence expression. """
 
-    def __init__(self, op0, op1):
-        Expr.__init__(self, expr_type='bool', children=[op0, op1])
+    def __init__(self, op0, op1, op2):
+        Expr.__init__(self, expr_type=op1.expr_type(), children=[op0, op1])
 
         self.ensure_number_of_children(3)
         self.ensure_children_types_match([1,2])
 
-            #class IfThenElse(Expr):
-#
-#    def __init__(self, args):
-#        pass
 
+class Subtract(Expr):
+    """
+    An object that represents a bit vector subtraction modulo 2^n where both op0
+    and op1 must be Expr objects with type 'uint<n>' for some n.
+    """
+    def __init__(self, op0, op1):
+        """
+        Construct a LogicalAnd object.
+        :param ops: One or more Expr objects of type Bool (operands).
+        """
+        Expr.__init__(self, type=op0.expr_type(), nodestr="subtract", children=[op0, op1])
 
-#class Subtract(Expr):
-#    """
-#    An object that represents a bit vector subtraction modulo 2^n where both op0
-#    and op1 must be Expr objects with type 'uint<n>' for some n.
-#    """
-#
-#    def __init__(self, op0, op1):
-#        """
-#        Construct a LogicalAnd object.
-#        :param args: One or more Expr objects of type Bool (operands).
-#        """
-#        Expr.__init__(self, type=op0.expr_type(), nodestr="subtract", children=[op0, op1])
-#
-#        self.ensure_number_of_children(2)
-#        //self.ensure_child_is_type(i, et.ExprTypeRepository._)
-#
-#class Extract(Expr):
-#    """
-#    An object representing an extraction expression. An extraction expression
-#    has three operands: a bitvector an index
-#    """
-#    def __init(self, args):
-#        pass
-#
-#class Insert(Expr):
-#    """
-#    An object that represets a bitvector expression that is the result of insert
-#    """
+        self.ensure_number_of_children(2)
+        self.ensure_child_is_bitvec(0)
+        self.ensure_children_types_match([0,1])
+
+class Concatenate(Expr):
+    """
+    Take N expressions of type 'bool' and turn them into one expression of type
+    'uintN' (i.e. a BitVec of size N).
+    """
+
+    def __init__(self, *ops):
+        Expr.__init__(self, expr_type='uint{:d}'.format(len(ops)), children=ops)
+
+        self.ensure_child_is_bitvec(op0)
+        self.ensure_number_of_children(1)
+
+class Dissociate(Expr):
+    """
+    Take an expression of type 'uintN' (i.e. a BitVec of size N) and turn it
+    into N expressions of type 'bool'.
+    """
+    def __init__(self, op):
+        Expr.__init__(self, expr_type=Product(['bool' for n in op.littup_size()]),
+                      children=[op])
+

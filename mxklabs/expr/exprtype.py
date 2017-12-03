@@ -1,11 +1,11 @@
 import abc
-import functools
-import itertools
-import operator
+from functools import reduce
+from itertools import product
+from operator import add, mul
 import re
 import six
 
-from mxklabs.utils import Utils
+from mxklabs.utils import Utils, memoise
 
 class ExprValue(object):
     """
@@ -248,16 +248,14 @@ class BitVec(ExprType):
 
     def __init__(self, number_of_bits):
         """ Initialise object. """
-        self._number_of_bits = number_of_bits
+        self._littup_size = number_of_bits
         self._num_values = 2 ** number_of_bits
 
-        littup_values_rev = itertools.product(*[[False, True] for b in
+        littup_values_rev = product(*[[False, True] for b in
             range(number_of_bits)])
         littup_values = six.moves.map(lambda v : v[::-1], littup_values_rev)
         self._values = six.moves.map(lambda v: ExprValue(expr_type=self,
             littup_value=v), littup_values)
-        #self._values = [ExprValue(expr_type=self, user_value=i) for i in
-        #                six.moves.range(2 ** number_of_bits)]
 
         ExprType.__init__(self, "uint{:d}".format(number_of_bits))
 
@@ -271,7 +269,7 @@ class BitVec(ExprType):
 
     def littup_size(self):
         """ See ExprType.littup_size. """
-        return self._number_of_bits
+        return self._littup_size
 
     def is_valid_user_value(self, user_value):
         """ See ExprType.is_valid_user_value. """
@@ -280,18 +278,86 @@ class BitVec(ExprType):
     def is_valid_littup_value(self, littup_value):
         """ See ExprType.user_value_to_littup_value. """
         return type(littup_value) == tuple \
-            and len(littup_value) == self._number_of_bits \
+            and len(littup_value) == self._littup_size \
             and all([type(lit_value) == bool for lit_value in littup_value])
 
     def user_value_to_littup_value(self, user_value):
         """ See ExprType.user_value_to_littup_value. """
         Utils.check_precondition(self.is_valid_user_value(user_value))
-        return tuple([(((1 << b) & user_value) != 0) for b in range(self._number_of_bits)])
+        return tuple([(((1 << b) & user_value) != 0) for b in range(self._littup_size)])
 
     def littup_value_to_user_value(self, littup_value):
         """ See ExprType.littup_value_to_user_value. """
         Utils.check_precondition(self.is_valid_littup_value(littup_value))
-        return sum([(1 << b) if littup_value[b] else 0 for b in range(self._number_of_bits)])
+        return sum([(1 << b) if littup_value[b] else 0 for b in range(self._littup_size)])
+
+
+class Product(ExprType):
+    """ An object that represents a product of types. """
+
+    def __init__(self, subtypes):
+        assert(all([isinstance(ExprType) for subtype in subtypes]))
+
+        self._subtypes = tuple(subtypes)
+        self._littup_size = sum([s.littup_size() for s in subtypes])
+        self._num_values = reduce(mul, [s.num_values() for s in subtypes], 1)
+        self._values = product(*[s.values() for s in subtypes])
+
+        subtype_strs = [str(s) for s in subtypes]
+        ExprType.__init__(self, "({})".format(",".join(subtype_strs)))
+
+    def values(self):
+        """ See ExprType.values. """
+        return self._values
+
+    def num_values(self):
+        """ See ExprType.num_values. """
+        return self._num_values
+
+    def littup_size(self):
+        """ See ExprType.littup_size. """
+        return self._littup_size
+
+    def is_valid_user_value(self, user_value):
+        """ See ExprType.is_valid_user_value. """
+        return (type(user_value) == tuple) and \
+               (len(user_value) == len(self._subtypes)) and \
+               (all(s.is_valid_user_value(v) for v, s in
+                    zip(user_value, self._subtypes)))
+
+    def is_valid_littup_value(self, littup_value):
+        """ See ExprType.user_value_to_littup_value. """
+        if type(littup_value) != tuple or len(littup_value) \
+                != self._littup_size:
+            return False
+        else:
+            i = 0
+            for s in self._subtype:
+                assert(len(littup_value) >= i + s.littup_size())
+                s_littup_value = littup_value[i:i + s.littup_size()]
+                if not s.is_valid_user_value(s_littup_value):
+                    return False
+                i += s.littup_size()
+            return True
+
+    def user_value_to_littup_value(self, user_value):
+        """ See ExprType.user_value_to_littup_value. """
+        Utils.check_precondition(self.is_valid_user_value(user_value))
+        return reduce(add, [s.user_value_to_littup_value(v) \
+            for s,v in zip(self._subtypes, user_value)])
+
+    def littup_value_to_user_value(self, littup_value):
+        """ See ExprType.littup_value_to_user_value. """
+        Utils.check_precondition(self.is_valid_littup_value(littup_value))
+
+        i = 0
+        user_value_list = []
+        for s in self._subtype:
+            assert (len(littup_value) >= i + s.littup_size())
+            s_littup_value = littup_value[i:i + s.littup_size()]
+            user_value_list.append(s.littup_value_to_user_value(s_littup_value))
+
+        return tuple(user_value_list)
 
 
 class ExprTypeRepository(object):
@@ -304,24 +370,17 @@ class ExprTypeRepository(object):
     """
     # Create one Bool object.
     _BOOL = Bool()
-    _BITVECS = {}
 
-    @staticmethod
+    @memoise
     def _BITVEC(number_of_bits):
-        if number_of_bits in ExprTypeRepository._BITVECS.keys():
-            return ExprTypeRepository._BITVECS[number_of_bits]
-        else:
-            T = BitVec(number_of_bits=number_of_bits)
-            ExprTypeRepository._BITVECS[number_of_bits] = T
-            return T
+        return BitVec(number_of_bits=number_of_bits)
 
-    # List of typestr regex and callable functions.
-    _type_str_regex_registry = [
-        (re.compile('^bool$'), lambda match: ExprTypeRepository._BOOL),
-        (re.compile('^uint(\d+)$'), lambda match: ExprTypeRepository._BITVEC(
-            int(match.group(1))))
-    ]
+    @memoise
+    @staticmethod
+    def _PRODUCT(*subtypes):
+        return Product(subtypes=subtypes)
 
+    @memoise
     @staticmethod
     def lookup(type_str):
         """
@@ -331,6 +390,30 @@ class ExprTypeRepository(object):
         """
         Utils.check_precondition(type(type_str) == str)
 
+        # How to tokenize a type_str.
+        token_regex = re.compile('^((bool)|(uint\d)|(\()|(\))|(\,))*$')
+        tokenised = re.match(type_str)
+
+        # Deal with Bool.
+        if type_str == 'bool':
+            return ExprTypeRepository._BOOL
+
+        # Regexes.
+        bitvec_regex = re.compile('^uint(\d+)$')
+
+        # Deal with BitVec.
+        bitvec_match = ExprTypeRepository.bitvec_regex.match(type_str)
+        if bitvec_match:
+            return int(bitvec_match.group(1))
+
+
+
+        # Deal with Product.
+
+        ##??
+
+        What about '(blah,(bool,uint8),relmre)'
+
         for regex, callback in ExprTypeRepository._type_str_regex_registry:
             match = regex.match(type_str)
             if match:
@@ -338,3 +421,5 @@ class ExprTypeRepository(object):
                 break
 
         raise RuntimeError("Type '{}' is not known".format(type_str))
+
+    def _parse(self, next, type_str):

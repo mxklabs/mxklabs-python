@@ -28,7 +28,7 @@ class Expr(object):
         (normally empty)
         """
         if type(expr_type) == str:
-          expr_type = et.ExprTypeRepository.lookup(expr_type)
+            expr_type = et.ExprTypeRepository.lookup(expr_type)
 
         Utils.check_precondition(et.ExprType.is_exprtype(expr_type))
         Utils.check_precondition(Utils.is_iterable(children))
@@ -151,8 +151,18 @@ class Expr(object):
             raise Exception("type \"{type}\" requires subexpression '{childstr}' to be constant".format(
                             type=str(type), childstr=str(self._children[index])))
 
-    def ensure_child_is_type(self, index, type):
-        if self._children[index].expr_type() != type:
+    def ensure_all_children_are_type(self, expr_type):
+        if type(expr_type) == str:
+            expr_type = et.ExprTypeRepository.lookup(expr_type)
+
+        for i in range(len(self.children())):
+            self.ensure_child_is_type(i, expr_type)
+
+    def ensure_child_is_type(self, index, expr_type):
+        if type(expr_type) == str:
+            expr_type = et.ExprTypeRepository.lookup(expr_type)
+
+        if self._children[index].expr_type() != expr_type:
             raise Exception("type \"{type}\" requires subexpression '{childstr}' to be to be of type "
                             "'{exptype}' but it is of type '{childtype}')".format(
                             type=str(type), childstr=str(self._children[index]), exptype=type,
