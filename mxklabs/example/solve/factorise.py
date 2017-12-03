@@ -65,7 +65,7 @@ def find_divisor(logger, n):
     divisor_typestr = 'uint%d' % divisor_bit_length
 
     n_ = mxk.Const(n_typestr, n)
-    divisor_ = mxk.Var(divisor_typestr, 'd')
+    divisor = mxk.Var(divisor_typestr, 'divisor')
 
     # Make sure divisor is non-trivial.
     constraints.append(mxk.LogicalNot(
@@ -79,39 +79,39 @@ def find_divisor(logger, n):
     # the integer division n_ / divisor_ and ensure there is no remainder.
     #
     # We're going to use a shift and subtract division.
-    rng = n_bit_length - divisor_bit_length
-    remainder_ = n_
+    remainder = n_
 
-    for r in range(rng+1):
-        remainder_part_start = rng - r
-        remainder_part_end = remainder_part_start + divisor_bit_length
+    # Iterate over bitvector within n that are the same size as the
+    # divisor, starting with the most significant such bitvector.
+    for r in range(n_bit_length - divisor_bit_length + 1):
 
-        print("[{},{}[".format(remainder_part_start, remainder_part_end))
+        # We're interested in the r-th most significant bitvector that is the
+        # same size as the divisor's bit length.
+        start = n_bit_length - divisor_bit_length - r
+        end = n_bit_length - r
 
-        remainder_part_ = mxk.Extract(remainder_,
-                          mxk.Const('int', remainder_part_start),
-                          mxk.Const('int', remainder_part_end))
+        remainder_as_bits = mxk.Dissociate(remainder)
+        remainder_part = mxk.Concatenate(remainder_as_bits[start:end])
 
-        # See if subtraction is possible.
-        can_subtract_ = mxk.LessThanEquals(divisor_, remainder_part_)
+        print("[{},{}[".format(start, end))
 
-        # Work out what n_part_ looks like after subtraction.
-        remainder_part_new_ = mxk.IfThenElse(can_subtract_,
-                                             mxk.Subtract(remainder_part_,
-                                                          divisor_),
-                                             remainder_part_)
+        # Work out what bits to replace remainder_part with.
+        remainder_part_new = mxk.IfThenElse(
+            # If divisor is less or equal to this remainder_part ...
+            mxk.LessThanEquals(divisor, remainder_part),
+            # ... then subtract divisor from remainder_part ...
+            mxk.Subtract(remainder_part, divisor),
+            # ... else leave it 'as is'.
+            remainder_part)
 
-        # Update n_ with the revised n_part_new_.
-        remainder_ = mxk.Insert(remainder_,
-                                remainder_part_new_,
-                                mxk.Const('int', remainder_part_start),
-                                mxk.Const('int', remainder_part_end))
+        # Update the remainder.
+        remainder = mxk.Concatenate(*(
+            remainder_as_bits[:start] + \
+            mxk.Dissociate(remainder_part_new) + \
+            remainder_as_bits[end:]))
 
-    # Ensure the remainder is 0!
-    constraints.append(mxk.Equals(remainder_, mxk.Const(divisor_typestr, 0)))
-
-    # TODO(mkkt): Extract, Insert, LessThanEquals, Equals, IfThenElse, Subtract.
-
+    # Ensure the final remainder is 0!
+    constraints.append(mxk.Equals(remainder, mxk.Const(divisor_typestr, 0)))
 
     # We're done! We got all the constraints. Let's use a constraint solver
     # to find an assignment to variables under which all constraints hold.
@@ -123,7 +123,7 @@ def find_divisor(logger, n):
 
         # We found a divisor, return it!
         assignment = solver.get_satisfying_assignment()
-        return assignment(divisor_)
+        return assignment(divisor)
 
     elif result == mxk.ConstraintSolver.RESULT_UNSAT:
         logger("Unable to find a divisor.")
