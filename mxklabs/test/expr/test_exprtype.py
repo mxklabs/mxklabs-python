@@ -54,7 +54,7 @@ class Test_Product(unittest.TestCase):
     def test_exprtype_bitvector(self):
         T1 = mxk.ExprTypeRepository._BITVEC(8)
         T2 = mxk.ExprTypeRepository._BOOL
-        T = mxk.ExprTypeRepository._PROD(T1, T2)
+        T = mxk.ExprTypeRepository._PRODUCT(T1, T2)
 
 
 
