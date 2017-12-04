@@ -371,17 +371,39 @@ class ExprTypeRepository(object):
     # Create one Bool object.
     _BOOL = Bool()
 
+    @staticmethod
+    @memoise
+    def _get_type_str_regex():
+        # Type string tokens.
+        type_str_tokens = ['bool', 'uint\d', '\(', '\)', '\,']
+        type_str_regex_str = '(' + '|'.join(['(' + t + ')' \
+            for t in type_str_tokens]) + ')'
+        print("regex={}".format(type_str_regex_str))
+        return re.compile(type_str_regex_str)
+
+    @staticmethod
+    @memoise
+    def _get_type_str_tokens(type_str):
+        regex = ExprTypeRepository._get_type_str_regex()
+        #match = regex.match(type_str)
+        #if match:
+        #    return [t for t in list(match.groups())[1:] if t is not None]
+        #else:
+        #    return []
+        return [m[0] for m in regex.findall(type_str)]
+
+    @staticmethod
     @memoise
     def _BITVEC(number_of_bits):
         return BitVec(number_of_bits=number_of_bits)
 
-    @memoise
     @staticmethod
+    @memoise
     def _PRODUCT(*subtypes):
         return Product(subtypes=subtypes)
 
-    @memoise
     @staticmethod
+    @memoise
     def lookup(type_str):
         """
         Get a type using a name like 'bool'
@@ -389,37 +411,23 @@ class ExprTypeRepository(object):
         :return: A ExprType object.
         """
         Utils.check_precondition(type(type_str) == str)
+        print(type_str)
+        tokens = ExprTypeRepository._get_type_str_tokens(type_str)
+        return ExprTypeRepository._parse(tokens)
 
-        # How to tokenize a type_str.
-        token_regex = re.compile('^((bool)|(uint\d)|(\()|(\))|(\,))*$')
-        tokenised = re.match(type_str)
+    @staticmethod
+    def _parse(tokens):
+        print("tokens={}".format(tokens))
 
-        # Deal with Bool.
-        if type_str == 'bool':
-            return ExprTypeRepository._BOOL
+        if len(tokens) > 0:
+            if tokens[0] == 'bool':
+                return ExprTypeRepository._BOOL
+            elif tokens[0].startswith('uint'):
+                return ExprTypeRepository._BITVEC(int(tokens[0][4]))
+            elif tokens[0] == '(':
+                pass
+            else:
+                raise Exception("Unable to find type '{}'".format(tokens))
+        else:
+            raise Exception("Unable to find type '{}'".format(tokens))
 
-        # Regexes.
-        bitvec_regex = re.compile('^uint(\d+)$')
-
-        # Deal with BitVec.
-        bitvec_match = ExprTypeRepository.bitvec_regex.match(type_str)
-        if bitvec_match:
-            return int(bitvec_match.group(1))
-
-
-
-        # Deal with Product.
-
-        ##??
-
-        What about '(blah,(bool,uint8),relmre)'
-
-        for regex, callback in ExprTypeRepository._type_str_regex_registry:
-            match = regex.match(type_str)
-            if match:
-                return callback(match)
-                break
-
-        raise RuntimeError("Type '{}' is not known".format(type_str))
-
-    def _parse(self, next, type_str):
