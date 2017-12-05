@@ -296,15 +296,23 @@ class Product(ExprType):
     """ An object that represents a product of types. """
 
     def __init__(self, subtypes):
-        assert(all([isinstance(ExprType) for subtype in subtypes]))
+        assert(all([isinstance(subtype, ExprType) for subtype in subtypes]))
 
         self._subtypes = tuple(subtypes)
         self._littup_size = sum([s.littup_size() for s in subtypes])
         self._num_values = reduce(mul, [s.num_values() for s in subtypes], 1)
-        self._values = product(*[s.values() for s in subtypes])
+        value_iters = [s.values() for s in subtypes]
+
+        # We can't use itertools.product here because it explicitly creates
+        # tuples from the subtype's values iterable, which in some cases
+        # is too big to create.
+        self._values = Utils.product(*value_iters)
 
         subtype_strs = [str(s) for s in subtypes]
         ExprType.__init__(self, "({})".format(",".join(subtype_strs)))
+
+    def subtypes(self):
+        return self._subtypes
 
     def values(self):
         """ See ExprType.values. """
@@ -375,22 +383,21 @@ class ExprTypeRepository(object):
     @memoise
     def _get_type_str_regex():
         # Type string tokens.
-        type_str_tokens = ['bool', 'uint\d', '\(', '\)', '\,']
-        type_str_regex_str = '(' + '|'.join(['(' + t + ')' \
-            for t in type_str_tokens]) + ')'
-        print("regex={}".format(type_str_regex_str))
+        type_str_tokens = ['bool', 'uint(\d)+', '\(', '\)', '\,']
+        type_str_regex_str = '(' + '|'.join([t for t in type_str_tokens]) + ')'
         return re.compile(type_str_regex_str)
 
     @staticmethod
     @memoise
     def _get_type_str_tokens(type_str):
         regex = ExprTypeRepository._get_type_str_regex()
-        #match = regex.match(type_str)
-        #if match:
-        #    return [t for t in list(match.groups())[1:] if t is not None]
-        #else:
-        #    return []
-        return [m[0] for m in regex.findall(type_str)]
+        tokens = [m[0] for m in regex.findall(type_str)]
+
+        if "".join(tokens) == type_str:
+            return tokens
+        else:
+            # Some characters unused.
+            return []
 
     @staticmethod
     @memoise
@@ -411,23 +418,37 @@ class ExprTypeRepository(object):
         :return: A ExprType object.
         """
         Utils.check_precondition(type(type_str) == str)
-        print(type_str)
         tokens = ExprTypeRepository._get_type_str_tokens(type_str)
         return ExprTypeRepository._parse(tokens)
 
     @staticmethod
     def _parse(tokens):
-        print("tokens={}".format(tokens))
-
         if len(tokens) > 0:
-            if tokens[0] == 'bool':
+            token = tokens.pop(0)
+
+            if token == 'bool':
                 return ExprTypeRepository._BOOL
-            elif tokens[0].startswith('uint'):
-                return ExprTypeRepository._BITVEC(int(tokens[0][4]))
-            elif tokens[0] == '(':
+            elif token.startswith('uint'):
+                return ExprTypeRepository._BITVEC(int(token[4:]))
+            elif token == '(':
+                subtypes = []
+                while True:
+                    subtypes.append(ExprTypeRepository._parse(tokens))
+                    if len(tokens) > 0:
+                        next = tokens.pop(0)
+                        if next == ')':
+                            return Product(subtypes)
+                        elif next == ',':
+                            continue
+                        else:
+                            raise("Expected ',' or ')'")
+                    else:
+                        raise ("Expected ',' or ')'")
                 pass
             else:
-                raise Exception("Unable to find type '{}'".format(tokens))
+                raise Exception("Expected '(', 'bool' or 'uint\d' (got '{}')"
+                    .format(token))
         else:
-            raise Exception("Unable to find type '{}'".format(tokens))
+            raise Exception("Expected '(', 'bool' or 'uint\d' (got '')")
+
 

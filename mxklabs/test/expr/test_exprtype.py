@@ -88,3 +88,20 @@ class Test_ExprTypeRepository(unittest.TestCase):
         self.assertTrue(isinstance(type_prod.subtypes()[0], mxk.Bool))
         self.assertTrue(isinstance(type_prod.subtypes()[1], mxk.BitVec))
         self.assertEqual(54, type_prod.subtypes()[1].littup_size())
+
+        type_prod = mxk.ExprTypeRepository.lookup('(bool,(uint1,bool,uint54))')
+        self.assertTrue(isinstance(type_prod, mxk.Product))
+        subt = type_prod.subtypes()
+        self.assertEquals(2, len(subt))
+        self.assertTrue(isinstance(subt[0], mxk.Bool))
+        self.assertTrue(isinstance(subt[1], mxk.Product))
+        self.assertEquals(3, len(subt[1].subtypes()))
+        self.assertTrue(isinstance(subt[1].subtypes()[0], mxk.BitVec))
+        self.assertEqual(1, subt[1].subtypes()[0].littup_size())
+        self.assertTrue(isinstance(subt[1].subtypes()[1], mxk.Bool))
+        self.assertTrue(isinstance(subt[1].subtypes()[2], mxk.BitVec))
+        self.assertEqual(54, subt[1].subtypes()[2].littup_size())
+
+        # Test an exception is raised when we can't tokenise the type string.
+        with self.assertRaises(Exception):
+            mxk.ExprTypeRepository.lookup('(bool,*uint54)')
