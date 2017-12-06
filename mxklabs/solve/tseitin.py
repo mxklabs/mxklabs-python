@@ -220,3 +220,23 @@ class Tseitin(ExprVisitor):
 
         return littup
 
+    @memoise
+    def _visit_subtract(self, expr):
+
+        littup = self._cache.lookup_littup(expr)
+
+        return littup
+
+    @memoise
+    def _visit_concatenate(self, expr):
+
+        littup = self._cache.lookup_littup(expr)
+
+        return littup
+
+    @memoise
+    def _visit_slice(self, expr):
+
+        littup = self._cache.lookup_littup(expr)
+
+        return littup

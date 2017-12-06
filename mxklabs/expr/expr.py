@@ -161,22 +161,37 @@ class Subtract(Expr):
 
 class Concatenate(Expr):
     """
-    Take N expressions of type 'bool' and turn them into one expression of type
-    'uintN' (i.e. a BitVec of size N).
+    Take one or more expressions of type 'uint<n1>', 'uint<n2>', ... and
+    concatenate the expressions into one bitvector of type 'uint<m>' where m
+    is n1 + n2 + ...
     """
 
     def __init__(self, *ops):
         Expr.__init__(self, expr_type='uint{:d}'.format(len(ops)), children=ops)
 
-        self.ensure_child_is_bitvec(op0)
+        self.ensure_all_children_are_bitvecs()
+        self.ensure_minimum_number_of_children(1)
+
+class Slice(Expr):
+    """
+    Take an expression of type 'uintN', integers start_bit and end_bit and
+    return a sliced version of the operand.
+    """
+    def __init__(self, op, start_bit, end_bit):
+        self._start_bit = start_bit
+        self._end_bit = end_bit
+
+        Expr.__init__(self, expr_type='uint{:d}'.format(end_bit - start_bit),
+                      children=[op], aux=[str(start_bit), str(end_bit)])
+
+        self.ensure_child_is_bitvec(0)
         self.ensure_number_of_children(1)
 
-class Dissociate(Expr):
-    """
-    Take an expression of type 'uintN' (i.e. a BitVec of size N) and turn it
-    into N expressions of type 'bool'.
-    """
-    def __init__(self, op):
-        Expr.__init__(self, expr_type=Product(['bool' for n in op.littup_size()]),
-                      children=[op])
+        if start_bit > end_bit:
+            raise Exception("Parameter start_bit (={}) must not exceed end_bit "
+                            "(={})".format(start_bit, end_bit))
 
+        if end_bit > op.littup_size():
+            raise Exception("Parameter end_bit (={}) must not exceed {} when "
+                            "operand is of type '{}'"
+                            "(={})".format(end_bit, op.littup_size(), op))

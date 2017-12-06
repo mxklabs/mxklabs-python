@@ -106,5 +106,36 @@ class ExprEvaluator(ExprVisitor):
         else:
             expr.child(2).visit(self).user_value()
 
+    @memoise
+    def _visit_subtract(self, expr):
+        '''
+        Internal method for working out the value of a subtract expression.
+        :param expr: A Subtract object.
+        :return: An ExprValue object.
+        '''
+        child0_res = expr.child(0).visit(self).user_value()
+        child1_res = expr.child(1).visit(self).user_value()
+        val = (child0_res - child1_res) % expr.expr_type().num_values()
+        return ExprValue(expr_type=expr.expr_type(), user_value=val)
 
+    @memoise
+    def _visit_concatenate(self, expr):
+        '''
+        Internal method for working out the value of a concatenate expression.
+        :param expr: A Concatenate object.
+        :return: An ExprValue object.
+        '''
+        ops = [c.visit(self).littup_value() for c in expr.children()]
+        val = sum(ops)
+        return ExprValue(expr_type=expr.expr_type(), littup_value=val)
 
+    @memoise
+    def _visit_slice(self, expr):
+        '''
+        Internal method for working out the value of a slice expression.
+        :param expr: A Slice object.
+        :return: An ExprValue object.
+        '''
+        op = expr.child().visit(self).littup_value()
+        val = op[expr.start_bit():expr.end_bit()]
+        return ExprValue(expr_type=expr.expr_type(), littup_value=val)
