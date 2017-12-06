@@ -88,6 +88,33 @@ class VarExtractor(ExprVisitor):
         return self._visit_default(expr)
 
     @memoise
+    def _visit_subtract(self, expr):
+        '''
+        Internal method for working the variables used in a Subtract object.
+        :param expr: An Subtract object.
+        :return: A set object containing variables used in expr.
+        '''
+        return self._visit_default(expr)
+
+    @memoise
+    def _visit_concatenate(self, expr):
+        '''
+        Internal method for working the variables used in a Concatenate object.
+        :param expr: An Concatenate object.
+        :return: A set object containing variables used in expr.
+        '''
+        return self._visit_default(expr)
+
+    @memoise
+    def _visit_slice(self, expr):
+        '''
+        Internal method for working the variables used in a Slice object.
+        :param expr: An Slice object.
+        :return: A set object containing variables used in expr.
+        '''
+        return self._visit_default(expr)
+
+    @memoise
     def _visit_default(self, expr):
         '''
         Internal method for working out the variables used in an expression.

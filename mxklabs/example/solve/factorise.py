@@ -90,8 +90,7 @@ def find_divisor(logger, n):
         start = n_bit_length - divisor_bit_length - r
         end = n_bit_length - r
 
-        remainder_as_bits = mxk.Dissociate(remainder)
-        remainder_part = mxk.Concatenate(remainder_as_bits[start:end])
+        remainder_part = mxk.Slice(remainder, start, end)
 
         print("[{},{}[".format(start, end))
 
@@ -105,10 +104,10 @@ def find_divisor(logger, n):
             remainder_part)
 
         # Update the remainder.
-        remainder = mxk.Concatenate(*(
-            remainder_as_bits[:start] + \
-            mxk.Dissociate(remainder_part_new) + \
-            remainder_as_bits[end:]))
+        remainder = mxk.Concatenate(
+            mxk.Slice(remainder, 0, start),
+            remainder_part_new,
+            mxk.Slice(remainder, end, n_bit_length))
 
     # Ensure the final remainder is 0!
     constraints.append(mxk.Equals(remainder, mxk.Const(divisor_typestr, 0)))

@@ -5,6 +5,7 @@ import six
 
 from mxklabs.utils import Utils
 from mxklabs.expr import exprtype as et
+from mxklabs.expr.exprtype import BitVec
 
 
 @six.add_metaclass(abc.ABCMeta)
@@ -157,6 +158,18 @@ class Expr(object):
 
         for i in range(len(self.children())):
             self.ensure_child_is_type(i, expr_type)
+
+    def ensure_child_is_bitvec(self, index):
+        if isinstance(self._children[index], BitVec):
+            raise Exception("type \"{type}\" requires subexpression "
+                            "'{childstr}' to be a bit vector but it is of type "
+                            "'{childtype}')".format(
+                            type=str(type), childstr=str(self._children[index]),
+                            childtype=str(self._children[index].expr_type())))
+
+    def ensure_all_children_are_bitvecs(self):
+        for i in range(len(self.children())):
+            self.ensure_child_is_bitvec(i)
 
     def ensure_child_is_type(self, index, expr_type):
         if type(expr_type) == str:
