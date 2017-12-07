@@ -1,6 +1,7 @@
 # TODO: Sanitise import.
-from mxklabs.expr.expr import LogicalAnd, LogicalOr, LogicalNot, Equals, \
-    Const, Var, IfThenElse, Concatenate, Slice, Subtract
+from mxklabs.expr.expr import LogicalAnd, LogicalOr, LogicalNot, \
+    LessThanEquals, Equals, Const, Var, IfThenElse, Concatenate, Slice, \
+    Subtract
 from mxklabs.expr.exprtype import ExprValue
 from mxklabs.expr.exprvisitor import ExprVisitor
 from mxklabs.utils import memoise
@@ -90,6 +91,23 @@ class ConstPropagator(ExprVisitor):
             return Const('bool', not op.expr_value().user_value())
         else:
             return LogicalNot(op)
+
+    @memoise
+    def _visit_less_than_equals(self, expr):
+        '''
+        Internal method for propagating constants in a LessThanEquals object.
+        :param expr: A LessThanEquals object.
+        :return: An expression equi-satisfiable to expr.
+        '''
+
+        ops = [child.visit(self) for child in expr.children()]
+
+        if isinstance(ops[0], Const) and isinstance(ops[1], Const):
+            # When comparing two Const objects we can work out the result.
+            is_less_than_equals = (ops[0].expr_value() <= ops[1].expr_value())
+            return Const('bool', is_less_than_equals)
+
+        return LessThanEquals(*ops)
 
     @memoise
     def _visit_equals(self, expr):

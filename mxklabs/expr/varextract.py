@@ -70,6 +70,16 @@ class VarExtractor(ExprVisitor):
         return self._visit_default(expr)
 
     @memoise
+    def _visit_less_than_equals(self, expr):
+        '''
+        Internal method for working the variables used in a LessThanEquals
+        object.
+        :param expr: An LessThanEquals object.
+        :return: A set object containing variables used in expr.
+        '''
+        return self._visit_default(expr)
+
+    @memoise
     def _visit_equals(self, expr):
         '''
         Internal method for working the variables used in a Equals object.

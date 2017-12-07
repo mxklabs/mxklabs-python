@@ -82,6 +82,18 @@ class ExprEvaluator(ExprVisitor):
         return ExprValue(expr_type='bool', user_value=not child0_res)
 
     @memoise
+    def _visit_less_than_equals(self, expr):
+        '''
+        Internal method for working out the value of an less-than-equals expression.
+        :param expr: A Equals object.
+        :return: An ExprValue object.
+        '''
+        child0_res = expr.child(0).visit(self).user_value()
+        child1_res = expr.child(1).visit(self).user_value()
+        return ExprValue(expr_type='bool',
+            user_value=(child0_res <= child1_res))
+
+    @memoise
     def _visit_equals(self, expr):
         '''
         Internal method for working out the value of an equivalence expression.

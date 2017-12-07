@@ -69,9 +69,9 @@ def find_divisor(logger, n):
 
     # Make sure divisor is non-trivial.
     constraints.append(mxk.LogicalNot(
-        mxk.Equals(n_, mxk.Const(divisor_typestr, 0))))
+        mxk.Equals(n_, mxk.Const(n_typestr, 0))))
     constraints.append(mxk.LogicalNot(
-        mxk.Equals(n_, mxk.Const(divisor_typestr, 1))))
+        mxk.Equals(n_, mxk.Const(n_typestr, 1))))
 
     # Now all that remains is to formulate constraints on n_ and divisor_ that
     # ensure that if the constraints are met then divisor_ divides n_. This is
@@ -92,7 +92,7 @@ def find_divisor(logger, n):
 
         remainder_part = mxk.Slice(remainder, start, end)
 
-        print("[{},{}[".format(start, end))
+        #print("[{},{}[".format(start, end))
 
         # Work out what bits to replace remainder_part with.
         remainder_part_new = mxk.IfThenElse(
@@ -110,7 +110,7 @@ def find_divisor(logger, n):
             mxk.Slice(remainder, end, n_bit_length))
 
     # Ensure the final remainder is 0!
-    constraints.append(mxk.Equals(remainder, mxk.Const(divisor_typestr, 0)))
+    constraints.append(mxk.Equals(remainder, mxk.Const(n_typestr, 0)))
 
     # We're done! We got all the constraints. Let's use a constraint solver
     # to find an assignment to variables under which all constraints hold.
