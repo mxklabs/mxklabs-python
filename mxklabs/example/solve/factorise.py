@@ -69,9 +69,9 @@ def find_divisor(logger, n):
 
     # Make sure divisor is non-trivial.
     constraints.append(mxk.LogicalNot(
-        mxk.Equals(n_, mxk.Const(n_typestr, 0))))
+        mxk.Equals(divisor, mxk.Const(divisor_typestr, 0))))
     constraints.append(mxk.LogicalNot(
-        mxk.Equals(n_, mxk.Const(n_typestr, 1))))
+        mxk.Equals(divisor, mxk.Const(divisor_typestr, 1))))
 
     # Now all that remains is to formulate constraints on n_ and divisor_ that
     # ensure that if the constraints are met then divisor_ divides n_. This is
@@ -83,7 +83,7 @@ def find_divisor(logger, n):
 
     # Iterate over bitvector within n that are the same size as the
     # divisor, starting with the most significant such bitvector.
-    for r in [0]: #range(n_bit_length - divisor_bit_length + 1):
+    for r in range(n_bit_length - divisor_bit_length + 1):
 
         # We're interested in the r-th most significant bitvector that is the
         # same size as the divisor's bit length.
@@ -92,8 +92,7 @@ def find_divisor(logger, n):
 
         remainder_part = mxk.Slice(remainder, start, end)
 
-        print("[{},{}[".format(start, end))
-        print("remainder: " + str(remainder))
+        #print("[{},{}[".format(start, end))
 
         # Work out what bits to replace remainder_part with.
         remainder_part_new = mxk.IfThenElse(
@@ -112,7 +111,6 @@ def find_divisor(logger, n):
 
     # Ensure the final remainder is 0!
     constr = mxk.Equals(remainder, mxk.Const(n_typestr, 0))
-    print("constr: " + str(constr))
     constraints.append(constr)
 
     # We're done! We got all the constraints. Let's use a constraint solver
@@ -125,7 +123,9 @@ def find_divisor(logger, n):
 
         # We found a divisor, return it!
         assignment = solver.get_satisfying_assignment()
-        return assignment(divisor)
+        divisor_value = assignment(divisor)
+        logger("{} divides {}".format(divisor_value, n))
+        return divisor_value
 
     elif result == mxk.ConstraintSolver.RESULT_UNSAT:
         logger("Unable to find a divisor.")

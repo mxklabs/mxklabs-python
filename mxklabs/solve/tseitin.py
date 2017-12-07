@@ -163,6 +163,8 @@ class Tseitin(ExprVisitor):
     @memoise
     def _visit_less_than_equals(self, expr):
 
+        ops = [child.visit(self) for child in expr.children()]
+
         littup = self._cache.lookup_littup(expr)
 
         return littup
@@ -171,7 +173,7 @@ class Tseitin(ExprVisitor):
     def _visit_equals(self, expr):
 
         ops = [child.visit(self) for child in expr.children()]
-        print(ops)
+
         littup = self._cache.lookup_littup(expr)
 
         assert(len(littup) == 1)
@@ -231,6 +233,8 @@ class Tseitin(ExprVisitor):
     @memoise
     def _visit_subtract(self, expr):
 
+        ops = [child.visit(self) for child in expr.children()]
+
         littup = self._cache.lookup_littup(expr)
 
         return littup
@@ -238,12 +242,16 @@ class Tseitin(ExprVisitor):
     @memoise
     def _visit_concatenate(self, expr):
 
+        ops = [child.visit(self) for child in expr.children()]
+
         littup = self._cache.lookup_littup(expr)
 
         return littup
 
     @memoise
     def _visit_slice(self, expr):
+
+        ops = [child.visit(self) for child in expr.children()]
 
         littup = self._cache.lookup_littup(expr)
 
