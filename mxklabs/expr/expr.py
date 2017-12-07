@@ -133,11 +133,22 @@ class Equals(Expr):
         self.ensure_children_types_match([0,1])
 
 
+class LessThanEquals(Expr):
+    """ An object that represents an equivalence expression. """
+
+    def __init__(self, op0, op1):
+        Expr.__init__(self, expr_type='bool', children=[op0, op1])
+
+        self.ensure_number_of_children(2)
+        self.ensure_all_children_are_bitvecs()
+        self.ensure_children_types_match([0,1])
+
+
 class IfThenElse(Expr):
     """ An object that represents an equivalence expression. """
 
     def __init__(self, op0, op1, op2):
-        Expr.__init__(self, expr_type=op1.expr_type(), children=[op0, op1])
+        Expr.__init__(self, expr_type=op1.expr_type(), children=[op0, op1, op2])
 
         self.ensure_number_of_children(3)
         self.ensure_children_types_match([1,2])
@@ -153,11 +164,12 @@ class Subtract(Expr):
         Construct a LogicalAnd object.
         :param ops: One or more Expr objects of type Bool (operands).
         """
-        Expr.__init__(self, type=op0.expr_type(), nodestr="subtract", children=[op0, op1])
+        Expr.__init__(self, expr_type=op0.expr_type(), children=[op0, op1])
 
         self.ensure_number_of_children(2)
         self.ensure_child_is_bitvec(0)
         self.ensure_children_types_match([0,1])
+
 
 class Concatenate(Expr):
     """
@@ -167,10 +179,11 @@ class Concatenate(Expr):
     """
 
     def __init__(self, *ops):
-        Expr.__init__(self, expr_type='uint{:d}'.format(len(ops)), children=ops)
+        Expr.__init__(self, expr_type='uint{:d}'.format(sum([op.expr_type().littup_size() for op in ops])), children=ops)
 
         self.ensure_all_children_are_bitvecs()
         self.ensure_minimum_number_of_children(1)
+
 
 class Slice(Expr):
     """
@@ -191,7 +204,8 @@ class Slice(Expr):
             raise Exception("Parameter start_bit (={}) must not exceed end_bit "
                             "(={})".format(start_bit, end_bit))
 
-        if end_bit > op.littup_size():
+        if end_bit > op.expr_type().littup_size():
             raise Exception("Parameter end_bit (={}) must not exceed {} when "
-                            "operand is of type '{}'"
-                            "(={})".format(end_bit, op.littup_size(), op))
+                            "operand is of type '{}'".format(end_bit,
+                                op.expr_type().littup_size(),
+                                op.expr_type()))

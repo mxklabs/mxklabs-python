@@ -160,6 +160,13 @@ class Tseitin(ExprVisitor):
         return (-op,)
 
     @memoise
+    def _visit_less_than_equals(self, expr):
+
+        littup = self._cache.lookup_littup(expr)
+
+        return littup
+
+    @memoise
     def _visit_equals(self, expr):
 
         ops = [child.visit(self) for child in expr.children()]
