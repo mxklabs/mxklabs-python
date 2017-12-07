@@ -83,7 +83,7 @@ def find_divisor(logger, n):
 
     # Iterate over bitvector within n that are the same size as the
     # divisor, starting with the most significant such bitvector.
-    for r in range(n_bit_length - divisor_bit_length + 1):
+    for r in [0]: #range(n_bit_length - divisor_bit_length + 1):
 
         # We're interested in the r-th most significant bitvector that is the
         # same size as the divisor's bit length.
@@ -92,7 +92,8 @@ def find_divisor(logger, n):
 
         remainder_part = mxk.Slice(remainder, start, end)
 
-        #print("[{},{}[".format(start, end))
+        print("[{},{}[".format(start, end))
+        print("remainder: " + str(remainder))
 
         # Work out what bits to replace remainder_part with.
         remainder_part_new = mxk.IfThenElse(
@@ -110,7 +111,9 @@ def find_divisor(logger, n):
             mxk.Slice(remainder, end, n_bit_length))
 
     # Ensure the final remainder is 0!
-    constraints.append(mxk.Equals(remainder, mxk.Const(n_typestr, 0)))
+    constr = mxk.Equals(remainder, mxk.Const(n_typestr, 0))
+    print("constr: " + str(constr))
+    constraints.append(constr)
 
     # We're done! We got all the constraints. Let's use a constraint solver
     # to find an assignment to variables under which all constraints hold.
