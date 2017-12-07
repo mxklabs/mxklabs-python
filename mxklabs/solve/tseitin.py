@@ -58,6 +58,7 @@ class Tseitin(ExprVisitor):
             elif bit not in self._cache[expr]:
                 lit = self.make_lit()
                 self._cache[expr][bit] = lit
+                return lit
             else:
                 return self._cache[expr][bit]
 
@@ -170,7 +171,7 @@ class Tseitin(ExprVisitor):
     def _visit_equals(self, expr):
 
         ops = [child.visit(self) for child in expr.children()]
-
+        print(ops)
         littup = self._cache.lookup_littup(expr)
 
         assert(len(littup) == 1)
