@@ -1,5 +1,7 @@
 from __future__ import print_function
 
+import itertools
+
 from mxklabs.dimacs import Dimacs
 from mxklabs.expr.expr import LogicalAnd, Const
 from mxklabs.expr.exprvisitor import ExprVisitor
@@ -166,6 +168,49 @@ class Tseitin(ExprVisitor):
         ops = [child.visit(self) for child in expr.children()]
 
         littup = self._cache.lookup_littup(expr)
+        lit, = littup
+
+        assert(len(ops[0]) == len(ops[1]))
+
+        num_bits = len(ops[0])
+
+        # True if this bit matters.
+        cond_lit = self._cache.TRUE_LIT
+
+        for bit in reversed(range(num_bits)):
+
+            # Shorthand.
+            l = ops[0][bit]
+            r = ops[1][bit]
+
+            # If more significant bits are equal then if (l < r) for this
+            # bit then it must be that op[0] <= op[1].
+            self._cache.add_clause(frozenset([-cond_lit, l, -r, lit]))
+
+            # If more significant bits are equal then if (l > r) for this
+            # bit then it must NOT be that op[0] <= op[1].
+            self._cache.add_clause(frozenset([-cond_lit, -l, r, -lit]))
+
+            if bit != 0:
+                # It's the least significant bit bit. If l == r then
+                # op[0] <= op[1].
+                self._cache.add_clause(frozenset([-cond_lit, l, r, lit]))
+                self._cache.add_clause(frozenset([-cond_lit, -l, -r, lit]))
+
+            else:
+                # It's not the least significant bit we need a new literal
+                # that is true iff l == r which we can use as cond_lit for the
+                # next bit.
+                new_cond_lit = self._cache.make_lit()
+
+                # Ensure new_cond_lit is true iff l == r.
+                self._cache.add_clause(frozenset([-cond_lit, l, r, new_cond_lit]))
+                self._cache.add_clause(frozenset([-cond_lit, l, -r, -new_cond_lit]))
+                self._cache.add_clause(frozenset([-cond_lit, -l, r, -new_cond_lit]))
+                self._cache.add_clause(frozenset([-cond_lit, -l, -r, new_cond_lit]))
+
+                # Update cond_lit.
+                cond_lit = new_cond_lit
 
         return littup
 
@@ -234,8 +279,59 @@ class Tseitin(ExprVisitor):
     def _visit_subtract(self, expr):
 
         ops = [child.visit(self) for child in expr.children()]
-
         littup = self._cache.lookup_littup(expr)
+
+        assert(len(littup) == len(ops[0]) == len(ops[1]))
+
+        bits = len(littup)
+
+        # True if we need to borrow bits.
+        carry = self._cache.FALSE_LIT
+
+        for bit in range(bits):
+
+            # Shorthands.
+            l = ops[0][bit]
+            r = ops[1][bit]
+
+            # +---------------+-------------------------+
+            # | IN            | OUT                     |
+            # +-------+---+---+-------------+-----------+
+            # | carry | l | r | littup[bit] | new_carry |
+            # +-------+---+---+-------------+-----------+
+            # |     0 | 0 | 0 | 0           | 0         |
+            # |     0 | 0 | 1 | 1           | 1         |
+            # |     0 | 1 | 0 | 1           | 0         |
+            # |     0 | 1 | 1 | 0           | 0         |
+            # |     1 | 0 | 0 | 1           | 1         |
+            # |     1 | 0 | 1 | 0           | 1         |
+            # |     1 | 1 | 0 | 0           | 0         |
+            # |     1 | 1 | 1 | 1           | 1         |
+            # +-------+---+---+-------------+-----------+
+
+            # There's got to be a better way!
+            self._cache.add_clause(frozenset([carry, l, r, -littup[bit]]))
+            self._cache.add_clause(frozenset([carry, l, -r, littup[bit]]))
+            self._cache.add_clause(frozenset([carry, -l, r, littup[bit]]))
+            self._cache.add_clause(frozenset([carry, -l, -r, -littup[bit]]))
+            self._cache.add_clause(frozenset([-carry, l, r, littup[bit]]))
+            self._cache.add_clause(frozenset([-carry, l, -r, -littup[bit]]))
+            self._cache.add_clause(frozenset([-carry, -l, r, -littup[bit]]))
+            self._cache.add_clause(frozenset([-carry, -l, -r, littup[bit]]))
+
+            if bit == (len(littup) - 1):
+
+                new_carry = self._cache.make_lit()
+
+                # There's got to be a better way!
+                self._cache.add_clause(frozenset([carry, l, r, -new_carry]))
+                self._cache.add_clause(frozenset([carry, l, -r, new_carry]))
+                self._cache.add_clause(frozenset([carry, -l, -new_carry]))
+                self._cache.add_clause(frozenset([-carry, l, new_carry]))
+                self._cache.add_clause(frozenset([-carry, -l, r, -new_carry]))
+                self._cache.add_clause(frozenset([-carry, -l, -r, new_carry]))
+
+                carry = new_carry
 
         return littup
 
@@ -243,16 +339,11 @@ class Tseitin(ExprVisitor):
     def _visit_concatenate(self, expr):
 
         ops = [child.visit(self) for child in expr.children()]
-
-        littup = self._cache.lookup_littup(expr)
-
-        return littup
+        return tuple(itertools.chain(*ops))
 
     @memoise
     def _visit_slice(self, expr):
 
-        ops = [child.visit(self) for child in expr.children()]
+        op = expr.child().visit(self)
 
-        littup = self._cache.lookup_littup(expr)
-
-        return littup
+        return op[expr.start_bit():expr.end_bit()]

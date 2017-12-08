@@ -209,3 +209,9 @@ class Slice(Expr):
                             "operand is of type '{}'".format(end_bit,
                                 op.expr_type().littup_size(),
                                 op.expr_type()))
+
+    def start_bit(self):
+        return self._start_bit
+
+    def end_bit(self):
+        return self._end_bit

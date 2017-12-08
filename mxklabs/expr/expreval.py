@@ -1,3 +1,5 @@
+import itertools
+
 from mxklabs.expr.exprvisitor import ExprVisitor
 from mxklabs.expr.exprtype import ExprValue
 from mxklabs.utils import memoise
@@ -138,7 +140,7 @@ class ExprEvaluator(ExprVisitor):
         :return: An ExprValue object.
         '''
         ops = [c.visit(self).littup_value() for c in expr.children()]
-        val = sum(ops)
+        val = tuple(itertools.chain(*ops))
         return ExprValue(expr_type=expr.expr_type(), littup_value=val)
 
     @memoise
