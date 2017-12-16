@@ -138,13 +138,34 @@ def find_divisor(logger, n):
     else:
         raise Exception("Unable to interpret result from solver")
 
+def find_prime_factors(logger, n):
+
+    if n <= 0:
+        raise("Unable to factorise {:d}".format(n))
+    elif n == 1:
+        return {}
+    else:
+        divisor = find_divisor(logger, n)
+        if divisor == None:
+            return { n : 1 }
+        else:
+            mapl = find_prime_factors(logger, divisor)
+            mapr = find_prime_factors(logger, n // divisor)
+
+            for n, val in mapr.items():
+                if n in mapl.keys():
+                    mapl[n] = mapl[n] + val
+                else:
+                    mapl[n] = val
+
+            return mapl
 
 def run_example(logger):
     """
     This example demonstrates how to factorise a 2048 bit number
     """
     #n = 22580116242535058188623517908541842633310092715854343846499796528769924223671807456607207419106621519588054730245966134358662000861657234814981687546213715297116993744190702405123601421779826894111197445944603613969124042229902202605182127458854328092374858429249966182880779471051954712334390750518196900438794893396809490213228123823764463452353363582030091984618564441824624833291389753934147982215735585974663924374055872463956337167613961791649759852314679564700205664568046040625039008367966025154382490947923562947778613745893443444809542921142924788398447884047063914104247152421812331793595144009461596199479
-    n = 1234
+    n = 10
 
     find_divisor(logger, n)
 
@@ -154,12 +175,25 @@ if __name__ == '__main__':
 import unittest
 
 
-class Test_EinsteinsRiddle(unittest.TestCase):
-    def test_example_solve_einsteins_riddle(self):
-        logs = []
-        logger = lambda msg: logs.append(msg)
+class Test_Factorise(unittest.TestCase):
 
-        run_example(logger=logger)
+    def test_find_divisor(self):
+        logger = lambda msg: None
 
-        self.assertEqual(['Solution: Norwegian drinks the water, Japanese owns '
-                          'the zebra!'], logs)
+        logger = lambda msg: None
+        DIVISOR = lambda i: find_divisor(logger, i)
+
+        #self.assertEqual(DIVISOR(1), None)
+        #self.assertEqual(DIVISOR(2), None)
+        #self.assertEqual(DIVISOR(3), None)
+        self.assertIn(DIVISOR(4), [2])
+
+    def test_find_prime_factors(self):
+
+        logger = lambda msg: None
+        FACTORS = lambda i: find_prime_factors(logger, i)
+
+        self.assertEqual({}, FACTORS(1))
+        self.assertEqual({2:1}, FACTORS(2))
+        self.assertEqual({3:1}, FACTORS(3))
+        self.assertEqual({2:2}, FACTORS(4))

@@ -31,7 +31,7 @@ class Tseitin(ExprVisitor):
                 Const('bool', False): {0: Tseitin._Cache.FALSE_LIT}
             }
             self._dimacs = Dimacs(
-                clauses=set([frozenset([Tseitin._Cache.TRUE_LIT])]))
+                clauses=[[Tseitin._Cache.TRUE_LIT]])#set([frozenset([Tseitin._Cache.TRUE_LIT])]))
 
         def dimacs(self):
             return self._dimacs
@@ -71,13 +71,16 @@ class Tseitin(ExprVisitor):
         ''' Add a CNF clause. '''
 
         def add_clause(self, clause):
-            self._dimacs.clauses.add(clause)
+            self._dimacs.clauses.append(clause)
 
         ''' Print cache. '''
 
         def print(self):
-            for exprstr, lit in self._cache.items():
-                print("'{exprstr}:{bit}' -> {lit}".format(exprstr=exprstr, lit=lit))
+            for exprstr, map in self._cache.items():
+                print("{map} -> {exprstr}".format(exprstr=exprstr, map=[v for k,v in map.items()]))
+                #for bit, lit in map.items():
+                #    print("'{exprstr}:{bit}' -> {lit}".format(exprstr=exprstr,
+                #                                              bit=bit, lit=lit))
 
     def __init__(self):
         self._cache = Tseitin._Cache()
@@ -103,10 +106,12 @@ class Tseitin(ExprVisitor):
         elif expr.expr_type() == ExprTypeRepository._BOOL:
             littup = expr.visit(self)
             lit, = littup
-            self._cache.add_clause(frozenset([lit]))
+            self._cache.add_clause([lit])
         else:
-            raise("Cannot add an expression with type '{expr_type}' as a "
-                  "constraint".format(expr_type=expr.expr_type()))
+            raise Exception("Cannot add an expression with type '{expr_type}' "
+                            "as a constraint ('{expr}')".format(
+                                expr_type=expr.expr_type(),
+                                expr=expr))
 
     ''' Can be used to established what literals belong to an expression. '''    
     def cache_lookup(self, expr):
@@ -131,11 +136,11 @@ class Tseitin(ExprVisitor):
         lit, = littup
 
         # Ensure when the logical and is true, exprlit is true.
-        self._cache.add_clause(frozenset([lit]+[-op for op, in ops]))
+        self._cache.add_clause([lit]+[-op for op, in ops])
 
         # Ensure when any child causes the logical and to be false, exprlit is false, too.
         for op, in ops:
-            self._cache.add_clause(frozenset([-lit, op]))
+            self._cache.add_clause([-lit, op])
 
         return littup
 
@@ -148,11 +153,11 @@ class Tseitin(ExprVisitor):
         lit, = littup
 
         # Ensure when the logical or is false, exprlit is false.
-        self._cache.add_clause(frozenset([-lit]+[op for op, in ops]))
+        self._cache.add_clause([-lit]+[op for op, in ops])
 
         # Ensure when any child causes the logical and to be true, exprlit is true, too.
         for op, in ops:
-            self._cache.add_clause(frozenset([lit, -op]))
+            self._cache.add_clause([lit, -op])
 
         return littup
 
@@ -185,17 +190,17 @@ class Tseitin(ExprVisitor):
 
             # If more significant bits are equal then if (l < r) for this
             # bit then it must be that op[0] <= op[1].
-            self._cache.add_clause(frozenset([-cond_lit, l, -r, lit]))
+            self._cache.add_clause([-cond_lit, l, -r, lit])
 
             # If more significant bits are equal then if (l > r) for this
             # bit then it must NOT be that op[0] <= op[1].
-            self._cache.add_clause(frozenset([-cond_lit, -l, r, -lit]))
+            self._cache.add_clause([-cond_lit, -l, r, -lit])
 
-            if bit != 0:
+            if bit == 0:
                 # It's the least significant bit bit. If l == r then
                 # op[0] <= op[1].
-                self._cache.add_clause(frozenset([-cond_lit, l, r, lit]))
-                self._cache.add_clause(frozenset([-cond_lit, -l, -r, lit]))
+                self._cache.add_clause([-cond_lit, l, r, lit])
+                self._cache.add_clause([-cond_lit, -l, -r, lit])
 
             else:
                 # It's not the least significant bit we need a new literal
@@ -204,10 +209,10 @@ class Tseitin(ExprVisitor):
                 new_cond_lit = self._cache.make_lit()
 
                 # Ensure new_cond_lit is true iff l == r.
-                self._cache.add_clause(frozenset([-cond_lit, l, r, new_cond_lit]))
-                self._cache.add_clause(frozenset([-cond_lit, l, -r, -new_cond_lit]))
-                self._cache.add_clause(frozenset([-cond_lit, -l, r, -new_cond_lit]))
-                self._cache.add_clause(frozenset([-cond_lit, -l, -r, new_cond_lit]))
+                self._cache.add_clause([-cond_lit, l, r, new_cond_lit])
+                self._cache.add_clause([-cond_lit, l, -r, -new_cond_lit])
+                self._cache.add_clause([-cond_lit, -l, r, -new_cond_lit])
+                self._cache.add_clause([-cond_lit, -l, -r, new_cond_lit])
 
                 # Update cond_lit.
                 cond_lit = new_cond_lit
@@ -235,18 +240,18 @@ class Tseitin(ExprVisitor):
 
         for b in range(bits):
             # For each bit, if operands disagree this implies -lit.
-            self._cache.add_clause(frozenset([ ops[0][b], -ops[1][b], -tmp_lits[b]]))
-            self._cache.add_clause(frozenset([-ops[0][b],  ops[1][b], -tmp_lits[b]]))
-            self._cache.add_clause(frozenset([ ops[0][b],  ops[1][b],  tmp_lits[b]]))
-            self._cache.add_clause(frozenset([-ops[0][b], -ops[1][b],  tmp_lits[b]]))
+            self._cache.add_clause([ ops[0][b], -ops[1][b], -tmp_lits[b]])
+            self._cache.add_clause([-ops[0][b],  ops[1][b], -tmp_lits[b]])
+            self._cache.add_clause([ ops[0][b],  ops[1][b],  tmp_lits[b]])
+            self._cache.add_clause([-ops[0][b], -ops[1][b],  tmp_lits[b]])
 
         # Ensure when the every bit agrees, exprlit is true.
         self._cache.add_clause(
-            frozenset([-tmp_lits[b] for b in range(bits)] + [lit]))
+            [-tmp_lits[b] for b in range(bits)] + [lit])
 
         # Ensure when any child causes the logical and to be false, exprlit is false, too.
         for b in range(bits):
-            self._cache.add_clause(frozenset([tmp_lits[b], -lit]))
+            self._cache.add_clause([tmp_lits[b], -lit])
 
         return littup
 
@@ -266,12 +271,12 @@ class Tseitin(ExprVisitor):
 
         for b in range(bits):
             # Literal cond implies littup[b] == ops[1][b]
-            self._cache.add_clause(frozenset([-cond, -littup[b], ops[1][b]]))
-            self._cache.add_clause(frozenset([-cond, littup[b], -ops[1][b]]))
+            self._cache.add_clause([-cond, -littup[b], ops[1][b]])
+            self._cache.add_clause([-cond, littup[b], -ops[1][b]])
 
             # Literal -cond implies littup[b] != ops[1][b]
-            self._cache.add_clause(frozenset([cond, littup[b], ops[1][b]]))
-            self._cache.add_clause(frozenset([cond, -littup[b], -ops[1][b]]))
+            self._cache.add_clause([cond, -littup[b], ops[2][b]])
+            self._cache.add_clause([cond, littup[b], -ops[2][b]])
 
         return littup
 
@@ -310,26 +315,25 @@ class Tseitin(ExprVisitor):
             # +-------+---+---+-------------+-----------+
 
             # There's got to be a better way!
-            self._cache.add_clause(frozenset([carry, l, r, -littup[bit]]))
-            self._cache.add_clause(frozenset([carry, l, -r, littup[bit]]))
-            self._cache.add_clause(frozenset([carry, -l, r, littup[bit]]))
-            self._cache.add_clause(frozenset([carry, -l, -r, -littup[bit]]))
-            self._cache.add_clause(frozenset([-carry, l, r, littup[bit]]))
-            self._cache.add_clause(frozenset([-carry, l, -r, -littup[bit]]))
-            self._cache.add_clause(frozenset([-carry, -l, r, -littup[bit]]))
-            self._cache.add_clause(frozenset([-carry, -l, -r, littup[bit]]))
+            self._cache.add_clause([carry, l, r, -littup[bit]])
+            self._cache.add_clause([carry, l, -r, littup[bit]])
+            self._cache.add_clause([carry, -l, r, littup[bit]])
+            self._cache.add_clause([carry, -l, -r, -littup[bit]])
+            self._cache.add_clause([-carry, l, r, littup[bit]])
+            self._cache.add_clause([-carry, l, -r, -littup[bit]])
+            self._cache.add_clause([-carry, -l, r, -littup[bit]])
+            self._cache.add_clause([-carry, -l, -r, littup[bit]])
 
-            if bit == (len(littup) - 1):
-
+            if bit < (len(littup) - 1):
                 new_carry = self._cache.make_lit()
 
                 # There's got to be a better way!
-                self._cache.add_clause(frozenset([carry, l, r, -new_carry]))
-                self._cache.add_clause(frozenset([carry, l, -r, new_carry]))
-                self._cache.add_clause(frozenset([carry, -l, -new_carry]))
-                self._cache.add_clause(frozenset([-carry, l, new_carry]))
-                self._cache.add_clause(frozenset([-carry, -l, r, -new_carry]))
-                self._cache.add_clause(frozenset([-carry, -l, -r, new_carry]))
+                self._cache.add_clause([carry, l, r, -new_carry])
+                self._cache.add_clause([carry, l, -r, new_carry])
+                self._cache.add_clause([carry, -l, -new_carry])
+                self._cache.add_clause([-carry, l, new_carry])
+                self._cache.add_clause([-carry, -l, r, -new_carry])
+                self._cache.add_clause([-carry, -l, -r, new_carry])
 
                 carry = new_carry
 
