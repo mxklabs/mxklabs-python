@@ -12,8 +12,16 @@ class Test_Tseitin(unittest.TestCase):
     def _TEST(self, result, constraints):
         t = mxk.Tseitin()
         s = mxk.CryptoSatSolver(logger=lambda msg: None)
+        vars = mxk.VarExtractor.extract(constraints)
         for c in constraints:
             t.add_constraint(c)
+
+        print('vars=' + str(vars))
+        print('cache=')
+        t._cache.print()
+
+        for clause in t.dimacs().clauses:
+            print(clause)
         self.assertEqual(result, s.solve(t.dimacs()))
 
     def _TEST_SAT(self, constraints):
@@ -126,6 +134,29 @@ class Test_Tseitin(unittest.TestCase):
 
         self._TEST_SAT([e_, mxk.Equals(x_, false_)])
         self._TEST_UNSAT([e_, mxk.Equals(x_, true_)])
+
+    def test_tseitin_less_than_equal(self):
+        true_ = mxk.Const('bool', True)
+        false_ = mxk.Const('bool', False)
+
+        self._TEST_SAT([mxk.Equals(
+            mxk.LessThanEquals(mxk.Const('uint3', 4), mxk.Const('uint3', 1)),
+            false_)])
+        self._TEST_UNSAT([mxk.Equals(
+            mxk.LessThanEquals(mxk.Const('uint3', 4), mxk.Const('uint3', 1)),
+            true_)])
+        self._TEST_SAT([mxk.Equals(
+            mxk.LessThanEquals(mxk.Const('uint3', 1), mxk.Const('uint3', 2)),
+            true_)])
+        self._TEST_UNSAT([mxk.Equals(
+            mxk.LessThanEquals(mxk.Const('uint3', 1), mxk.Const('uint3', 2)),
+            false_)])
+        self._TEST_SAT([mxk.Equals(
+            mxk.LessThanEquals(mxk.Const('uint3', 2), mxk.Const('uint3', 2)),
+            true_)])
+        self._TEST_UNSAT([mxk.Equals(
+            mxk.LessThanEquals(mxk.Const('uint3', 2), mxk.Const('uint3', 2)),
+            false_)])
 
 #  def test_tseitin_logical_not(self):
 #    tseitin = mxk.Tseitin()

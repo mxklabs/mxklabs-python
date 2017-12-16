@@ -1,5 +1,8 @@
+from six.moves import reduce
+
+from mxklabs.expr.exprbase import Expr
 from mxklabs.expr.exprvisitor import ExprVisitor
-from mxklabs.utils import memoise
+from mxklabs.utils import memoise, Utils
 
 
 class VarExtractor(ExprVisitor):
@@ -10,12 +13,24 @@ class VarExtractor(ExprVisitor):
     @staticmethod
     def extract(expr):
         """
-        Return the variables used in an expression.
-        :param expr: The Expr object to evaluate.
+        Return the variables used in an expression (or list of expressions).
+        :param expr: The Expr object to evaluate or an iterable collection
+           of such Expr objects.
         :return: A set object containing Var objects.
         """
+        is_expr = isinstance(expr, Expr)
+        is_iterable_exprs = Utils.is_iterable(expr) and \
+            all([isinstance(e, Expr) for e in expr])
+
+        assert(is_expr or is_iterable_exprs)
+
         ee = VarExtractor()
-        return expr.visit(ee)
+        if is_expr:
+            return expr.visit(ee)
+        if is_iterable_exprs:
+            return reduce(lambda x,y: x.union(y),
+                          [e.visit(ee) for e in expr],
+                          set())
 
     def __init__(self):
         """
@@ -131,9 +146,6 @@ class VarExtractor(ExprVisitor):
         :param expr: An Expr object.
         :return: A set object containing variables used in expr.
         '''
-        result = set()
-
-        for child in expr.children():
-            result = result.union(child.visit(self))
-
-        return result
+        return reduce(lambda x,y: x.union(y),
+                      [child.visit(self) for child in expr.children()],
+                      set())
