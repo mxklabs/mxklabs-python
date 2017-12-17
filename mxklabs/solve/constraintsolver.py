@@ -154,13 +154,9 @@ class TseitinConstraintSolver(ConstraintSolver):
     # Solve CNF using our SAT solver.
     sat_result = sat_solver.solve(tseitin.dimacs())
 
-    #print('vars=' + str(vars))
-    print('cache=')
-    tseitin._cache.print()
+    self.logger("tseitin_clauses={}".format(len(tseitin.dimacs().clauses)))
+    self.logger("tseitin_variables={}".format(tseitin.dimacs().num_vars))
 
-    for clause in tseitin.dimacs().clauses:
-      print(clause)
-    
     # Convert the result.
     if sat_result == sat.SatSolver.RESULT_SAT:
       self.logger("SAT")

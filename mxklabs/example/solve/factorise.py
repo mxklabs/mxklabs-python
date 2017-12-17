@@ -1,6 +1,8 @@
 from __future__ import division
 from __future__ import print_function
 
+import sys
+
 import mxklabs as mxk
 
 def find_divisor(logger, n):
@@ -57,8 +59,8 @@ def find_divisor(logger, n):
     n_bit_length = n.bit_length()
     divisor_bit_length = (n_bit_length // 2) if (n_bit_length % 2) == 0 else (n_bit_length // 2) + 1
 
-    logger("N={}".format(n_bit_length))
-    logger("CEIL(N/2)={}".format(divisor_bit_length))
+    #logger("N={}".format(n_bit_length))
+    #logger("CEIL(N/2)={}".format(divisor_bit_length))
 
     # Const representing n and a variable for the divisor.
     n_typestr = 'uint%d' % n_bit_length
@@ -146,6 +148,7 @@ def find_prime_factors(logger, n):
         return {}
     else:
         divisor = find_divisor(logger, n)
+
         if divisor == None:
             return { n : 1 }
         else:
@@ -156,6 +159,7 @@ def find_prime_factors(logger, n):
                 if n in mapl.keys():
                     mapl[n] = mapl[n] + val
                 else:
+
                     mapl[n] = val
 
             return mapl
@@ -165,12 +169,15 @@ def run_example(logger):
     This example demonstrates how to factorise a 2048 bit number
     """
     #n = 22580116242535058188623517908541842633310092715854343846499796528769924223671807456607207419106621519588054730245966134358662000861657234814981687546213715297116993744190702405123601421779826894111197445944603613969124042229902202605182127458854328092374858429249966182880779471051954712334390750518196900438794893396809490213228123823764463452353363582030091984618564441824624833291389753934147982215735585974663924374055872463956337167613961791649759852314679564700205664568046040625039008367966025154382490947923562947778613745893443444809542921142924788398447884047063914104247152421812331793595144009461596199479
-    n = 10
 
-    find_divisor(logger, n)
+    if len(sys.argv) <= 1:
+        print("usage python factorise.py <n>")
+    else:
+        factors = find_prime_factors(logger, int(sys.argv[1]))
+        print(factors)
 
 if __name__ == '__main__':
-    run_example(logger=print)
+    run_example(logger=lambda msg: None)
 
 import unittest
 
