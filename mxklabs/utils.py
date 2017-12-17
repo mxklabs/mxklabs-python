@@ -1,5 +1,7 @@
+import atexit
 import inspect
 from itertools import tee
+import json
 import re
 
 # Compile these regexes once.
@@ -105,20 +107,76 @@ class Utils(object):
 ''' Memoise decorator. '''
 
 def memoise(function):
-
     """
-    You can use this function to memoise calls to the function (avoid repeat
-    calculations for the same parameter by storing them).
+    You can use this function as a decorator (a callable object that given
+    a function as a parameter returns another function) on other functions to
+    memoise calls to said function (i.e. avoid repeat calculations for the same
+    parameters by storing them in memory).
 
     NOTE: I'd have rather used functools.lru_cache to achieve memoisation but
     it's not available in Python 2.x. Instead we're using a custom implementation.
     """
-    stored_results = {}
+    cache = {}
     def memoise_wrapper(*args):
-        if args in stored_results:
-            return stored_results[args]
+        if args in cache:
+            return cache[args]
         else:
             result = function(*args)
-            stored_results[args] = result
+            cache[args] = result
             return result
     return memoise_wrapper
+
+
+def memoise_to_file(filename):
+    """
+    You can call this function with a filename parameter to generate a decorator
+    (a callable object that given a function as a parameter returns another
+    function) which can be placed on other functions to persistently memoise
+    calls to said function (i.e. avoid repeat calculations for the same
+    parameters by storing them in on disk).
+
+    The returned decorators implement persistent memoisation implemented by
+    dumping results to a JSON file. For this to work both parameters and return
+    values of function MUST be serialisable to JSON.
+    :param filename: The filename to cache stuff to.
+    :return: A memoising decorator function.
+    """
+    def decorator(function):
+
+        def load_cache_from_disk():
+            try:
+                cache = {}
+                cache_as_json = json.load(open(filename, 'r'))
+                for entry in cache_as_json:
+                    cache[tuple(entry['args'])] = entry['result']
+                return cache
+
+            except (IOError, ValueError):
+                return {}
+
+        def save_cache_to_disk(cache):
+            try:
+                cache_as_json = []
+                for params, value in cache.items():
+                    cache_as_json.append({'args': params, 'result': value})
+                json.dump(cache_as_json, open(filename, 'w'))
+            except (IOError, ValueError):
+                print("Unable to memoise '{}'".format(filename))
+
+        # Load from disk when decorator is generated.
+        cache = load_cache_from_disk()
+        # Save to disk on program exit.
+        atexit.register(lambda: save_cache_to_disk(cache))
+
+        def memoise_wrapper(*args):
+
+            if args not in cache:
+                result = function(*args)
+                cache[args] = result
+                return result
+
+            return cache[args]
+
+        return memoise_wrapper
+
+    return decorator
