@@ -1,5 +1,6 @@
 import abc
-import functools
+from functools import reduce
+from operator import xor
 
 import six
 
@@ -39,9 +40,8 @@ class Expr(object):
 
         self._expr_type = expr_type
         self._children = children
-
-        params = [self.node_str()] + [str(o) for o in children] + aux
-        self._str_rep = "({})".format(" ".join(params))
+        self._params = [self.node_str()] + list(children) + list(aux)
+        self._hash = None
 
     def node_str(self):
         """
@@ -67,7 +67,19 @@ class Expr(object):
         :return: True if strictly less than other.
         """
         Utils.check_precondition(isinstance(other, Expr))
-        return self._str_rep < other._str_rep
+
+        if len(self._params) != len(other._params):
+            return len(self._params) < len(other._params)
+        else:
+            for i in range(len(self._params)):
+                if self._params[i] < other._params[i]:
+                    return True
+                elif self._params[i] > other._params[i]:
+                    return False
+                else:
+                    continue
+
+            return False
 
     def __eq__(self, other):
         """
@@ -77,28 +89,39 @@ class Expr(object):
         :param other: The Expr object to compare to.
         :return: True if equal to other.
         """
-        return self._str_rep == other._str_rep
-  
+        if len(self._params) != len(other._params):
+            return False
+        else:
+            for i in range(len(self._params)):
+                if self._params[i] != other._params[i]:
+                    return False
+                else:
+                    continue
+
+            return True
+
     def __hash__(self):
         """
         Utility function to retrieve a hash value for this Expr object.
         :return: A hash value.
         """
-        return hash(self._str_rep)
+        if self._hash == None:
+            self._hash = reduce(xor, [hash(p) for p in self._params], 0)
+        return self._hash
 
     def __str__(self):
         """
         Utility function to retrieve a string representation of an Expr object.
         :return: A string representation.
         """
-        return self._str_rep
+        return "({})".format(" ".join([str(p) for p in self._params]))
 
     def __repr__(self):
         """
         Return a string representation of this Expr object.
         :return: A string representation.
         """
-        return self._str_rep
+        return "({})".format(" ".join([str(p) for p in self._params]))
 
     def child(self, index=0):
         """
