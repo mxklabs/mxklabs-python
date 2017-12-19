@@ -5,7 +5,7 @@ import sys
 
 import mxklabs as mxk
 
-def find_divisor(logger, n):
+def get_divisor_and_constraints(logger, n):
 
     constraints = []
 
@@ -56,8 +56,8 @@ def find_divisor(logger, n):
     # As a side note, note that one of the inequalities above only holds for
     # N>=3. However, we've checked CEIL(N/2) is sufficient for N<3 manually.
 
-    n_bit_length = n.bit_length()
-    divisor_bit_length = (n_bit_length // 2) if (n_bit_length % 2) == 0 else (n_bit_length // 2) + 1
+    divisor_bit_length = (n.bit_length() // 2) if (n.bit_length() % 2) == 0 else (n.bit_length() // 2) + 1
+    n_bit_length = n.bit_length() + max(0, divisor_bit_length - 2)
 
     #logger("N={}".format(n_bit_length))
     #logger("CEIL(N/2)={}".format(divisor_bit_length))
@@ -114,6 +114,12 @@ def find_divisor(logger, n):
     # Ensure the final remainder is 0!
     constr = mxk.Equals(remainder, mxk.Const(n_typestr, 0))
     constraints.append(constr)
+
+    return divisor, constraints
+
+def find_divisor(logger, n):
+
+    divisor, constraints = get_divisor_and_constraints(logger, n)
 
     # We're done! We got all the constraints. Let's use a constraint solver
     # to find an assignment to variables under which all constraints hold.
@@ -193,7 +199,10 @@ class Test_Factorise(unittest.TestCase):
         #self.assertEqual(DIVISOR(1), None)
         #self.assertEqual(DIVISOR(2), None)
         #self.assertEqual(DIVISOR(3), None)
-        self.assertIn(DIVISOR(4), [2])
+        #self.assertIn(DIVISOR(4), [2])
+        #self.assertIn(DIVISOR(6), [2, 3])
+        self.assertIn(DIVISOR(22), [2,11])
+
 
     def test_find_prime_factors(self):
 
