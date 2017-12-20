@@ -135,11 +135,14 @@ class BruteForceConstraintSolver(ConstraintSolver):
 '''
 class TseitinConstraintSolver(ConstraintSolver):
   
-  def __init__(self, sat_solver_type=sat.CryptoSatSolver, logger=lambda msg : print("@TseitinConstraintSolver: {msg}".format(msg=msg))):
+  def __init__(self, sat_solver_type=sat.CryptoSatSolver, logger=None,
+               stat_handler=None):
+
       if logger is None:
           logger = lambda msg: None
 
       self.sat_solver_type = sat_solver_type
+      self._stat_handler = stat_handler
       super(TseitinConstraintSolver, self).__init__(logger)
   
   def _solve_impl(self):
@@ -153,6 +156,10 @@ class TseitinConstraintSolver(ConstraintSolver):
     
     # Solve CNF using our SAT solver.
     sat_result = sat_solver.solve(tseitin.dimacs())
+
+    if self._stat_handler is not None:
+        self._stat_handler("num_clauses", len(tseitin.dimacs().clauses))
+        self._stat_handler("num_variables", tseitin.dimacs().num_vars)
 
     self.logger("tseitin_clauses={}".format(len(tseitin.dimacs().clauses)))
     self.logger("tseitin_variables={}".format(tseitin.dimacs().num_vars))
