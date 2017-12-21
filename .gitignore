@@ -1,7 +1,12 @@
 # Byte-compiled / optimized / DLL files
 __pycache__/
+py2venv/
+py3venv/
+.idea/
 *.py[cod]
 *$py.class
+*.cache
+*.out
 
 # Kate
 *.kate-swp
