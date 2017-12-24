@@ -149,7 +149,7 @@ class Z3SatSolver(SatSolver):
       self.logger("SAT")
       # Make callable satisfying assignment.
       model = z3_solver.model()
-      self._satisfying_assignment = lambda lit : bool(model[z3_vars[lit]])  
+      self._satisfying_assignment = lambda lit : bool(model[z3_vars[lit]])
       return SatSolver.RESULT_SAT
     elif z3_result == z3.unsat:
       self.logger("UNSAT")

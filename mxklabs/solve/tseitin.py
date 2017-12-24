@@ -71,7 +71,8 @@ class Tseitin(ExprVisitor):
         ''' Add a CNF clause. '''
 
         def add_clause(self, clause):
-            self._dimacs.clauses.append(clause)
+            if self.TRUE_LIT not in clause:
+                self._dimacs.clauses.append(clause)
 
         ''' Print cache. '''
 

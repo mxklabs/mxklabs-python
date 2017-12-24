@@ -16,9 +16,9 @@ class Test_Tseitin(unittest.TestCase):
         for c in constraints:
             t.add_constraint(c)
 
-        print('vars=' + str(vars))
-        print('cache=')
-        t._cache.print()
+        #print('vars=' + str(vars))
+        #print('cache=')
+        #t._cache.print()
 
         for clause in t.dimacs().clauses:
             print(clause)
