@@ -91,9 +91,12 @@ class CryptoSatSolver(SatSolver):
     
     # Create a SAT solver.
     pycryptosat_solver = pycryptosat.Solver()
-    
+
     # Move CNF to solver.
     for clause in self.dimacs.clauses:
+      for lit in clause:
+        print("%d " % lit, end="")
+        print("0 ", end="")
       pycryptosat_solver.add_clause(clause)
       
     # Get the SAT solver to do our dirty work.
