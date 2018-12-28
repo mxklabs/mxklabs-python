@@ -104,7 +104,7 @@ class DimacsParser(object):
           self.problem_statement_line = self.line_no
           self.problem_statement_num_vars_column = line_frags[2][1][0]+1
           self.problem_statement_num_clauses_column = line_frags[3][1][0]+1
-	  try:
+          try:
             num_vars = int(line_frags[2][0])
             try:
               num_clauses = int(line_frags[3][0])
@@ -149,7 +149,7 @@ class DimacsParser(object):
     result = []
     was_in_token = False
     token_start = None
-    for i in xrange(len(s)):
+    for i in range(len(s)):
       is_in_token = s[i] not in string.whitespace
       if not was_in_token and is_in_token:
         token_start = i
