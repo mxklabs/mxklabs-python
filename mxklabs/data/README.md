@@ -35,8 +35,8 @@ if __name__ == "__main__":
 | Object | Type |
 |---|---|
 | [`mxklabs.data.FileBackedCircularBuffer`](#mxklabs.data.FileBackedCircularBuffer) [[`link`](#mxklabs.data.FileBackedCircularBuffer)] | `object` |
-| [`mxklabs.data.FileBackedCircularBuffer`](#mxklabs.data.FileBackedCircularBuffer.add_record) [[`link`](#mxklabs.data.FileBackedCircularBuffer.add_record)] | `function` |
-| [`mxklabs.data.FileBackedCircularBuffer`](#mxklabs.data.FileBackedCircularBuffer.records) [[`link`](#mxklabs.data.FileBackedCircularBuffer.records)] | `function` |
+| [`mxklabs.data.FileBackedCircularBuffer.add_record`](#mxklabs.data.FileBackedCircularBuffer.add_record) [[`link`](#mxklabs.data.FileBackedCircularBuffer.add_record)] | `function` |
+| [`mxklabs.data.FileBackedCircularBuffer.records`](#mxklabs.data.FileBackedCircularBuffer.records) [[`link`](#mxklabs.data.FileBackedCircularBuffer.records)] | `function` |
  
 #### <a name="mxklabs.data.FileBackedCircularBuffer"></a> `mxklabs.data.FileBackedCircularBuffer(filename, max_number_of_records, record_size)`
 Creates a circular buffer object which uses `filename` as a backend to store data. The buffer
