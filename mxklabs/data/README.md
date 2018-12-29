@@ -13,20 +13,18 @@ Create a circular buffer for 10-byte objects with 1000 records
 and populate it with some strings. 
 
 ```python
-import mxklabs.data     
+import mxklabs.data
+  
+# Create non-volatile (backed by file) circular buffer.
+buffer = mxklabs.data.FileBackedCircularBuffer('filename.data', max_number_of_records=1000, record_size=10)
 
-if __name__ == "__main__":
-  
-  # Create non-volatile (backed by file) circular buffer.
-  buffer = mxklabs.data.FileBackedCircularBuffer('filename.data', max_number_of_records=1000, record_size=10)
-  
-  # Add some silly records.
-  buffer.add_record(bytes("foobar    ", 'utf-8'))
-  buffer.add_record(bytes("superman  ", 'utf-8'))
-  buffer.add_record(bytes("christmas ", 'utf-8'))
-  
-  # Print all records from oldest to newest.
-  for record in buffer.records():
+# Add some silly records.
+buffer.add_record(bytes("foobar    ", 'utf-8'))
+buffer.add_record(bytes("superman  ", 'utf-8'))
+buffer.add_record(bytes("christmas ", 'utf-8'))
+
+# Print all records from oldest to newest.
+for record in buffer.records():
     print(str(record))
 ```
 
