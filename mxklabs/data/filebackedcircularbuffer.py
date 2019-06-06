@@ -21,6 +21,8 @@ class FileBackedCircularBuffer(object):
             with open(self._filename, 'rb') as file:
                 file.seek(0, 2) # seek end of the file
                 size = file.tell()
+                if size != self._filesize:
+                    print("error: expected filesize '{}', actual filesize '{}'".format(self._filesize, size))
                 assert(size == self._filesize)
         else:
             # File doesn't exist. Create it with index 0.
