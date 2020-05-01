@@ -7,6 +7,11 @@ format is the 'de facto' standard for Boolean formulas in
 
 Read more about mxklabs.dimacs [`here`](mxklabs/dimacs/README.md).
 
+## <a name="mxklabs.rsa">mxklabs.rsa
+A python 3 module for decoding OpenSSH RSA certificates.
+
+Read more about mxklabs.rsa [`here`](mxklabs/rsa/README.md).
+
 ## <a name="mxklabs.data">mxklabs.data
 A work-in-progress python 3 module for data classes we find 
 useful. Currently the only data class in this module is a 

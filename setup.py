@@ -11,4 +11,8 @@ setup(
   keywords = ['mxklabs', 'mxklabs.data', 'mxklabs.sat', 'DIMACS', 'SAT',
               'satisfiability', 'CNF', 'circular', 'buffer', 'persistent'],
   classifiers = [],
+  include_package_data=True,
+  install_requires=[
+    'asn1tools'
+  ]
 )
