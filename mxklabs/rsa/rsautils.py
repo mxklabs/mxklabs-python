@@ -1,5 +1,6 @@
 import asn1tools
 import base64 
+import decimal
 import os
 import struct
 
@@ -22,7 +23,7 @@ class RsaUtils:
     return chunk, remaining_binary_data
 
   @staticmethod
-  def publicKeyFromFile(filename):
+  def public_key_from_file(filename):
     """ Extract public key file contents as a dictionary. """
 
     # Read file and extract base64.
@@ -42,7 +43,7 @@ class RsaUtils:
     return { 'publicExponent': public_exponent, 'modulus' : modulus }
 
   @staticmethod
-  def privateKeyFromFile(filename):
+  def private_key_from_file(filename):
     """ Extract private key file contents as a dictionary. """
 
     # Read the file.
@@ -53,3 +54,11 @@ class RsaUtils:
 
     # Decode the ASN.1.
     return RsaUtils._asn1_parser.decode('RSAPrivateKey', binary_data)
+
+  @staticmethod
+  def get_rounded_sqrt(num, rounding):
+    """ Calculate square roots of large integers. """
+    deci = decimal.Decimal(num)
+    with decimal.localcontext() as ctx:
+      ctx.prec = num.bit_length()
+      return int(deci.sqrt().to_integral_exact(rounding=rounding))

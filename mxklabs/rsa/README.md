@@ -13,8 +13,8 @@ Convert a private or public key file into a dictionary.
 import mxklabs.rsa as mxkrsa
 
 # Decode the key files.
-id_rsa = mxkrsa.RsaUtils.privateKeyFromFile('id_rsa')
-id_rsa_pub = mxkrsa.RsaUtils.publicKeyFromFile('id_rsa.pub')
+id_rsa = mxkrsa.RsaUtils.private_key_from_file('id_rsa')
+id_rsa_pub = mxkrsa.RsaUtils.public_key_from_file('id_rsa.pub')
 
 print(id_rsa)
 print(id_rsa_pub)
@@ -43,13 +43,54 @@ The idea is that you try and factorise `modulus` into prime factors. The prime f
 Note that the benchmark repository includes at least one modulus with bit-length *n* for all even *n* in [8, 2048] and, as per `OpenSSH` keys, the bit length of both primes is always *exactly
 half* that of the modulus.
 
+### RsaEvalTool: Example
+Use our tool to see how your factorisation algorithm performs over
+benchmarks of increasing bit lengths. Any call taking longer than 
+a specified timeout will automatically be terminated because our
+evaluation tool runs your function in a separate process.
+
+```python
+import mxklabs.rsa as mxkrsa
+import matplotlib.pyplot as plt
+
+def naive_factorisation(modulus, callback):
+  """ Replace this with your state-of-the-art implementation. """
+  for p in range(3,modulus):
+    if modulus % p == 0:
+      result = p
+      # Once you have found the factors, return by calling the
+      # callback with the first argument being the prime factor
+      # you found and the second argument being a dictionary of
+      # diagnostic values you want to keep track of (see below).
+      return callback(result, {'number-of-iterations': p - 3 + 1})
+
+# Do the evaluation over a bunch of benchmarks.
+eval_tool = mxkrsa.RsaEvalTool()
+results = eval_tool.evaluate(naive_factorisation, timeout=10)
+
+# Get the results as lists of values.
+field0 = results.get_values('benchmark-id')
+field1 = results.get_values('modulus')
+field2 = results.get_values('modulus-sqrt')
+field3 = results.get_values('modulus-bit-length')
+field4 = results.get_values('run-time')
+# You can get your custom values back here.
+custom0 = results.get_values('number-of-iterations')
+
+# Plot the results.
+plt.title('Results for \'Naive Factorisation Function\'')
+plt.plot(field3, field4, label='modulus bit length vs run time')
+```
+
+If your algorithm gets to the 2048-bit benchmark come and find me -- I'll buy you a Twix.
+
 ### RsaUtils: API Summary
 
 | Object | Type |
 |---|---|
 | [`mxklabs.rsa.RsaUtils`](#mxklabs.rsa.RsaUtils) [[`link`](#mxklabs.rsa.RsaUtils)] | `object` |
-| [`mxklabs.rsa.RsaUtils.privateKeyFromFile`](#mxklabs.rsa.RsaUtils.privateKeyFromFile) [[`link`](#mxklabs.rsa.RsaUtils.privateKeyFromFile)] | `function` |
-| [`mxklabs.rsa.RsaUtils.publicKeyFromFile`](#mxklabs.rsa.RsaUtils.publicKeyFromFile) [[`link`](#mxklabs.rsa.RsaUtils.publicKeyFromFile)] | `function` |
+| [`mxklabs.rsa.RsaUtils.private_key_from_file`](#mxklabs.rsa.RsaUtils.private_key_from_file) [[`link`](#mxklabs.rsa.RsaUtils.private_key_from_file)] | `function` |
+| [`mxklabs.rsa.RsaUtils.public_key_from_file`](#mxklabs.rsa.RsaUtils.public_key_from_file) [[`link`](#mxklabs.rsa.RsaUtils.public_key_from_file)] | `function` || [`mxklabs.rsa.RsaUtils.public_key_from_file`](#mxklabs.rsa.RsaUtils.public_key_from_file) [[`link`](#mxklabs.rsa.RsaUtils.public_key_from_file)] | `function` |
 | [`mxklabs.rsa.RsaBenchmark`](#mxklabs.rsa.RsaBenchmark) [[`link`](#mxklabs.rsa.RsaBenchmark)] | `object` | 
 | [`mxklabs.rsa.RsaBenchmarkRepository`](#mxklabs.rsa.RsaBenchmarkRepository) [[`link`](#mxklabs.rsa.RsaBenchmarkRepository)] | `object` |
 
@@ -57,12 +98,12 @@ half* that of the modulus.
 #### <a name="mxklabs.rsa.RsaUtils"></a> `mxklabs.rsa.RsaUtils`
 There is no need to instantiate `RsaUtils` at the moment because all it's methods are static.
 
-#### <a name="mxklabs.rsa.RsaUtils.privateKeyFromFile"></a> `mxklabs.data.rsa.RsaUtils.privateKeyFromFile(self, filename)`
+#### <a name="mxklabs.rsa.RsaUtils.private_key_from_file"></a> `mxklabs.data.rsa.RsaUtils.private_key_from_file(self, filename)`
 Takes the name of a private key filename and produces a dictionary with the following fields: `coefficient`, `exponent1`, 
  `exponent2`, `modulus`, `prime1`, `prime2`, `privateExponent`, 
  `publicExponent` and `version`.
 
-#### <a name="mxklabs.rsa.RsaUtils.publicKeyFromFile"></a> `mxklabs.data.rsa.RsaUtils.publicKeyFromFile(self, filename)`
+#### <a name="mxklabs.rsa.RsaUtils.public_key_from_file"></a> `mxklabs.data.rsa.RsaUtils.public_key_from_file(self, filename)`
 Takes the name of a public key filename and produces a dictionary with the following fields: `modulus`, `publicExponent`.
 
 #### <a name="mxklabs.rsa.RsaBenchmark"></a> `mxklabs.rsa.RsaBenchmark`
