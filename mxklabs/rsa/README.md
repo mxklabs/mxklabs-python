@@ -6,9 +6,8 @@ A work-in-progress python 3 module for decoding `openssh` RSA certificates (the 
 pip install mxklabs
 ```
 
-### Example
-Create a circular buffer for 10-byte objects with 1000 records
-and populate it with some strings. 
+### RsaUtils: Example
+Convert a private or public key file into a dictionary.
 
 ```python
 import mxklabs.rsa as mxkrsa
@@ -21,14 +20,39 @@ print(id_rsa)
 print(id_rsa_pub)
 ```
 
-### API Summary
+### RsaBenchmarkRepository: Example
+Load some benchmarks you can use to compare your integer factorisation functions. 
+
+```python
+import mxklabs.rsa as mxkrsa
+
+# Instantiate the benchmark repository.
+repo = mxkrsa.RsaBenchmarkRepository()
+
+# Print out the benchmarks.
+for benchmark in repo:
+  print('-'*80)
+  print(f"  id={benchmark.id}")
+  print(f"  modulus={benchmark.modulus} ({benchmark.modulus.bit_length()} bits)")
+  print(f"  prime1={benchmark.prime1} ({benchmark.prime1.bit_length()} bits)")
+  print(f"  prime2={benchmark.prime2} ({benchmark.prime2.bit_length()} bits)")
+```
+
+The idea is that you try and factorise `modulus` into prime factors. The prime factors, `prime1` and `prime2` are also included in the benchmark for verification purposes.
+
+Note that the benchmark repository includes at least one modulus with bit-length *n* for all even *n* in [8, 2048] and, as per `OpenSSH` keys, the bit length of both primes is always *exactly
+half* that of the modulus.
+
+### RsaUtils: API Summary
 
 | Object | Type |
 |---|---|
 | [`mxklabs.rsa.RsaUtils`](#mxklabs.rsa.RsaUtils) [[`link`](#mxklabs.rsa.RsaUtils)] | `object` |
 | [`mxklabs.rsa.RsaUtils.privateKeyFromFile`](#mxklabs.rsa.RsaUtils.privateKeyFromFile) [[`link`](#mxklabs.rsa.RsaUtils.privateKeyFromFile)] | `function` |
 | [`mxklabs.rsa.RsaUtils.publicKeyFromFile`](#mxklabs.rsa.RsaUtils.publicKeyFromFile) [[`link`](#mxklabs.rsa.RsaUtils.publicKeyFromFile)] | `function` |
- 
+| [`mxklabs.rsa.RsaBenchmark`](#mxklabs.rsa.RsaBenchmark) [[`link`](#mxklabs.rsa.RsaBenchmark)] | `object` | 
+| [`mxklabs.rsa.RsaBenchmarkRepository`](#mxklabs.rsa.RsaBenchmarkRepository) [[`link`](#mxklabs.rsa.RsaBenchmarkRepository)] | `object` |
+
 
 #### <a name="mxklabs.rsa.RsaUtils"></a> `mxklabs.rsa.RsaUtils`
 There is no need to instantiate `RsaUtils` at the moment because all it's methods are static.
@@ -38,5 +62,27 @@ Takes the name of a private key filename and produces a dictionary with the foll
  `exponent2`, `modulus`, `prime1`, `prime2`, `privateExponent`, 
  `publicExponent` and `version`.
 
-#### <a name="mxklabs.rsa.RsaUtils.records"></a> `mxklabs.data.FileBackedCircularBuffer.records(self)`
-Takes the name of a public key filename and produces a dictionary with the following fields: `modulus` and `publicExponent`.
+#### <a name="mxklabs.rsa.RsaUtils.publicKeyFromFile"></a> `mxklabs.data.rsa.RsaUtils.publicKeyFromFile(self, filename)`
+Takes the name of a public key filename and produces a dictionary with the following fields: `modulus`, `publicExponent`.
+
+#### <a name="mxklabs.rsa.RsaBenchmark"></a> `mxklabs.rsa.RsaBenchmark`
+An <a name="mxklabs.rsa.RsaBenchmark">`RsaBenchmark`</a> object represents an RSA integer factorisation challenge and is an object with the following attributes:
+
+| Object | Type | Description |
+|---|---|---|
+| id | 'string' | A unique identifier. |
+| modulus | 'int' | The RSA modulus. |
+| prime1 | 'int' | The smallest prime factor of the modulus. | 
+| prime2 | 'int' | The largest prime factor of the modulus. | 
+
+a string attribute `id` and integer attributes `modulus`, `prime1` and `prime2` representing a benchmark RSA certificate of a certain bit length. The integers have the following properties:
+* `prime1` and `prime2` are prime numbers
+* `prime1` is less than or equal to `prime2`
+* `modulus` equals `prime1*prime2`
+* `modulus.bit_length()` equals `2*prime1.bit_length()`
+* `modulus.bit_length()` equals `2*prime2.bit_length()`
+
+As an end-user, you don't instantiate <a name="mxklabs.rsa.RsaBenchmark">`RsaBenchmark`</a> objects yourself; you obtain them via a <a name="mxklabs.rsa.RsaBenchmarkRepository">`RsaBenchmarkRepository`</a> instance.
+
+#### <a name="mxklabs.rsa.RsaBenchmarkRepository"></a> `mxklabs.rsa.RsaBenchmarkRepository`
+You can instantiate <a name="mxklabs.rsa.RsaBenchmarkRepository">RsaBenchmarkRepository</a> without any argument and subsequently use it as an iterator over <a name="mxklabs.rsa.RsaBenchmark">`RsaBenchmark`</a> instances of increasing difficulty.
