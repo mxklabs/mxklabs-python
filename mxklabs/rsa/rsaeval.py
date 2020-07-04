@@ -22,21 +22,25 @@ class RsaEvalTool:
   DEFAULT_TIMEOUT = 10.0
 
   def __init__(self):
-    self._benchmark_repo = mxklabs.rsa.RsaBenchmarkRepository()
+    pass
 
-  def evaluate(self, fun, timeout=DEFAULT_TIMEOUT):
+  def evaluate(self, fun, benchmarks=None, timeout=DEFAULT_TIMEOUT, verbose=False):
     """ Evaluate a factorisation function. """
     results = []
-    for benchmark in self._benchmark_repo:
+    if benchmarks is None:
+      benchmarks = mxklabs.rsa.RsaBenchmarkRepository.all()
+    for benchmark in benchmarks:
       try:
         result = self.evaluate_benchmark(fun, benchmark, float(timeout))
-        self._print_result(result)
+        if verbose:
+          self._print_result(result)
         results.append(result)
       except TimeoutError:
         print(f"[TIME OUT AFTER {int(timeout):d}s]")
+        break
     return RsaEvalResult(results)
 
-  def evaluate_benchmark(self, fun, benchmark, timeout):
+  def evaluate_benchmark(self, fun, benchmark, timeout=DEFAULT_TIMEOUT, verbose=False):
     """ Run a function with prototype fun(modulus, callback)
         in a multiprocess which times out if it takes too long.
     """
