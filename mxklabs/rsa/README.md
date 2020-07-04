@@ -66,20 +66,20 @@ def naive_factorisation(modulus, callback):
 
 # Do the evaluation over a bunch of benchmarks.
 eval_tool = mxkrsa.RsaEvalTool()
-results = eval_tool.evaluate(naive_factorisation, timeout=10)
+results = eval_tool.evaluate(naive_factorisation, timeout=10, verbose=True)
 
 # Get the results as lists of values.
-field0 = results.get_values('benchmark-id')
-field1 = results.get_values('modulus')
-field2 = results.get_values('modulus-sqrt')
-field3 = results.get_values('modulus-bit-length')
-field4 = results.get_values('run-time')
+benchmark_ids = results.get_values('benchmark-id')
+moduli = results.get_values('modulus')
+moduli_sqrts = results.get_values('modulus-sqrt')
+moduli_bit_lengths = results.get_values('modulus-bit-length')
+run_times = results.get_values('run-time')
 # You can get your custom values back here.
-custom0 = results.get_values('number-of-iterations')
+num_iterations = results.get_values('number-of-iterations')
 
 # Plot the results.
 plt.title('Results for \'Naive Factorisation Function\'')
-plt.plot(field3, field4, label='modulus bit length vs run time')
+plt.scatter(moduli_bit_lengths, run_times, marker='+', label='modulus bit length vs run time')
 ```
 
 If your algorithm gets to the 2048-bit benchmark come and find me -- I'll buy you a Twix.
