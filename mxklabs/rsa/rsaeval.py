@@ -24,14 +24,14 @@ class RsaEvalTool:
   def __init__(self):
     pass
 
-  def evaluate(self, fun, benchmarks=None, timeout=DEFAULT_TIMEOUT, verbose=False):
+  def evaluate(self, fun, benchmarks=None, timeout=DEFAULT_TIMEOUT, verify=True, verbose=False):
     """ Evaluate a factorisation function. """
     results = []
     if benchmarks is None:
       benchmarks = mxklabs.rsa.RsaBenchmarkRepository.all()
     for benchmark in benchmarks:
       try:
-        result = self.evaluate_benchmark(fun, benchmark, float(timeout))
+        result = self.evaluate_benchmark(fun, benchmark, float(timeout), verify=verify, verbose=verbose)
         if verbose:
           self._print_result(result)
         results.append(result)
@@ -40,7 +40,7 @@ class RsaEvalTool:
         break
     return RsaEvalResult(results)
 
-  def evaluate_benchmark(self, fun, benchmark, timeout=DEFAULT_TIMEOUT, verbose=False):
+  def evaluate_benchmark(self, fun, benchmark, timeout=DEFAULT_TIMEOUT, verify=True, verbose=False):
     """ Run a function with prototype fun(modulus, callback)
         in a multiprocess which times out if it takes too long.
     """
@@ -69,8 +69,9 @@ class RsaEvalTool:
       assert not queue.empty()
       res, stats = queue.get()
 
-      assert(modulus % res == 0)
-      assert(res == benchmark.prime1 or res == benchmark.prime2)
+      if verify:
+        assert(modulus % res == 0)
+        assert(res == benchmark.prime1 or res == benchmark.prime2)
 
       log = collections.OrderedDict()
       log['benchmark-id'] = benchmark.id
