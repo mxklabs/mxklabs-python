@@ -12,7 +12,7 @@ class RsaUtils:
   _asn1_parser = asn1tools.compile_files(_asn1_filename)
 
   @staticmethod
-  def _getChunk(binary_data):
+  def _get_chunk(binary_data):
     """ Convenience function for extracting a field. """
 
     # Get the first four bytes to see how big the field is.
@@ -32,12 +32,12 @@ class RsaUtils:
     binary_data = base64.b64decode(file_parts[1])
 
     # Discard the key type.
-    _, binary_data = RsaUtils._getChunk(binary_data)
+    _, binary_data = RsaUtils._get_chunk(binary_data)
     # Get the public exponent.
-    public_exponent_as_bytes, binary_data = RsaUtils._getChunk(binary_data)
+    public_exponent_as_bytes, binary_data = RsaUtils._get_chunk(binary_data)
     public_exponent = int.from_bytes(public_exponent_as_bytes, byteorder='big')
     # Get the modulus.
-    modulus_as_bytes, binary_data = RsaUtils._getChunk(binary_data)
+    modulus_as_bytes, binary_data = RsaUtils._get_chunk(binary_data)
     modulus = int.from_bytes(modulus_as_bytes, byteorder='big')
 
     return { 'publicExponent': public_exponent, 'modulus' : modulus }
