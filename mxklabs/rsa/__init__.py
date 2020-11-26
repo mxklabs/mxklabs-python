@@ -1,3 +1,3 @@
-from mxklabs.rsa.rsautils import RsaUtils
-from mxklabs.rsa.rsaeval import RsaEvalTool
-from mxklabs.rsa.benchmarks import RsaBenchmarkRepository, RsaBenchmark
+from .rsautils import RsaUtils
+from .rsaeval import RsaEvalTool
+from .benchmarks import RsaBenchmarkRepository, RsaBenchmark

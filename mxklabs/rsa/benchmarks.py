@@ -1,6 +1,6 @@
 import collections
 
-import mxklabs.rsa.benchmarks_gen as benchmarks_gen
+from .benchmarks_gen import RSA_BENCHMARKS
 
 class RsaBenchmark:
   def __init__(self, bit_length, id, prime1, prime2):
@@ -19,14 +19,14 @@ class RsaBenchmarkRepository:
   @staticmethod
   def all():
     """ Yield all available benchmarks. """
-    benchmarks = [RsaBenchmark(**kwargs) for kwargs in benchmarks_gen.RSA_BENCHMARKS]
+    benchmarks = [RsaBenchmark(**kwargs) for kwargs in RSA_BENCHMARKS]
     for benchmark in benchmarks:
       yield benchmark
 
   @staticmethod
   def sharded(max_benchmarks_for_each_bit_length=1):
     """ Only yield up to a specified maximum of benchmarks for each bit length. """
-    benchmarks = [RsaBenchmark(**kwargs) for kwargs in benchmarks_gen.RSA_BENCHMARKS]
+    benchmarks = [RsaBenchmark(**kwargs) for kwargs in RSA_BENCHMARKS]
     last_bit_length = 0
     count = 0
     for benchmark in benchmarks:

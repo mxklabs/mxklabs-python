@@ -1,1 +1,1 @@
-from mxklabs.data.filebackedcircularbuffer import FileBackedCircularBuffer
+from .filebackedcircularbuffer import FileBackedCircularBuffer
