@@ -1,0 +1,21 @@
+{
+  "valueType" : "bool",
+  "exprDefs" :
+  [
+    {
+      "id" : "logical_not",
+      "minOps" : 1,
+      "maxOps" : 1
+    },
+    {
+      "id" : "logical_and",
+      "minOps" : 2,
+      "maxOps" : null
+    },
+    {
+      "id" : "logical_or",
+      "minOps" : 2,
+      "maxOps" : null
+    }
+  ]
+}
