@@ -1,7 +1,10 @@
 import json
 import os
 
-_exprdefs_file = os.path.join(os.path.dirname(__file__), 'exprdefs.json')
+from .semantics import *
 
-with open(_exprdefs_file, 'r') as defs:
-  exprdefs = json.loads(defs.read())
+_exprdescrs_file = os.path.join(os.path.dirname(__file__), 'exprdescrs.json')
+
+with open(_exprdescrs_file, 'r') as descrs:
+  exprdescrs = json.loads(descrs.read())
+

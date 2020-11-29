@@ -4,6 +4,7 @@ import pytest
 def test_evaluate_and():
   ctx = mxklabs.expr.ExprContext()
 
+
   a = ctx.prop.variable(name="a")
   b = ctx.prop.variable(name="b")
   c = ctx.prop.logical_and(a, b)
