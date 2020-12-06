@@ -3,7 +3,7 @@ from ..valtype import ValType
 class Bool(ValType):
 
   def __init__(self):
-    ValType.__init__(self, id='bool')
+    ValType.__init__(self, ident='bool')
 
   def value_to_str(self, value):
     if value:

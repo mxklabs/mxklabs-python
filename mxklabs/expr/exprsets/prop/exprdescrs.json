@@ -5,19 +5,19 @@
   "exprDescrs" :
   [
     {
-      "id" : "logical_not",
+      "ident" : "logical_not",
       "minOps" : 1,
       "maxOps" : 1,
       "attrs" : []
     },
     {
-      "id" : "logical_and",
+      "ident" : "logical_and",
       "minOps" : 2,
       "maxOps" : null,
       "attrs" : []
     },
     {
-      "id" : "logical_or",
+      "ident" : "logical_or",
       "minOps" : 2,
       "maxOps" : null,
       "attrs" : []

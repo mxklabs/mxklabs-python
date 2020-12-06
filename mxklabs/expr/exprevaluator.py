@@ -12,12 +12,12 @@ class ExprEvaluator:
 
     @functools.lru_cache(maxsize=None)
     def eval(self, expr):
-      if expr.id == 'variable':
+      if expr.ident == 'variable':
         return self.varmap[expr]
       else:
         # Evaluate expr's ops.
         opvals = [self.eval(op) for op in expr.ops]
         # Get the function to evaluate op.
-        semantics_fun = getattr(expr.exprset.semantics, expr.id)
+        semantics_fun = getattr(expr.exprset.semantics, expr.ident)
         # Evaluate it.
-        return semantics_fun(opvals)
+        return semantics_fun(*opvals)
