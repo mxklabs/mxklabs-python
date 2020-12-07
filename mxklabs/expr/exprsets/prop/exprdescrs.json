@@ -1,7 +1,9 @@
-{
-  "dependencies" : [],
+{ 
   "valTypes" : ["mxklabs.expr.valtypes.bool"],
   "varType" : "mxklabs.expr.valtypes.bool",
+  "mappings" : {
+    "mapping_cnf" : ["mxklabs.expr.exprsets.cnf"]
+  },
   "exprDescrs" :
   [
     {
@@ -17,9 +19,39 @@
       "attrs" : []
     },
     {
+      "ident" : "logical_nand",
+      "minOps" : 2,
+      "maxOps" : null,
+      "attrs" : []
+    },
+    {
       "ident" : "logical_or",
       "minOps" : 2,
       "maxOps" : null,
+      "attrs" : []
+    },
+    {
+      "ident" : "logical_nor",
+      "minOps" : 2,
+      "maxOps" : null,
+      "attrs" : []
+    },
+    {
+      "ident" : "logical_xor",
+      "minOps" : 2,
+      "maxOps" : 2,
+      "attrs" : []
+    },
+    {
+      "ident" : "logical_xnor",
+      "minOps" : 2,
+      "maxOps" : 2,
+      "attrs" : []
+    },
+    {
+      "ident" : "implies",
+      "minOps" : 2,
+      "maxOps" : 2,
       "attrs" : []
     }
   ]

@@ -68,4 +68,20 @@ def test_expr_pool():
   not2 = ctx.prop.logical_not(a1)
   assert(id(a1) != id(not2))
   assert(id(not1) == id(not2))
-  
+
+def test_expr_transform():
+  ctx1 = mxklabs.expr.ExprContext(load_mxklabs_exprsets=False)
+  ctx1.load_exprset("mxklabs.expr.exprsets.prop")
+
+  a = ctx1.prop.variable(name="a")
+  b = ctx1.prop.variable(name="b")
+  expr = ctx1.prop.logical_or(a, b)
+
+  ctx2 = mxklabs.expr.ExprContext(load_mxklabs_exprsets=False)
+  ctx2.load_exprset("mxklabs.expr.exprsets.cnf")
+
+  #ctx_mapping = ctx1.map_onto(ctx2)
+
+
+
+

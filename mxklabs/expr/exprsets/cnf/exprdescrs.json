@@ -1,0 +1,26 @@
+{
+  "valTypes" : ["mxklabs.expr.valtypes.bool"],
+  "varType" : "mxklabs.expr.valtypes.bool",
+  "mappings" : {},
+  "exprDescrs" :
+  [
+    {
+      "ident" : "logical_not",
+      "minOps" : 1,
+      "maxOps" : 1,
+      "attrs" : []
+    },
+    {
+      "ident" : "logical_and",
+      "minOps" : 2,
+      "maxOps" : null,
+      "attrs" : []
+    },
+    {
+      "ident" : "logical_or",
+      "minOps" : 2,
+      "maxOps" : null,
+      "attrs" : []
+    }
+  ]
+}

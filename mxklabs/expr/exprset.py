@@ -57,7 +57,7 @@ class ExprSet:
     return self.ctx.make_expr(exprset=self, ident=exprdescr['ident'], ops=ops, attrs=attrs)
 
   def load_semantics(self):
-    self.semantics = Semantics()
+    self.semantics = self._module.semantics.Semantics(ctx=self)
     for exprdescr in self._module.exprdescrs['exprDescrs']:
-      fun = getattr(self._module.semantics, exprdescr['ident'])
-      setattr(self.semantics, exprdescr['ident'], lambda *opvals, fun=fun : fun(*opvals))
+      if not hasattr(self.semantics, exprdescr['ident']):
+        raise RuntimeError(f"no semantics found for '{self.short_name}.{exprdescr['ident']}'")
