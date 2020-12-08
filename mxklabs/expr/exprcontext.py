@@ -20,17 +20,17 @@ class ExprContext:
       exprsets = self._get_mxklabs_exprsets()
       for exprset in exprsets:
         exprset = self.load_exprset(exprset)
-        self.exprsets[exprset.ident] = exprset
+        self.exprsets[exprset.id] = exprset
 
-  def load_valtype(self, ident):
-    if ident not in self.valtypes:
-      logger.info(f'Loading valtype \'{ident}\'')
-      module = importlib.import_module(ident)
+  def load_valtype(self, id):
+    if id not in self.valtypes:
+      logger.info(f'Loading valtype \'{id}\'')
+      module = importlib.import_module(id)
       valtype = ValType(ctx=self,
-        ident=ident,
-        short_name=self._id_to_short_name(ident),
+        id=id,
+        short_name=self._id_to_short_name(id),
         module=module)
-      self.valtypes[ident] = valtype
+      self.valtypes[id] = valtype
 
   def load_exprset(self, id_):
     """
@@ -52,7 +52,7 @@ class ExprContext:
     short_name = self._id_to_short_name(id_)
     exprset = ExprSet(
       ctx=self,
-      ident=id_,
+      id=id_,
       short_name=short_name,
       module=module)
 
@@ -61,7 +61,7 @@ class ExprContext:
     setattr(self, short_name, exprset)
 
     # Load valtypes.
-    for valtype in module.exprdescrs["valTypes"]:
+    for valtype in module.definition["valTypes"]:
       self.load_valtype(valtype)
 
     return exprset
@@ -74,7 +74,7 @@ class ExprContext:
     if name in self.vars.keys():
       raise RuntimeError(f"variable with name '{name}' already exists in this context")
     else:
-      expr = Expr(ctx=self, exprset=None, ident="variable", ops=[], attrs={"name":name})
+      expr = Expr(ctx=self, exprset=None, id="variable", ops=[], attrs={"name":name})
       self.vars[name] = valtype
       return self.exprpool.make_unique(expr)
 
@@ -83,15 +83,15 @@ class ExprContext:
     # TODO: Use an expression pool to avoid duplicate values.
     return self.exprpool.make_unique(expr)
 
-  def _id_to_short_name(self, ident):
-    if '.' in ident:
-      return ident[ident.rfind('.')+1:]
+  def _id_to_short_name(self, id):
+    if '.' in id:
+      return id[id.rfind('.')+1:]
     else:
-      return ident
+      return id
 
   def _get_mxklabs_exprsets(self):
     exprsets_dir = os.path.join(os.path.dirname(__file__), "exprsets")
     ids = [e for e in os.listdir(exprsets_dir)
         if os.path.isdir(os.path.join(exprsets_dir, e)) and not e.startswith('_')]
-    return [f"mxklabs.expr.exprsets.{ident}" for ident in ids]
+    return [f"mxklabs.expr.exprsets.{id}" for id in ids]
 

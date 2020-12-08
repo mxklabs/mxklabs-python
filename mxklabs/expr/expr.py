@@ -4,10 +4,10 @@ import functools
 
 class Expr:
 
-  def __init__(self, ctx, exprset, ident, ops, attrs):
+  def __init__(self, ctx, exprset, id, ops, attrs):
     self.ctx = ctx
     self.exprset = exprset
-    self.ident = ident
+    self.id = id
     self.ops = ops
     self.attrs = attrs
     self._hash = None
@@ -18,7 +18,7 @@ class Expr:
 
     hash_items = []
     hash_items.append(self.exprset)
-    hash_items.append(self.ident)
+    hash_items.append(self.id)
     hash_items += self.ops
     hash_items += self.attrs.keys()
     hash_items += self.attrs.values()
@@ -29,7 +29,7 @@ class Expr:
   @functools.lru_cache(maxsize=1000)
   def __eq__(self, rhs):
     return self.exprset == rhs.exprset and \
-           self.ident == rhs.ident and \
+           self.id == rhs.id and \
            self.ops == rhs.ops and \
            self.attrs == rhs.attrs
 

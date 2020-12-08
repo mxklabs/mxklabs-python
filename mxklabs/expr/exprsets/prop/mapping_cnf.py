@@ -11,7 +11,7 @@ class Mapping:
     pass
 
   def map_valtype(self, valtype):
-    assert(valtype.ident == 'mxklabs.expr.valtypes.bool')
+    assert(valtype.id == 'mxklabs.expr.valtypes.bool')
 
 
   def logical_not(self, expr, mapped_op):

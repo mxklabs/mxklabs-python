@@ -1,23 +1,27 @@
 {
   "valTypes" : ["mxklabs.expr.valtypes.bool"],
   "varType" : "mxklabs.expr.valtypes.bool",
-  "mappings" : {},
-  "exprDescrs" :
+  "semantics" : "semantics.Semantics",
+  "inputValidation" : "semantics.InputValidation",
+  "typeInference" : "semantics.TypeInference",
+  "mappings" : {
+  },
+  "expressions" :
   [
     {
-      "ident" : "logical_not",
+      "id" : "logical_not",
       "minOps" : 1,
       "maxOps" : 1,
       "attrs" : []
     },
     {
-      "ident" : "logical_and",
+      "id" : "logical_and",
       "minOps" : 2,
       "maxOps" : null,
       "attrs" : []
     },
     {
-      "ident" : "logical_or",
+      "id" : "logical_or",
       "minOps" : 2,
       "maxOps" : null,
       "attrs" : []

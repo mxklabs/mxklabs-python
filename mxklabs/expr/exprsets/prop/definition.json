@@ -1,55 +1,58 @@
 { 
   "valTypes" : ["mxklabs.expr.valtypes.bool"],
   "varType" : "mxklabs.expr.valtypes.bool",
+  "semantics" : "semantics.Semantics",
+  "inputValidation" : "semantics.InputValidation",
+  "typeInference" : "semantics.TypeInference",
   "mappings" : {
-    "mapping_cnf" : ["mxklabs.expr.exprsets.cnf"]
+    "semantics.PropToCnfMapping": ["mxklabs.expr.exprsets.cnf"]
   },
-  "exprDescrs" :
+  "expressions" :
   [
     {
-      "ident" : "logical_not",
+      "id" : "logical_not",
       "minOps" : 1,
       "maxOps" : 1,
       "attrs" : []
     },
     {
-      "ident" : "logical_and",
+      "id" : "logical_and",
       "minOps" : 2,
       "maxOps" : null,
       "attrs" : []
     },
     {
-      "ident" : "logical_nand",
+      "id" : "logical_nand",
       "minOps" : 2,
       "maxOps" : null,
       "attrs" : []
     },
     {
-      "ident" : "logical_or",
+      "id" : "logical_or",
       "minOps" : 2,
       "maxOps" : null,
       "attrs" : []
     },
     {
-      "ident" : "logical_nor",
+      "id" : "logical_nor",
       "minOps" : 2,
       "maxOps" : null,
       "attrs" : []
     },
     {
-      "ident" : "logical_xor",
+      "id" : "logical_xor",
       "minOps" : 2,
       "maxOps" : 2,
       "attrs" : []
     },
     {
-      "ident" : "logical_xnor",
+      "id" : "logical_xnor",
       "minOps" : 2,
       "maxOps" : 2,
       "attrs" : []
     },
     {
-      "ident" : "implies",
+      "id" : "implies",
       "minOps" : 2,
       "maxOps" : 2,
       "attrs" : []

@@ -3,8 +3,8 @@ import os
 
 from .semantics import *
 
-_exprdescrs_file = os.path.join(os.path.dirname(__file__), 'exprdescrs.json')
+_definition_file = os.path.join(os.path.dirname(__file__), 'definition.json')
 
-with open(_exprdescrs_file, 'r') as descrs:
-  exprdescrs = json.loads(descrs.read())
+with open(_definition_file, 'r') as deffile:
+  definition = json.loads(deffile.read())
 

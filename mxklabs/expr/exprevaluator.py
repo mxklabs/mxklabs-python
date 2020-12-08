@@ -12,7 +12,7 @@ class ExprEvaluator:
 
     @functools.lru_cache(maxsize=None)
     def eval(self, expr):
-      if expr.ident == 'variable':
+      if expr.id == 'variable':
         if expr not in self.varmap:
           raise RuntimeError(f'evaluation depends on value for variable \'{expr.attrs["name"]}\', which is not available')
         return self.varmap[expr]
@@ -20,6 +20,6 @@ class ExprEvaluator:
         # Evaluate expr's ops.
         opvals = [self.eval(op) for op in expr.ops]
         # Get the function to evaluate op.
-        semantics_fun = getattr(expr.exprset.semantics, expr.ident)
+        semantics_fun = getattr(expr.exprset.semantics, expr.id)
         # Evaluate it.
         return semantics_fun(expr, *opvals)

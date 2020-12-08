@@ -13,6 +13,6 @@ setup(
   classifiers = [],
   package_data={"": ["*.asn"]},
   install_requires=[
-    'asn1tools'
+    'asn1tools', 'prodict'
   ]
 )
