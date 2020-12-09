@@ -28,10 +28,16 @@ class ExprSet:
 
   def _expr_fun(self, *ops, expr_def, **attrs):
     # Check operators.
-    if (expr_def['minOps'] is not None and len(ops) < expr_def['minOps']):
-      raise RuntimeError(f"'{self.short_name}.{expr_def['id']}' expect at least {expr_def['minOps']} operands (got {len(ops)})")
-    if (expr_def['maxOps'] is not None and len(ops) > expr_def['maxOps']):
-      raise RuntimeError(f"'{self.short_name}.{expr_def['id']}' expect at most {expr_def['maxOps']} operands (got {len(ops)})")
+    if (expr_def['minOps'] is not None and \
+        expr_def['minOps'] is not None and \
+        expr_def['minOps'] == expr_def['maxOps']):
+      if (expr_def['minOps'] != len(ops)):
+        raise RuntimeError(f"'{self.short_name}.{expr_def['id']}' expects exactly {expr_def['minOps']} operand{'s' if expr_def['minOps'] > 1 else ''} (got {len(ops)})")
+    else:
+      if (expr_def['minOps'] is not None and len(ops) < expr_def['minOps']):
+        raise RuntimeError(f"'{self.short_name}.{expr_def['id']}' expects at least {expr_def['minOps']} operand{'s' if expr_def['minOps'] > 1 else ''} (got {len(ops)})")
+      if (expr_def['maxOps'] is not None and len(ops) > expr_def['maxOps']):
+        raise RuntimeError(f"'{self.short_name}.{expr_def['id']}' expects at most {expr_def['maxOps']} operand{'s' if expr_def['maxOps'] > 1 else ''} (got {len(ops)})")
 
     for op_index, op in zip(range(len(ops)), ops):
       if not isinstance(op, Expr):
