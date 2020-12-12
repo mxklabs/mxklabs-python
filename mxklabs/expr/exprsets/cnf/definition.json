@@ -1,5 +1,9 @@
 {
-  "valTypes" : ["mxklabs.expr.valtypes.bool"],
+  "id" : "mxklabs.expr.exprsets.cnf",
+  "shortName" : "cnf",
+  "dependencies" : {
+    "valTypes" : ["mxklabs.expr.valtypes.bool"]
+  },
   "varType" : "mxklabs.expr.valtypes.bool",
   "semantics" : "semantics.Semantics",
   "inputValidation" : "semantics.InputValidation",
@@ -12,12 +16,6 @@
       "id" : "logical_not",
       "minOps" : 1,
       "maxOps" : 1,
-      "attrs" : []
-    },
-    {
-      "id" : "logical_and",
-      "minOps" : 2,
-      "maxOps" : null,
       "attrs" : []
     },
     {

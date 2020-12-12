@@ -83,5 +83,10 @@ def test_expr_transform():
   #ctx_mapping = ctx1.map_onto(ctx2)
 
 
-
+ctx = mxklabs.expr.ExprContext()
+a1 = ctx.prop.variable(name="a")
+not1 = ctx.prop.logical_not(a1)
+not2 = ctx.prop.logical_not(a1)
+assert(id(a1) != id(not2))
+assert(id(not1) == id(not2))
 

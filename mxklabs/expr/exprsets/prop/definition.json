@@ -1,5 +1,9 @@
-{ 
-  "valTypes" : ["mxklabs.expr.valtypes.bool"],
+{
+  "id" : "mxklabs.expr.exprsets.prop",
+  "shortName" : "prop",
+  "dependencies" : {
+    "valTypes" : ["mxklabs.expr.valtypes.bool"]
+  },
   "varType" : "mxklabs.expr.valtypes.bool",
   "semantics" : "semantics.Semantics",
   "inputValidation" : "semantics.InputValidation",
