@@ -1,0 +1,22 @@
+{
+  "identifier" : "mxklabs.expr.definitions.exprclasssets.cnf",
+  "shortName" : "cnf",
+  "dependencies" : {
+    "valTypes" : ["mxklabs.expr.valtypes.bool"]
+  },
+  "varType" : "bool",
+  "inputValidator" : "semantics.InputValidator",
+  "typeInference" : "semantics.TypeInference",
+  "valueInference" : "semantics.ValueInference",
+  "mappings" : {
+  },
+  "expressions" :
+  [
+    {
+      "identifier" : "logical_not"
+    },
+    {
+      "identifier" : "logical_or"
+    }
+  ]
+}
