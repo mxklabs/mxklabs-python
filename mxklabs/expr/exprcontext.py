@@ -34,6 +34,13 @@ class ExprContext:
         module=module)
       self.valtype_classes[identifier] = valtype_class
 
+      fun = lambda **attrs : self._valtype_fun(valtype_class, **attrs)
+      setattr(self, module.definition['shortName'], fun)
+
+  def _valtype_fun(self, valtype_class, **valtype_attrs):
+    valtype = Valtype(self, valtype_class, **valtype_attrs)
+    return self.valtype_pool.make_unique(valtype)
+
   def load_expr_class_set(self, identifier):
     """
         Load an expression set via a module name.
@@ -71,16 +78,8 @@ class ExprContext:
 
     return exprset
 
-  def get_unique_valtype(self, valtype_class_id, **valtype_attrs):
-    if valtype_class_id not in self.valtype_classes.keys():
-      raise RuntimeError(f"unknown type '{valtype_class_id}'")
-
-    valtype_class = self.valtype_classes[valtype_class_id]
-    valtype = Valtype(self, valtype_class, **valtype_attrs)
-    return self.valtype_pool.make_unique(valtype)
-
-  def make_var(self, name, valtype_class_id, **valtype_attrs):
-    valtype = self.get_unique_valtype(valtype_class_id, **valtype_attrs)
+  def make_var(self, name, valtype_fun, **valtype_attrs):
+    valtype = valtype_fun(**valtype_attrs)
 
     if name in self.vars.keys():
       raise RuntimeError(f"variable with name '{name}' already exists in this context")
