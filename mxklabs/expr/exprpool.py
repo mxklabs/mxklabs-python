@@ -4,6 +4,7 @@ class ExprPool:
     self.pool = {}
 
   def make_unique(self, expr):
+    print(f'make_unique({expr})')
     if expr in self.pool:
       return self.pool[expr]
     else:

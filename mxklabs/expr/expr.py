@@ -4,80 +4,59 @@ import functools
 
 class Expr:
 
-  def __init__(self, ctx, exprset, id, ops, val_type, attrs):
-    self.ctx = ctx
-    self.exprset = exprset
-    self.id = id
-    self.ops = ops
-    self.val_type = val_type
-    self.attrs = attrs
+  def __init__(self, **kwargs):
+    self.ctx = kwargs['ctx']
+    self.expr_class_set = kwargs['expr_class_set']
+    self.identifier = kwargs['identifier']
+    self.ops = kwargs['ops']
+    self.valtype = kwargs['valtype']
+    self.attrs = kwargs['attrs']
     self._hash = None
-
-    if self.exprset is not None and id in self.exprset.expr_defs:
-      expr_def = self.exprset.expr_defs[id]
-
-      # Check number of operands.
-      min_ops = expr_def['minOps']
-      max_ops = expr_def['maxOps']
-      if (min_ops is not None and \
-          max_ops is not None and \
-          min_ops == max_ops):
-        if (min_ops != len(ops)):
-          raise RuntimeError(f"'{self.exprset.short_name}.{self.id}' expects exactly {min_ops} operand{'s' if min_ops > 1 else ''} (got {len(ops)})")
-      else:
-        if (min_ops is not None and len(ops) < min_ops):
-          raise RuntimeError(f"'{self.exprset.short_name}.{self.id}' expects at least {min_ops} operand{'s' if min_ops > 1 else ''} (got {len(ops)})")
-        if (max_ops is not None and len(ops) > max_ops):
-          raise RuntimeError(f"'{self.exprset.short_name}.{self.id}' expects at most {max_ops} operand{'s' if max_ops > 1 else ''} (got {len(ops)})")
-
-      # Check operands are actually expression objects.
-      for op_index, op in zip(range(len(ops)), ops):
-        if not isinstance(op, Expr):
-          raise RuntimeError(f"'{self.exprset.short_name}.{self.id}' expects operands of type mxklabs.expr.Expr (operand {op_index} has type {type(op)})")
-
-      # Check operands are from the same context.
-      for op_index, op in zip(range(len(ops)), ops):
-        if not isinstance(op, Expr):
-          raise RuntimeError(f"'{self.exprset.short_name}.{self.id}' expects operands of type mxklabs.expr.Expr (operand {op_index} has type {type(op)})")
-
-
-      # TODO: Check operand validity.
-      # TODO: Check all operands are from the same context.
-
-      # Check attributes.
-      exp_attrs = set(expr_def['attrs'])
-      act_attrs = set(attrs.keys())
-
-      for actAttr in act_attrs:
-        if actAttr not in exp_attrs:
-          raise RuntimeError(f"'{self.exprset.short_name}.{self.id}' does not expect attribute '{actAttr}'")
-      for expAttr in exp_attrs:
-        if expAttr not in act_attrs:
-          raise RuntimeError(f"'{self.exprset.short_name}.{self.id}' expects attribute '{expAttr}'")
-
-
+    
   def __hash__(self):
     if self._hash is not None:
       return self._hash
+    print(f'__hash__({self})')
+    print(f'1')
 
     hash_items = []
-    hash_items.append(self.exprset)
-    hash_items.append(self.id)
+    hash_items.append(self.expr_class_set)
+    hash_items.append(self.identifier)
     hash_items += self.ops
-    hash_items.append(self.val_type)
+    hash_items.append(self.valtype)
     hash_items += self.attrs.keys()
     hash_items += self.attrs.values()
-    print(f'self.attrs={self.attrs} self.attrs.values={self.attrs.values()}')
     _hash = hash(tuple(hash_items))
     self._hash = _hash
     return _hash
 
+  def __str__(self):
+    return self.get_compact_str()
+
+  def get_compact_str(self):
+    if self.identifier == "variable":
+      return f"{self.attrs['name']}"
+    else:
+      result = f"{self.identifier}("
+      result += ",".join([f"{op}" for op in self.ops])
+      result += ")"
+      return result
+
+  def get_pretty_str(self):
+    if self.identifier == "variable":
+      return f"{self.attrs['name']}"
+    else:
+      result = f"{self.expr_class_set.identifier}.{self.identifier}"
+      for op in self.ops:
+        result += f"\n  - {op}"
+      return result
+
   @functools.lru_cache(maxsize=1000)
   def __eq__(self, rhs):
-    return self.exprset == rhs.exprset and \
-           self.id == rhs.id and \
+    return self.expr_class_set == rhs.expr_class_set and \
+           self.identifier == rhs.identifier and \
            self.ops == rhs.ops and \
-           self.val_type == rhs.val_type and \
+           self.valtype == rhs.valtype and \
            self.attrs == rhs.attrs
 
   def evaluate(self, varmap):
@@ -87,4 +66,3 @@ class Expr:
     """
     evaluator = ExprEvaluator(self.ctx, varmap)
     return evaluator.eval(self)
-

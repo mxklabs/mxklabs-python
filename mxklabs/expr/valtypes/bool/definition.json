@@ -1,5 +1,5 @@
 {
-  "id" : "mxklabs.expr.valtypes.bool",
+  "identifier" : "mxklabs.expr.valtypes.bool",
   "shortName" : "bool",
   "semantics" : "semantics.Bool",
   "attrs" : []

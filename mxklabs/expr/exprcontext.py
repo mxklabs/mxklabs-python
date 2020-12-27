@@ -3,37 +3,38 @@ import logging
 import os
 
 from .expr import Expr
-from .exprset import ExprSet
+from .exprclassset import ExprClassSet
 from .exprpool import ExprPool
-from .valtypeclass import ValTypeClass
-from .valtype import ValType
+from .valtypeclass import ValtypeClass
+from .valtype import Valtype
 
 logger = logging.getLogger(f'mxklabs.expr.ExprContext')
 
 class ExprContext:
 
-  def __init__(self, load_mxklabs_exprsets=True):
-    self.exprsets = {}
+  def __init__(self, load_default_expr_class_sets=True):
+    self.exprclasssets = {}
     self.exprpool = ExprPool()
-    self.val_type_pool = ExprPool()
-    self.val_type_classes = {}
+    self.valtype_pool = ExprPool()
+    self.valtype_classes = {}
     self.vars = {}
-    if load_mxklabs_exprsets:
-      exprsets = self._get_mxklabs_exprsets()
+
+    if load_default_expr_class_sets:
+      exprsets = self._get_default_expr_class_sets()
       for exprset in exprsets:
-        exprset = self.load_exprset(exprset)
-        self.exprsets[exprset.id] = exprset
+        exprset = self.load_expr_class_set(exprset)
+        self.exprclasssets[exprset.identifier] = exprset
 
-  def load_val_type(self, id):
-    if id not in self.val_type_classes:
-      logger.info(f'Loading \'{id}\'')
-      module = importlib.import_module(id)
-      val_type_class = ValTypeClass(ctx=self,
-        id=id,
+  def load_valtype_class(self, identifier):
+    if identifier not in self.valtype_classes:
+      logger.info(f'Loading \'{identifier}\'')
+      module = importlib.import_module(identifier)
+      valtype_class = ValtypeClass(ctx=self,
+        identifier=identifier,
         module=module)
-      self.val_type_classes[id] = val_type_class
+      self.valtype_classes[identifier] = valtype_class
 
-  def load_exprset(self, id):
+  def load_expr_class_set(self, identifier):
     """
         Load an expression set via a module name.
         For example:
@@ -42,27 +43,27 @@ class ExprContext:
         from mxklabs.expr import ExprBuilder
 
         builder = ExprBuilder()
-        builder.load_exprset("mxklabs.expr.exprsets.bitvector")
+        builder.load_expr_class_set("mxklabs.expr.definitions.exprclasssets.bitvector")
 
         # Now use the bitvector exprset.
         x = builder.bitvector.variable(width=10)
         ```
     """
-    logger.info(f'Loading exprset \'{id}\'')
-    module = importlib.import_module(id)
+    logger.info(f'Loading exprset \'{identifier}\'')
+    module = importlib.import_module(identifier)
 
     short_name = module.definition['shortName']
 
     if hasattr(self, short_name):
-      logger.error(f"'{id}' cannot be loaded (name '{short_name}' is already in use)")
-      raise RuntimeError(f"'{id}' cannot be loaded (name '{short_name}' is already in use)")
+      logger.error(f"'{identifier}' cannot be loaded (name '{short_name}' is already in use)")
+      raise RuntimeError(f"'{identifier}' cannot be loaded (name '{short_name}' is already in use)")
 
     # Load dependencies.
-    for val_type_class in module.definition["dependencies"]["valTypes"]:
-      self.load_val_type(val_type_class)
+    for valtype_class in module.definition["dependencies"]["valTypes"]:
+      self.load_valtype_class(valtype_class)
 
     # Create expression set.
-    exprset = ExprSet(ctx=self, id=id, module=module)
+    exprset = ExprClassSet(ctx=self, identifier=identifier, module=module)
 
     # This is where we set the exprset attribute so that they can be
     # accessed with, e.g., context.prop.
@@ -70,33 +71,27 @@ class ExprContext:
 
     return exprset
 
-  def get_unique_val_type(self, val_type_class_id, **val_type_attrs):
-    if val_type_class_id not in self.val_type_classes.keys():
-      raise RuntimeError(f"unknown type '{val_type_class_id}'")
+  def get_unique_valtype(self, valtype_class_id, **valtype_attrs):
+    if valtype_class_id not in self.valtype_classes.keys():
+      raise RuntimeError(f"unknown type '{valtype_class_id}'")
 
-    val_type_class = self.val_type_classes[val_type_class_id]
-    val_type = ValType(self, val_type_class, **val_type_attrs)
-    print(f'val_type={val_type}')
-    return self.val_type_pool.make_unique(val_type)
+    valtype_class = self.valtype_classes[valtype_class_id]
+    valtype = Valtype(self, valtype_class, **valtype_attrs)
+    return self.valtype_pool.make_unique(valtype)
 
-  def make_var(self, name, val_type_class_id, **val_type_attrs):
-    val_type = self.get_unique_val_type(val_type_class_id, **val_type_attrs)
+  def make_var(self, name, valtype_class_id, **valtype_attrs):
+    valtype = self.get_unique_valtype(valtype_class_id, **valtype_attrs)
 
     if name in self.vars.keys():
       raise RuntimeError(f"variable with name '{name}' already exists in this context")
     else:
-      expr = Expr(ctx=self, exprset=None, id="variable", ops=[], val_type=val_type, attrs={"name":name})
-      self.vars[name] = val_type
+      expr = Expr(ctx=self, expr_class_set=None, identifier="variable", ops=[], valtype=valtype, attrs={"name":name})
+      self.vars[name] = valtype
       return self.exprpool.make_unique(expr)
 
-  def make_expr(self, exprset, id, ops, attrs):
-    val_type = self.get_unique_val_type('mxklabs.expr.valtypes.bool')
-    expr = Expr(ctx=self, exprset=exprset, id=id, ops=ops, val_type=val_type, attrs=attrs)
-    return self.exprpool.make_unique(expr)
-
-  def _get_mxklabs_exprsets(self):
-    exprsets_dir = os.path.join(os.path.dirname(__file__), "exprsets")
-    ids = [e for e in os.listdir(exprsets_dir)
-        if os.path.isdir(os.path.join(exprsets_dir, e)) and not e.startswith('_')]
-    return [f"mxklabs.expr.exprsets.{id}" for id in ids]
+  def _get_default_expr_class_sets(self):
+    expr_class_sets_dir = os.path.join(os.path.dirname(__file__), "definitions", "exprclasssets")
+    ids = [e for e in os.listdir(expr_class_sets_dir)
+        if os.path.isdir(os.path.join(expr_class_sets_dir, e)) and not e.startswith('_')]
+    return [f"mxklabs.expr.definitions.exprclasssets.{identifier}" for identifier in ids]
 

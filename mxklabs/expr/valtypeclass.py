@@ -1,8 +1,8 @@
 from .module import Module
 
-class ValTypeClass(Module):
+class ValtypeClass(Module):
 
-  def __init__(self, ctx, id, module):
-    Module.__init__(self, ctx, id, module)
+  def __init__(self, ctx, identifier, module):
+    Module.__init__(self, ctx, identifier, module)
     self.attrs = module.definition['attrs']
 
