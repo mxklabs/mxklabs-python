@@ -9,7 +9,7 @@
   "typeInference" : "semantics.TypeInference",
   "valueInference" : "semantics.ValueInference",
   "mappings" : {
-    "semantics.PropToCnfMapping": ["mxklabs.expr.definitions.exprclasssets.cnf"]
+    "semantics.PropToCnfMapping": ["mxklabs.expr.definitions.cnf"]
   },
   "expressions" :
   [

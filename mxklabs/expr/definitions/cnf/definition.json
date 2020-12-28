@@ -1,5 +1,5 @@
 {
-  "identifier" : "mxklabs.expr.definitions.exprclasssets.cnf",
+  "identifier" : "mxklabs.expr.definitions.cnf",
   "shortName" : "cnf",
   "dependencies" : {
     "valTypes" : ["mxklabs.expr.valtypes.bool"]

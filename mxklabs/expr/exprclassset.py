@@ -26,10 +26,10 @@ class ExprClassSet(Module):
         raise RuntimeError(f"no value inference found for '{self.short_name}.{expr_def['identifier']}'")
 
   def variable(self, name, **attrs):
-    return self.ctx.make_var(name=name, valtype_fun=getattr(self.ctx, self.module.definition['varType']), **attrs)
+    return self.ctx.make_var(name=name, valtype_fun=getattr(self.ctx.valtypes, self.module.definition['varType']), **attrs)
 
   def constant(self, value, **attrs):
-    return self.ctx.make_constant(value=value, valtype_fun=getattr(self.ctx, self.module.definition['varType']), **attrs)
+    return self.ctx.make_constant(value=value, valtype_fun=getattr(self.ctx.valtypes, self.module.definition['varType']), **attrs)
 
   def _expr_fun(self, *ops, expr_def, **attrs):
     # Check operand and attribute validity.
@@ -38,7 +38,7 @@ class ExprClassSet(Module):
 
     # Work out the type.
     type_infererence_fun = getattr(self.type_inference, expr_def['identifier'])
-    valtype = type_infererence_fun(*[op.valtype for op in ops], **attrs)
+    valtype = type_infererence_fun(*ops, **attrs)
 
     # Create the expression.
     expr = Expr(ctx=self.ctx, expr_class_set=self, identifier=expr_def['identifier'], ops=ops, valtype=valtype, attrs=attrs)

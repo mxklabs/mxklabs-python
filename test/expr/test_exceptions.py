@@ -15,6 +15,6 @@ def test_not_exact_number_of_ops():
 
 def test_load_exprset_twice():
   ctx = mxklabs.expr.ExprContext(load_default_expr_class_sets=False)
-  ctx.load_expr_class_set("mxklabs.expr.definitions.exprclasssets.prop")
-  with pytest.raises(RuntimeError, match=r"'mxklabs.expr.definitions.exprclasssets.prop' cannot be loaded \(name 'prop' is already in use\)"):
-    ctx.load_expr_class_set("mxklabs.expr.definitions.exprclasssets.prop")
+  ctx.load_expr_class_set("mxklabs.expr.definitions.prop")
+  with pytest.raises(RuntimeError, match=r"'mxklabs.expr.definitions.prop' cannot be loaded \(name 'prop' is already in use\)"):
+    ctx.load_expr_class_set("mxklabs.expr.definitions.prop")

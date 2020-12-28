@@ -1,4 +1,4 @@
-from ....exprutils import ExprUtils
+from ...exprutils import ExprUtils
 
 class InputValidator:
 
@@ -6,21 +6,21 @@ class InputValidator:
     self.ctx = ctx
 
   def logical_not(self, ops, **attrs):
-    ExprUtils.basicOpsAndAttrsCheck('logical_not', 1, 1, self.ctx.bool(), ops, [], attrs)
+    ExprUtils.basicOpsAndAttrsCheck('logical_not', 1, 1, self.ctx.valtypes.bool(), ops, [], attrs)
 
   def logical_or(self, *ops, **attrs):
-    ExprUtils.basicOpsAndAttrsCheck('logical_not', 2, 0, self.ctx.bool(), ops, [], attrs)
+    ExprUtils.basicOpsAndAttrsCheck('logical_not', 2, 0, self.ctx.valtypes.bool(), ops, [], attrs)
 
 class TypeInference:
 
   def __init__(self, ctx):
     self.ctx = ctx
 
-  def logical_not(self, op_valtype, **attrs):
-    return self.ctx.bool()
+  def logical_not(self, ops, **attrs):
+    return self.ctx.valtypes.bool()
 
-  def logical_or(self, *op_valt_types, **attrs):
-    return self.ctx.bool()
+  def logical_or(self, ops, **attrs):
+    return self.ctx.valtypes.bool()
 
 class ValueInference:
 

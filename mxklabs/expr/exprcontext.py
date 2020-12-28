@@ -10,6 +10,9 @@ from .valtype import Valtype
 
 logger = logging.getLogger(f'mxklabs.expr.ExprContext')
 
+class AttrHolder:
+  pass
+
 class ExprContext:
 
   def __init__(self, load_default_expr_class_sets=True):
@@ -18,6 +21,7 @@ class ExprContext:
     self.valtype_pool = ExprPool()
     self.valtype_classes = {}
     self.vars = {}
+    self.valtypes = AttrHolder()
 
     if load_default_expr_class_sets:
       exprsets = self._get_default_expr_class_sets()
@@ -35,7 +39,7 @@ class ExprContext:
       self.valtype_classes[identifier] = valtype_class
 
       fun = lambda **attrs : self._valtype_fun(valtype_class, **attrs)
-      setattr(self, module.definition['shortName'], fun)
+      setattr(self.valtypes, module.definition['shortName'], fun)
 
   def _valtype_fun(self, valtype_class, **valtype_attrs):
     valtype = Valtype(self, valtype_class, **valtype_attrs)
@@ -50,7 +54,7 @@ class ExprContext:
         from mxklabs.expr import ExprBuilder
 
         builder = ExprBuilder()
-        builder.load_expr_class_set("mxklabs.expr.definitions.exprclasssets.bitvector")
+        builder.load_expr_class_set("mxklabs.expr.definitions.bitvector")
 
         # Now use the bitvector exprset.
         x = builder.bitvector.variable(width=10)
@@ -89,8 +93,8 @@ class ExprContext:
       return self.exprpool.make_unique(expr)
 
   def _get_default_expr_class_sets(self):
-    expr_class_sets_dir = os.path.join(os.path.dirname(__file__), "definitions", "exprclasssets")
+    expr_class_sets_dir = os.path.join(os.path.dirname(__file__), "definitions")
     ids = [e for e in os.listdir(expr_class_sets_dir)
         if os.path.isdir(os.path.join(expr_class_sets_dir, e)) and not e.startswith('_')]
-    return [f"mxklabs.expr.definitions.exprclasssets.{identifier}" for identifier in ids]
+    return [f"mxklabs.expr.definitions.{identifier}" for identifier in ids]
 
