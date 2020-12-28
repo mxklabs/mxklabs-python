@@ -12,7 +12,7 @@ class Expr:
     self.valtype = kwargs['valtype']
     self.attrs = kwargs['attrs']
     self._hash = None
-    
+
   def __hash__(self):
     if self._hash is not None:
       return self._hash
@@ -64,12 +64,15 @@ class Expr:
   # Find a way to cache this.
   def __eq__(self, rhs):
     # TODO: Could optimise and use hash if already computed.
-    return self.ctx == rhs.ctx and \
+    result = self.ctx == rhs.ctx and \
            self.expr_class_set == rhs.expr_class_set and \
            self.identifier == rhs.identifier and \
            self.ops == rhs.ops and \
            self.valtype == rhs.valtype and \
            self.attrs == rhs.attrs
+    print(f"{self} == {rhs} ==> {result}")
+    return result
+      
 
   def evaluate(self, varmap):
     """

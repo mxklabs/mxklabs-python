@@ -38,7 +38,7 @@ class ExprSimplifier:
   def __init__(self, ctx):
     self.ctx = ctx
 
-  def logical_not(self, op0, **attrs):
+  def logical_not(self, op0):
     # not(1) => 0
     # not(0) => 1
     if self.ctx.prop.is_constant(op0):
@@ -58,26 +58,65 @@ class ExprSimplifier:
 
     return None
 
-  def logical_and(self, *ops, **attrs):
+  def logical_and(self, *ops):
+    # and(..., 0, ...) => 0
+    if any([self.ctx.prop.is_constant(op) and not op.value for op in ops]):
+      return self.ctx.prop.constant(False)
+
+    # and(1, ..., 1) => 1
+    if all([self.ctx.prop.is_constant(op) and op.value for op in ops]):
+      return self.ctx.prop.constant(True)
+
+    # Sort by operand hash.
+    ops = list(ops)
+    new_ops = sorted(ops, key=hash)
+    if new_ops != ops:
+      return self.ctx.prop.logical_and(*new_ops)
+
     return None
 
-  def logical_nand(self, *ops, **attrs):
+  def logical_nand(self, *ops):
+    return self.ctx.logical_not(self.ctx.logical_and(*ops))
+
+  def logical_or(self, *ops):
+    # or(..., 1, ...) => 1
+    if any([self.ctx.prop.is_constant(op) and op.value for op in ops]):
+      return self.ctx.prop.constant(True)
+
+    # or(0, ..., 0) => 0
+    if all([self.ctx.prop.is_constant(op) and not op.value for op in ops]):
+      return self.ctx.prop.constant(False)
+
+    # Sort by operand hash.
+    ops = list(ops)
+    new_ops = sorted(ops, key=hash)
+    if new_ops != ops:
+      return self.ctx.prop.logical_or(*new_ops)
+
     return None
 
-  def logical_or(self, *ops, **attrs):
+  def logical_nor(self, *ops):
+    return self.ctx.logical_not(self.ctx.logical_or(*ops))
+
+  def logical_xor(self, *ops):
+    # If xor(0,1) => 1
+    # If xor(1,0) => 1
+    # If xor(1,1) => 0
+    # If xor(0,0) => 0
+    if all([self.ctx.prop.is_constant(op) for op in ops]):
+      return self.ctx.prop.constant(ops[0].value != ops[1].value)
+
+    # Sort by operand hash.
+    if hash(ops[1]) < hash(ops[0]):
+      return self.ctx.prop.logical_xor(ops[1], ops[0])
+
     return None
 
-  def logical_nor(self, *ops, **attrs):
-    return None
+  def logical_xnor(self, *ops):
+    return self.ctx.logical_not(self.ctx.logical_xor(*ops))
 
-  def logical_xor(self, *ops, **attrs):
-    return None
-
-  def logical_xnor(self, *ops, **attrs):
-    return None
-
-  def implies(self, *ops, **attrs):
-    return None
+  def implies(self, *ops):
+    return self.ctx.prop.logical_or(self.ctx.prop.logical_not(ops[0]), ops[1])
 
 class TypeInference:
 
