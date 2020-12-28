@@ -11,6 +11,21 @@ class InputValidator:
   def logical_or(self, *ops, **attrs):
     ExprUtils.basicOpsAndAttrsCheck('logical_not', 2, 0, self.ctx.valtypes.bool(), ops, [], attrs)
 
+class ExprSimplifier:
+  """ Responsible for simplifying and canonicalising expressions. Return
+      an expression object to replace the about-to-be-constructed expression
+      to replace it with something simpler. Take care not to create infinite
+      recursion. Return None to construct the expression as-is.
+  """
+  def __init__(self, ctx):
+    self.ctx = ctx
+
+  def logical_not(self, op0, **attrs):
+    return None
+
+  def logical_or(self, ops, **attrs):
+    return None
+
 class TypeInference:
 
   def __init__(self, ctx):

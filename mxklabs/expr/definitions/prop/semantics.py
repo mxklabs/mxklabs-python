@@ -29,6 +29,56 @@ class InputValidator:
   def implies(self, *ops, **attrs):
     ExprUtils.basicOpsAndAttrsCheck('implies', 2, 2, self.ctx.valtypes.bool(), ops, [], attrs)
 
+class ExprSimplifier:
+  """ Responsible for simplifying and canonicalising expressions. Return
+      an expression object to replace the about-to-be-constructed expression
+      to replace it with something simpler. Take care not to create infinite
+      recursion. Return None to construct the expression as-is.
+  """
+  def __init__(self, ctx):
+    self.ctx = ctx
+
+  def logical_not(self, op0, **attrs):
+    # not(1) => 0
+    # not(0) => 1
+    if self.ctx.prop.is_constant(op0):
+      return self.ctx.prop.constant(not op0.value)
+
+    # not(not(e)) => e
+    if self.ctx.prop.is_logical_not(op0):
+      return op0.ops[0]
+
+    # not(and(e_0,...,e_n)) => or(not(e_0),...,not(e_n)))
+    if self.ctx.prop.is_logical_and(op0):
+      return self.ctx.prop.logical_or(*[self.ctx.prop.logical_not(op) for op in op0.ops])
+
+    # not(or(e_0,...,e_n)) => and(not(e_0),...,not(e_n)))
+    if self.ctx.prop.is_logical_or(op0):
+      return self.ctx.prop.logical_and(*[self.ctx.prop.logical_not(op) for op in op0.ops])
+
+    return None
+
+  def logical_and(self, *ops, **attrs):
+    return None
+
+  def logical_nand(self, *ops, **attrs):
+    return None
+
+  def logical_or(self, *ops, **attrs):
+    return None
+
+  def logical_nor(self, *ops, **attrs):
+    return None
+
+  def logical_xor(self, *ops, **attrs):
+    return None
+
+  def logical_xnor(self, *ops, **attrs):
+    return None
+
+  def implies(self, *ops, **attrs):
+    return None
+
 class TypeInference:
 
   def __init__(self, ctx):

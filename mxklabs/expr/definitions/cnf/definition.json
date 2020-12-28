@@ -6,6 +6,7 @@
   },
   "varType" : "bool",
   "inputValidator" : "semantics.InputValidator",
+  "exprSimplifier" : "semantics.ExprSimplifier",
   "typeInference" : "semantics.TypeInference",
   "valueInference" : "semantics.ValueInference",
   "mappings" : {

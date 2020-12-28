@@ -82,6 +82,34 @@ def test_expr_transform():
 
   #ctx_mapping = ctx1.map_onto(ctx2)
 
+def test_logical_not_simplify():
+  ctx = mxklabs.expr.ExprContext()
+  a = ctx.prop.variable(name="a")
+  not_a = ctx.prop.logical_not(a)
+  b = ctx.prop.variable(name="b")
+  not_b = ctx.prop.logical_not(b)
+  t = ctx.prop.constant(value=True)
+  f = ctx.prop.constant(value=False)
+
+  # not(True) => False
+  assert(f == ctx.prop.logical_not(t))
+
+  # not(False) => True
+  assert(t == ctx.prop.logical_not(f))
+
+  # not(not(a)) => a
+  assert(a == ctx.prop.logical_not(ctx.prop.logical_not(a)))
+
+  # not(and(a, not(b))) => or(not(a),b))
+  expr1 = ctx.prop.logical_not(ctx.prop.logical_and(a, not_b))
+  expr2 = ctx.prop.logical_or(not_a, b)
+  assert(expr1 == expr2)
+
+  # not(or(a, not(b))) => and(not(a),b)
+  expr1 = ctx.prop.logical_not(ctx.prop.logical_or(a, not_b))
+  expr2 = ctx.prop.logical_and(not_a, b)
+  assert(expr1 == expr2)
+
 
 ctx = mxklabs.expr.ExprContext()
 a1 = ctx.prop.variable(name="a")

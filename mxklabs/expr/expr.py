@@ -16,8 +16,6 @@ class Expr:
   def __hash__(self):
     if self._hash is not None:
       return self._hash
-    print(f'__hash__({self})')
-    print(f'1')
 
     hash_items = []
     hash_items.append(self.expr_class_set)
@@ -33,9 +31,18 @@ class Expr:
   def __str__(self):
     return self.get_compact_str()
 
+  def __getattr__(self, name):
+    if name in self.attrs:
+      return self.attrs[name]
+    else:
+      # Default behaviour
+      raise AttributeError
+
   def get_compact_str(self):
-    if self.identifier == "variable":
-      return f"{self.attrs['name']}"
+    if self.ctx.is_variable(self):
+      return f"{self.name}"
+    elif self.ctx.is_constant(self):
+      return f"{self.value}"
     else:
       result = f"{self.identifier}("
       result += ",".join([f"{op}" for op in self.ops])
@@ -43,17 +50,22 @@ class Expr:
       return result
 
   def get_pretty_str(self):
-    if self.identifier == "variable":
-      return f"{self.attrs['name']}"
+    if self.expr_class_set.is_variable(self):
+      return f"{self.name}"
+    elif self.expr_class_set.is_constant(self):
+      return f"{self.value}"
     else:
       result = f"{self.expr_class_set.identifier}.{self.identifier}"
       for op in self.ops:
         result += f"\n  - {op}"
       return result
 
-  @functools.lru_cache(maxsize=1000)
+  #@functools.lru_cache(maxsize=1000)
+  # Find a way to cache this.
   def __eq__(self, rhs):
-    return self.expr_class_set == rhs.expr_class_set and \
+    # TODO: Could optimise and use hash if already computed.
+    return self.ctx == rhs.ctx and \
+           self.expr_class_set == rhs.expr_class_set and \
            self.identifier == rhs.identifier and \
            self.ops == rhs.ops and \
            self.valtype == rhs.valtype and \

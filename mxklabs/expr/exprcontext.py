@@ -45,6 +45,12 @@ class ExprContext:
     valtype = Valtype(self, valtype_class, **valtype_attrs)
     return self.valtype_pool.make_unique(valtype)
 
+  def is_variable(self, expr):
+    return expr.identifier == "variable"
+
+  def is_constant(self, expr):
+    return expr.identifier == "constant"
+
   def load_expr_class_set(self, identifier):
     """
         Load an expression set via a module name.
@@ -91,6 +97,11 @@ class ExprContext:
       expr = Expr(ctx=self, expr_class_set=None, identifier="variable", ops=[], valtype=valtype, attrs={"name":name})
       self.vars[name] = valtype
       return self.exprpool.make_unique(expr)
+
+  def make_constant(self, value, valtype_fun, **valtype_attrs):
+    valtype = valtype_fun(**valtype_attrs)
+    expr = Expr(ctx=self, expr_class_set=None, identifier="constant", ops=[], valtype=valtype, attrs={"value":value})
+    return self.exprpool.make_unique(expr)
 
   def _get_default_expr_class_sets(self):
     expr_class_sets_dir = os.path.join(os.path.dirname(__file__), "definitions")
