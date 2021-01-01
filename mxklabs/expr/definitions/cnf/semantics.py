@@ -7,13 +7,13 @@ class InputValidator:
 
   def logical_not(self, *ops, **attrs):
     ExprUtils.basicOpsAndAttrsCheck('logical_not', 1, 1, self.ctx.valtypes.bool(), ops, [], attrs)
-    if not self.ctx.is_variable(ops[0]):
+    if not self.ctx.is_variable(ops[0]) or ops[0].valtype != self.ctx.valtypes.bool():
       raise RuntimeError(f"'logical_not' must negate a variable (got operand '{ops[0].identifier}')")
 
   def logical_or(self, *ops, **attrs):
-    ExprUtils.basicOpsAndAttrsCheck('logical_or', 2, 0, self.ctx.valtypes.bool(), ops, [], attrs)
+    ExprUtils.basicOpsAndAttrsCheck('logical_or', 2, None, self.ctx.valtypes.bool(), ops, [], attrs)
     for op in ops:
-      if not self.ctx.is_variable(op) and not self.ctx.is_logical_not(op):
+      if not self.ctx.is_variable(op) and not self.ctx.cnf.is_logical_not(op):
         raise RuntimeError(f"'logical_or' must be a disjunction over 'variable' and 'logical_not' expression (got operand '{op.identifier}')")
 
 class ExprSimplifier:
@@ -59,11 +59,10 @@ class CnfMapping:
     self.ctx = ctx
 
   def logical_not(self, expr, oplit):
-    print(f"oplit={oplit}")
     return self._make_not(oplit)
 
   def logical_or(self, expr, *oplits):
-    lit = self.ctx.make_var(f'{expr}', self.ctx.valtypes.bool())
+    lit = self.ctx.make_var(f'{expr}', self.ctx.valtypes.bool)
 
     # For each op: lit => oplit
     for oplit in oplits:

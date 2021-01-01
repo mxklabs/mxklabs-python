@@ -67,6 +67,8 @@ class ExprSimplifier:
     if all([self.ctx.prop.is_constant(op) and op.value for op in ops]):
       return self.ctx.prop.constant(True)
 
+    # TODO: if and(expr, ..., not expr) => 0
+
     # Sort by operand hash.
     ops = list(ops)
     new_ops = sorted(ops, key=hash)
@@ -86,6 +88,8 @@ class ExprSimplifier:
     # or(0, ..., 0) => 0
     if all([self.ctx.prop.is_constant(op) and not op.value for op in ops]):
       return self.ctx.prop.constant(False)
+
+    # TODO: if or(expr, ..., not expr) => 1
 
     # Sort by operand hash.
     ops = list(ops)
@@ -186,7 +190,7 @@ class CnfMapping:
     return self._make_not(oplit)
 
   def logical_and(self, expr, *oplits):
-    lit = self.ctx.make_var(f'{expr}', self.ctx.valtypes.bool())
+    lit = self.ctx.make_var(f'{expr}', self.ctx.valtypes.bool)
 
     # For each op: lit => oplit
     for oplit in oplits:
@@ -205,7 +209,7 @@ class CnfMapping:
     raise RuntimeError(f"Unexpected call to create CNF mapping for '{expr}'")
 
   def logical_or(self, expr, *oplits):
-    lit = self.ctx.make_var(f'{expr}', self.ctx.valtypes.bool())
+    lit = self.ctx.make_var(f'{expr}', self.ctx.valtypes.bool)
 
     # For each op: lit => oplit
     for oplit in oplits:
@@ -224,7 +228,7 @@ class CnfMapping:
     raise RuntimeError(f"Unexpected call to create CNF mapping for '{expr}'")
 
   def logical_xor(self, expr, oplit0, oplit1):
-    lit = self.ctx.make_var(f'{expr}', self.ctx.valtypes.bool())
+    lit = self.ctx.make_var(f'{expr}', self.ctx.valtypes.bool)
 
     # oplit0 and not oplit1 => lit
     self.ctx.add_constraint(self.ctx.cnf.logical_or(

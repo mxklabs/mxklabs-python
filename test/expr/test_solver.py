@@ -9,7 +9,7 @@ a = ctx.prop.variable(name="a")
 
 ctx.prop.logical_not(a)
 
-ctx.add_constraint(ctx.prop.logical_not(a))
+ctx.add_constraint(ctx.prop.logical_and(a, ctx.prop.logical_not(a)))
 
 result = ctx.solve()
 
