@@ -4,9 +4,11 @@ import os
 
 from .expr import Expr
 from .exprclassset import ExprClassSet
+from .exprevaluator import ExprEvaluator
 from .exprpool import ExprPool
 from .valtypeclass import ValtypeClass
 from .valtype import Valtype
+from .solver import Solver
 
 logger = logging.getLogger(f'mxklabs.expr.ExprContext')
 
@@ -22,6 +24,7 @@ class ExprContext:
     self.valtype_classes = {}
     self.vars = {}
     self.valtypes = AttrHolder()
+    self.constraints = []
 
     if load_default_expr_class_sets:
       exprsets = self._get_default_expr_class_sets()
@@ -102,6 +105,26 @@ class ExprContext:
     valtype = valtype_fun(**valtype_attrs)
     expr = Expr(ctx=self, expr_class_set=None, identifier="constant", ops=[], valtype=valtype, attrs={"value":value})
     return self.exprpool.make_unique(expr)
+
+  def add_constraint(self, expr):
+    if expr.valtype == self.valtypes.bool():
+      self.constraints.append(expr)
+    else:
+      raise RuntimeError(f"constraints must be of type '{self.valtypes.bool()}' (got {expr.valtype})")
+
+  def evaluate(self, expr, varmap):
+    """
+    Return the value of this expression under a given dictionary mapping
+    variables to values.
+    """
+    evaluator = ExprEvaluator(self, varmap)
+    return evaluator.eval(expr)
+
+  def solve(self):
+    cnfctx = ExprContext(load_default_expr_class_sets=False)
+    cnfctx.load_expr_class_set("mxklabs.expr.definitions.cnf")
+    solver = Solver(self, cnfctx)
+    return solver.solve()
 
   def _get_default_expr_class_sets(self):
     expr_class_sets_dir = os.path.join(os.path.dirname(__file__), "definitions")

@@ -5,11 +5,16 @@ class InputValidator:
   def __init__(self, ctx):
     self.ctx = ctx
 
-  def logical_not(self, ops, **attrs):
+  def logical_not(self, *ops, **attrs):
     ExprUtils.basicOpsAndAttrsCheck('logical_not', 1, 1, self.ctx.valtypes.bool(), ops, [], attrs)
+    if not self.ctx.is_variable(ops[0]):
+      raise RuntimeError(f"'logical_not' must negate a variable (got operand '{ops[0].identifier}')")
 
   def logical_or(self, *ops, **attrs):
-    ExprUtils.basicOpsAndAttrsCheck('logical_not', 2, 0, self.ctx.valtypes.bool(), ops, [], attrs)
+    ExprUtils.basicOpsAndAttrsCheck('logical_or', 2, 0, self.ctx.valtypes.bool(), ops, [], attrs)
+    for op in ops:
+      if not self.ctx.is_variable(op) and not self.ctx.is_logical_not(op):
+        raise RuntimeError(f"'logical_or' must be a disjunction over 'variable' and 'logical_not' expression (got operand '{op.identifier}')")
 
 class ExprSimplifier:
   """ Responsible for simplifying and canonicalising expressions. Return
@@ -48,23 +53,36 @@ class ValueInference:
   def logical_or(self, expr, *op_values):
     return any(op_values)
 
-"""
-class LogicalNot(ExprClass):
-  def __init__(self):
-    ExprClass.__init__(self, min_ops=1, max_ops=1, attrs=[])
+class CnfMapping:
 
-  def check_ops(self, op0):
-    pass
+  def __init__(self, ctx):
+    self.ctx = ctx
 
-  def do_valtype_inference(self, op0):
-    pass
+  def logical_not(self, expr, oplit):
+    print(f"oplit={oplit}")
+    return self._make_not(oplit)
 
-  def do_constant_propagation(self, op0):
-    if op0.is_constant():
-      evaluate(op0.value)
+  def logical_or(self, expr, *oplits):
+    lit = self.ctx.make_var(f'{expr}', self.ctx.valtypes.bool())
 
-  def evaluate(self, op0_value):
-    pass
-"""
+    # For each op: lit => oplit
+    for oplit in oplits:
+      self.ctx.add_constraint(self.ctx.cnf.logical_or(
+        oplit,
+        self._make_not(lit)))
+
+    # not oplit_0 and ... and not oplit_n => not lit
+    self.ctx.add_constraint(self.ctx.cnf.logical_or(
+        *[oplit for oplit in oplits],
+        self._make_not(lit)))
+
+    return lit
+
+  def _make_not(self, oplit):
+    if self.ctx.cnf.is_logical_not(oplit):
+      return oplit.ops[0]
+    else:
+      return self.ctx.cnf.logical_not(oplit)
+
 
 

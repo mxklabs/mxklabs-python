@@ -7,8 +7,8 @@ def test_evaluate_not():
   a = ctx.prop.variable(name="a")
   expr = ctx.prop.logical_not(a)
 
-  assert(True == expr.evaluate({a : False}))
-  assert(False == expr.evaluate({a : True}))
+  assert(True == ctx.evaluate(expr, {a : False}))
+  assert(False == ctx.evaluate(expr, {a : True}))
 
 def test_evaluate_and():
   ctx = mxklabs.expr.ExprContext()
@@ -17,10 +17,10 @@ def test_evaluate_and():
   b = ctx.prop.variable(name="b")
   expr = ctx.prop.logical_and(a, b)
 
-  assert(False == expr.evaluate({a : False, b : False}))
-  assert(False == expr.evaluate({a : False, b : True}))
-  assert(False == expr.evaluate({a : True, b : False}))
-  assert(True == expr.evaluate({a : True, b : True}))
+  assert(False == ctx.evaluate(expr, {a : False, b : False}))
+  assert(False == ctx.evaluate(expr, {a : False, b : True}))
+  assert(False == ctx.evaluate(expr, {a : True, b : False}))
+  assert(True == ctx.evaluate(expr, {a : True, b : True}))
 
 def test_evaluate_or():
   ctx = mxklabs.expr.ExprContext()
@@ -29,10 +29,10 @@ def test_evaluate_or():
   b = ctx.prop.variable(name="b")
   expr = ctx.prop.logical_or(a, b)
 
-  assert(False == expr.evaluate({a : False, b : False}))
-  assert(True == expr.evaluate({a : False, b : True}))
-  assert(True == expr.evaluate({a : True, b : False}))
-  assert(True == expr.evaluate({a : True, b : True}))
+  assert(False == ctx.evaluate(expr, {a : False, b : False}))
+  assert(True == ctx.evaluate(expr, {a : False, b : True}))
+  assert(True == ctx.evaluate(expr, {a : True, b : False}))
+  assert(True == ctx.evaluate(expr, {a : True, b : True}))
 
 def test_expr_hash():
   ctx = mxklabs.expr.ExprContext()

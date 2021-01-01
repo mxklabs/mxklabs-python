@@ -4,6 +4,7 @@ class ExprUtils:
 
   @staticmethod
   def basicOpsAndAttrsCheck(opid, min_ops, max_ops, exp_op_valtype, ops, exp_attrs, act_attrs):
+
     # Check number of operands.
     if (min_ops is not None and \
         max_ops is not None and \

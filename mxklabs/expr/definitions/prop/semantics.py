@@ -175,3 +175,91 @@ class ValueInference:
 
   def implies(self, expr, op_value0, op_value1):
     return op_value1 or not op_value0
+
+class CnfMapping:
+
+  def __init__(self, ctx):
+    self.ctx = ctx
+
+  def logical_not(self, expr, oplit):
+    print(f"oplit={oplit}")
+    return self._make_not(oplit)
+
+  def logical_and(self, expr, *oplits):
+    lit = self.ctx.make_var(f'{expr}', self.ctx.valtypes.bool())
+
+    # For each op: lit => oplit
+    for oplit in oplits:
+      self.ctx.add_constraint(self.ctx.cnf.logical_or(
+        oplit,
+        self._make_not(lit)))
+
+    # oplit_0 and ... and oplit_n => lit
+    self.ctx.add_constraint(self.ctx.cnf.logical_or(
+        *[self._make_not(oplit) for oplit in oplits],
+        lit))
+
+    return lit
+
+  def logical_nand(self, expr, *oplits):
+    raise RuntimeError(f"Unexpected call to create CNF mapping for '{expr}'")
+
+  def logical_or(self, expr, *oplits):
+    lit = self.ctx.make_var(f'{expr}', self.ctx.valtypes.bool())
+
+    # For each op: lit => oplit
+    for oplit in oplits:
+      self.ctx.add_constraint(self.ctx.cnf.logical_or(
+        oplit,
+        self._make_not(lit)))
+
+    # not oplit_0 and ... and not oplit_n => not lit
+    self.ctx.add_constraint(self.ctx.cnf.logical_or(
+        *[oplit for oplit in oplits],
+        self._make_not(lit)))
+
+    return lit
+
+  def logical_nor(self, expr, *oplits):
+    raise RuntimeError(f"Unexpected call to create CNF mapping for '{expr}'")
+
+  def logical_xor(self, expr, oplit0, oplit1):
+    lit = self.ctx.make_var(f'{expr}', self.ctx.valtypes.bool())
+
+    # oplit0 and not oplit1 => lit
+    self.ctx.add_constraint(self.ctx.cnf.logical_or(
+        self._make_not(oplit0),
+        oplit1,
+        lit))
+
+    # not oplit0 and oplit1 => lit
+    self.ctx.add_constraint(self.ctx.cnf.logical_or(
+        oplit0,
+        self._make_not(oplit1),
+        lit))
+
+    # oplit0 and oplit1 => not lit
+    self.ctx.add_constraint(self.ctx.cnf.logical_or(
+        self._make_not(oplit0),
+        self._make_not(oplit1),
+        self._make_not(lit)))
+
+    # not oplit0 and not oplit1 => not lit
+    self.ctx.add_constraint(self.ctx.cnf.logical_or(
+        oplit0,
+        oplit1,
+        self._make_not(lit)))
+
+    return lit
+
+  def logical_xnor(self, expr, op_cnf_expr_tup0, op_cnf_expr_tup1):
+    raise RuntimeError(f"Unexpected call to create CNF mapping for '{expr}'")
+
+  def implies(self, expr, op_cnf_expr_tup0, op_cnf_expr_tup1):
+    raise RuntimeError(f"Unexpected call to create CNF mapping for '{expr}'")
+
+  def _make_not(self, oplit):
+    if self.ctx.cnf.is_logical_not(oplit):
+      return oplit.ops[0]
+    else:
+      return self.ctx.cnf.logical_not(oplit)

@@ -9,6 +9,7 @@
   "exprSimplifier" : "semantics.ExprSimplifier",
   "typeInference" : "semantics.TypeInference",
   "valueInference" : "semantics.ValueInference",
+  "cnfMapping" : "semantics.CnfMapping",
   "mappings" : {
   },
   "expressions" :

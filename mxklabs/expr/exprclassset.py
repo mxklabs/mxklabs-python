@@ -64,8 +64,8 @@ class ExprClassSet(Module):
       expr = Expr(ctx=self.ctx, expr_class_set=self, identifier=exprid, ops=ops, valtype=valtype, attrs=attrs)
       return self.ctx.exprpool.make_unique(expr)
 
-
-
+  def get_cnf_mapping_class(self):
+    return self.get_class(self.module.definition['cnfMapping'])
 
   def get_class(self, name):
     symbol = self.module

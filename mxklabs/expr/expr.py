@@ -31,6 +31,9 @@ class Expr:
   def __str__(self):
     return self.get_compact_str()
 
+  def __repr__(self):
+    return self.get_compact_str()
+
   def __getattr__(self, name):
     if name in self.attrs:
       return self.attrs[name]
@@ -70,14 +73,7 @@ class Expr:
            self.ops == rhs.ops and \
            self.valtype == rhs.valtype and \
            self.attrs == rhs.attrs
-    print(f"{self} == {rhs} ==> {result}")
+    #print(f"{self} == {rhs} ==> {result}")
     return result
       
 
-  def evaluate(self, varmap):
-    """
-    Return the value of this expression under a given dictionary mapping
-    variables to values.
-    """
-    evaluator = ExprEvaluator(self.ctx, varmap)
-    return evaluator.eval(self)

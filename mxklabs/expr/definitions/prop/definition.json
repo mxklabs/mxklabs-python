@@ -9,9 +9,7 @@
   "exprSimplifier" : "semantics.ExprSimplifier",
   "typeInference" : "semantics.TypeInference",
   "valueInference" : "semantics.ValueInference",
-  "mappings" : {
-    "semantics.PropToCnfMapping": ["mxklabs.expr.definitions.cnf"]
-  },
+  "cnfMapping" : "semantics.CnfMapping",
   "expressions" :
   [
     {
