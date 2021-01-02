@@ -1,0 +1,19 @@
+mxklabs.expr
+
+* Better error messages (file + line numbers)
+* Support constants.
+* Support bitvector type (in lowering).
+* Make the definitions slicker.
+* Do more checking of type inputs/outputs.
+
+  Check user input values for constants are valid.
+  Check value provided to user in variable mappings are valid.
+  Check each implementation in semantics.py receives the right input 
+    and outputs the right thing.
+
+* Move variables to be made in a context rather than per expr set:
+
+  ctx.variable(name="a", valtype="bool")
+  ctx.variable(name="p", valtype="bitvector", width=10)
+
+* Add support for bitvector expressions.

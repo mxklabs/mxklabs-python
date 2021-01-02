@@ -5,6 +5,9 @@ def test_sat1():
   ctx = mxklabs.expr.ExprContext()
   a = ctx.prop.variable(name="a")
 
+  ctx.variable(name="a", valtype="bool")
+  ctx.variable(name="p", valtype="bitvector", width=10)
+
   ctx.add_constraint(a)
   result = ctx.solve()
 
