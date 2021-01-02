@@ -186,11 +186,11 @@ class CnfMapping:
     self.ctx = ctx
 
   def logical_not(self, expr, oplit):
-    print(f"oplit={oplit}")
     return self._make_not(oplit)
 
   def logical_and(self, expr, *oplits):
-    lit = self.ctx.make_var(f'{expr}', self.ctx.valtypes.bool)
+    litname = ExprUtils.make_variable_name_from_expr(expr)
+    lit = self.ctx.make_var(litname, self.ctx.valtypes.bool)
 
     # For each op: lit => oplit
     for oplit in oplits:
@@ -209,7 +209,8 @@ class CnfMapping:
     raise RuntimeError(f"Unexpected call to create CNF mapping for '{expr}'")
 
   def logical_or(self, expr, *oplits):
-    lit = self.ctx.make_var(f'{expr}', self.ctx.valtypes.bool)
+    litname = ExprUtils.make_variable_name_from_expr(expr)
+    lit = self.ctx.make_var(litname, self.ctx.valtypes.bool)
 
     # For each op: lit => oplit
     for oplit in oplits:
@@ -228,7 +229,8 @@ class CnfMapping:
     raise RuntimeError(f"Unexpected call to create CNF mapping for '{expr}'")
 
   def logical_xor(self, expr, oplit0, oplit1):
-    lit = self.ctx.make_var(f'{expr}', self.ctx.valtypes.bool)
+    litname = ExprUtils.make_variable_name_from_expr(expr)
+    lit = self.ctx.make_var(litname, self.ctx.valtypes.bool)
 
     # oplit0 and not oplit1 => lit
     self.ctx.add_constraint(self.ctx.cnf.logical_or(

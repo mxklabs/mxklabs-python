@@ -1,3 +1,5 @@
+import string
+
 from .expr import Expr
 
 class ExprUtils:
@@ -40,4 +42,12 @@ class ExprUtils:
     for expAttr in exp_attrs:
       if expAttr not in act_attrs:
         raise RuntimeError(f"'{opid}' expects attribute '{expAttr}'")
+
+  @staticmethod
+  def make_variable_name_from_expr(expr, bit=None):
+    result = f"[{repr(expr)}"
+    if bit is not None:
+      result += f":{bit}"
+    result += "]"
+    return result
 

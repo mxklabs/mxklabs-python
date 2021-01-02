@@ -11,7 +11,7 @@ class InputValidator:
       raise RuntimeError(f"'logical_not' must negate a variable (got operand '{ops[0].identifier}')")
 
   def logical_or(self, *ops, **attrs):
-    ExprUtils.basicOpsAndAttrsCheck('logical_or', 2, None, self.ctx.valtypes.bool(), ops, [], attrs)
+    ExprUtils.basicOpsAndAttrsCheck('logical_or', 1, None, self.ctx.valtypes.bool(), ops, [], attrs)
     for op in ops:
       if not self.ctx.is_variable(op) and not self.ctx.cnf.is_logical_not(op):
         raise RuntimeError(f"'logical_or' must be a disjunction over 'variable' and 'logical_not' expression (got operand '{op.identifier}')")
@@ -28,7 +28,7 @@ class ExprSimplifier:
   def logical_not(self, op0, **attrs):
     return None
 
-  def logical_or(self, ops, **attrs):
+  def logical_or(self, *ops, **attrs):
     return None
 
 class TypeInference:
@@ -36,10 +36,10 @@ class TypeInference:
   def __init__(self, ctx):
     self.ctx = ctx
 
-  def logical_not(self, ops, **attrs):
+  def logical_not(self, op0, **attrs):
     return self.ctx.valtypes.bool()
 
-  def logical_or(self, ops, **attrs):
+  def logical_or(self, *ops, **attrs):
     return self.ctx.valtypes.bool()
 
 class ValueInference:

@@ -98,8 +98,9 @@ class ExprContext:
       raise RuntimeError(f"variable with name '{name}' already exists in this context")
     else:
       expr = Expr(ctx=self, expr_class_set=None, identifier="variable", ops=[], valtype=valtype, attrs={"name":name})
-      self.vars[name] = valtype
-      return self.exprpool.make_unique(expr)
+      expr = self.exprpool.make_unique(expr)
+      self.vars[name] = expr
+      return expr
 
   def make_constant(self, value, valtype_fun, **valtype_attrs):
     valtype = valtype_fun(**valtype_attrs)

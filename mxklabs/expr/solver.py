@@ -1,13 +1,19 @@
 #from .exprcontext import ExprContext
+from pysat.solvers import Glucose3
 
-class SolverResult:
+class SolveResult:
 
-  def __init__(self, varmap=None, unsat_proof=None):
+  def __init__(self, varmap=None):
     self.varmap = varmap
-    self.unsat_proof = unsat_proof
+
+  def __bool__(self):
+    return self.varmap is not None
 
   def __nonzero__(self):
-    return self.varmap is not None
+    return self.__bool__()
+
+  def get_varmap(self):
+    return self.varmap
 
 class SolveContext:
 
@@ -45,12 +51,64 @@ class SolveContext:
 
   def solve(self):
     for constraint in self.ctx.constraints:
-      self.cnfctx.add_constraint(self.map_expr(constraint))
-
-    
+      self.cnfctx.add_constraint(
+        self.cnfctx.cnf.logical_or(self.map_expr(constraint)))
 
     print(f"variables={self.cnfctx.vars}")
-    print(f"constraints={self.cnfctx.constraints}")
+    print('-'*80)
+    print(f"constraints=")
+    for c in self.cnfctx.constraints:
+      print(f"- {c}")
+    print('-'*80)
+
+    var_num = 1
+    var_num_mapping = {}
+    var_num_mapping_inv = {}
+
+    # TODO: Don't hard code use of glucose.
+    g = Glucose3()
+
+    for c in self.cnfctx.constraints:
+      assert(self.cnfctx.cnf.is_logical_or(c))
+      clause = []
+      for op in c.ops:
+        if self.cnfctx.is_variable(op):
+          if op not in var_num_mapping:
+            var_num_mapping[op] = var_num
+            var_num_mapping_inv[var_num] = op
+            var_num += 1
+          clause.append(var_num_mapping[op])
+        else:
+          assert(self.cnfctx.cnf.is_logical_not(op))
+          assert(self.cnfctx.is_variable(op.ops[0]))
+          if op.ops[0] not in var_num_mapping:
+            var_num_mapping[op.ops[0]] = var_num
+            var_num_mapping_inv[var_num] = op.ops[0]
+            var_num += 1
+          clause.append(-var_num_mapping[op.ops[0]])
+      g.add_clause(clause)
+
+    print(f"var_num_mapping={var_num_mapping}")
+
+    if g.solve():
+      # SAT
+      cnf_varmap = {}
+      model = g.get_model()
+      for i in model:
+        if i in var_num_mapping_inv:
+          cnf_varmap[var_num_mapping_inv[i]] = True
+        if -i in var_num_mapping_inv:
+          cnf_varmap[var_num_mapping_inv[-i]] = False
+
+      varmap = {}
+      for _,v in self.ctx.vars.items():
+        # TODO: generalise
+        varmap[v] = cnf_varmap[self.map_expr(v)]
+        return SolveResult(varmap=varmap)
+    else:
+      # UNSAT
+      print("UNSAT")
+      return SolveResult()
 
 class Solver:
 

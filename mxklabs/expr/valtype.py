@@ -35,6 +35,14 @@ class Valtype:
       result += '}'
     return result
 
+  def __repr__(self):
+    result = f'{self.valtype_class.identifier}'
+    if len(self.attrs) > 0:
+      result += '{'
+      result += ','.join([f'{k}:{v}' for k, v in self.attrs])
+      result += '}'
+    return result
+
   def __eq__(self, rhs):
     return self.valtype_class == rhs.valtype_class and \
            self.attrs == rhs.attrs
