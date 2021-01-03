@@ -7,7 +7,7 @@ from .exprclassset import ExprClassSet
 from .exprevaluator import ExprEvaluator
 from .exprpool import ExprPool
 from .valtypeclass import ValtypeClass
-from .valtype import Valtype
+from .valtypeobj import Valtype
 from .solver import Solver
 
 logger = logging.getLogger(f'mxklabs.expr.ExprContext')
@@ -25,7 +25,7 @@ class Proxy:
 
 class ExprContext:
 
-  def __init__(self, load_default_expr_class_sets=True):
+  def __init__(self, load_defaults=True):
     self.exprclasssets = {}
     self.exprpool = ExprPool()
     self.valtype_pool = ExprPool()
@@ -34,11 +34,10 @@ class ExprContext:
     self._proxies = {}
     self.constraints = []
 
-    if load_default_expr_class_sets:
+    if load_defaults:
       exprsets = self._get_default_expr_class_sets()
       for exprset in exprsets:
         exprset = self.load_expr_class_set(exprset)
-        self.exprclasssets[exprset.identifier] = exprset
 
   def get_proxy(self, short_name):
     """ Create and return a proxy object as an attribute for a given short_name (e.g. ctx.bool). """
@@ -109,7 +108,7 @@ class ExprContext:
         from mxklabs.expr import ExprBuilder
 
         builder = ExprBuilder()
-        builder.load_expr_class_set("mxklabs.expr.definitions.bitvector")
+        builder.load_expr_class_set("mxklabs.expr.exprset.bitvector")
 
         # Now use the bitvector exprset.
         x = builder.bitvector.variable(width=10)
@@ -120,22 +119,20 @@ class ExprContext:
 
     short_name = module.definition['shortName']
 
-    if hasattr(self, short_name):
-      logger.error(f"'{identifier}' cannot be loaded (name '{short_name}' is already in use)")
-      raise RuntimeError(f"'{identifier}' cannot be loaded (name '{short_name}' is already in use)")
+    if identifier in self.exprclasssets.keys():
+      raise RuntimeError(f"'{identifier}' cannot be loaded twice (already loaded)")
+    else:
+      # Load dependencies.
+      for valtype_class in module.definition["dependencies"]["valTypes"]:
+        self.load_valtype_class(valtype_class)
+      proxy = self.get_proxy(short_name)
 
-    # Load dependencies.
-    for valtype_class in module.definition["dependencies"]["valTypes"]:
-      self.load_valtype_class(valtype_class)
+      # Create expression set.
+      exprset = ExprClassSet(ctx=self, proxy=proxy, identifier=identifier, module=module)
 
-    # Create expression set.
-    exprset = ExprClassSet(ctx=self, identifier=identifier, module=module)
+      self.exprclasssets[identifier] = exprset
 
-    # This is where we set the exprset attribute so that they can be
-    # accessed with, e.g., context.prop.
-    setattr(self, short_name, exprset)
-
-    return exprset
+      return exprset
 
   def add_constraint(self, expr):
     if expr.valtype == self.bool():
@@ -152,14 +149,11 @@ class ExprContext:
     return evaluator.eval(expr)
 
   def solve(self):
-    cnfctx = ExprContext(load_default_expr_class_sets=False)
-    cnfctx.load_expr_class_set("mxklabs.expr.definitions.cnf")
+    cnfctx = ExprContext(load_defaults=False)
+    cnfctx.load_expr_class_set("mxklabs.expr.exprset.cnf")
     solver = Solver(self, cnfctx)
     return solver.solve()
 
   def _get_default_expr_class_sets(self):
-    expr_class_sets_dir = os.path.join(os.path.dirname(__file__), "definitions")
-    ids = [e for e in os.listdir(expr_class_sets_dir)
-        if os.path.isdir(os.path.join(expr_class_sets_dir, e)) and not e.startswith('_')]
-    return [f"mxklabs.expr.definitions.{identifier}" for identifier in ids]
+    return ["mxklabs.expr.exprset.bool"]
 

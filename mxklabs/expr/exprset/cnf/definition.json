@@ -2,7 +2,7 @@
   "identifier" : "mxklabs.expr.definitions.cnf",
   "shortName" : "cnf",
   "dependencies" : {
-    "valTypes" : ["mxklabs.expr.valtypes.bool"]
+    "valTypes" : ["mxklabs.expr.valtype.bool"]
   },
   "inputValidator" : "semantics.InputValidator",
   "exprSimplifier" : "semantics.ExprSimplifier",

@@ -18,7 +18,7 @@ def test_sat2():
   ctx = mxklabs.expr.ExprContext()
   a = ctx.bool.variable(name="a")
 
-  ctx.add_constraint(ctx.prop.logical_not(a))
+  ctx.add_constraint(ctx.bool.logical_not(a))
   result = ctx.solve()
 
   # Is satisfiable.
@@ -31,7 +31,7 @@ def test_unsat1():
   ctx = mxklabs.expr.ExprContext()
   a = ctx.bool.variable(name="a")
 
-  ctx.add_constraint(ctx.prop.logical_and(a, ctx.prop.logical_not(a)))
+  ctx.add_constraint(ctx.bool.logical_and(a, ctx.bool.logical_not(a)))
   result = ctx.solve()
 
   # Is not satisfiable.

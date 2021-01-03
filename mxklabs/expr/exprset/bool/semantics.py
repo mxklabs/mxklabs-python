@@ -45,16 +45,16 @@ class ExprSimplifier:
       return self.ctx.bool.constant(not op0.value)
 
     # not(not(e)) => e
-    if self.ctx.prop.is_logical_not(op0):
+    if self.ctx.bool.is_logical_not(op0):
       return op0.ops[0]
 
     # not(and(e_0,...,e_n)) => or(not(e_0),...,not(e_n)))
-    if self.ctx.prop.is_logical_and(op0):
-      return self.ctx.prop.logical_or(*[self.ctx.prop.logical_not(op) for op in op0.ops])
+    if self.ctx.bool.is_logical_and(op0):
+      return self.ctx.bool.logical_or(*[self.ctx.bool.logical_not(op) for op in op0.ops])
 
     # not(or(e_0,...,e_n)) => and(not(e_0),...,not(e_n)))
-    if self.ctx.prop.is_logical_or(op0):
-      return self.ctx.prop.logical_and(*[self.ctx.prop.logical_not(op) for op in op0.ops])
+    if self.ctx.bool.is_logical_or(op0):
+      return self.ctx.bool.logical_and(*[self.ctx.bool.logical_not(op) for op in op0.ops])
 
     return None
 
@@ -73,7 +73,7 @@ class ExprSimplifier:
     ops = list(ops)
     new_ops = sorted(ops, key=hash)
     if new_ops != ops:
-      return self.ctx.prop.logical_and(*new_ops)
+      return self.ctx.bool.logical_and(*new_ops)
 
     return None
 
@@ -95,7 +95,7 @@ class ExprSimplifier:
     ops = list(ops)
     new_ops = sorted(ops, key=hash)
     if new_ops != ops:
-      return self.ctx.prop.logical_or(*new_ops)
+      return self.ctx.bool.logical_or(*new_ops)
 
     return None
 
@@ -112,7 +112,7 @@ class ExprSimplifier:
 
     # Sort by operand hash.
     if hash(ops[1]) < hash(ops[0]):
-      return self.ctx.prop.logical_xor(ops[1], ops[0])
+      return self.ctx.bool.logical_xor(ops[1], ops[0])
 
     return None
 
@@ -120,7 +120,7 @@ class ExprSimplifier:
     return self.ctx.logical_not(self.ctx.logical_xor(*ops))
 
   def implies(self, *ops):
-    return self.ctx.prop.logical_or(self.ctx.prop.logical_not(ops[0]), ops[1])
+    return self.ctx.bool.logical_or(self.ctx.bool.logical_not(ops[0]), ops[1])
 
 class TypeInference:
 

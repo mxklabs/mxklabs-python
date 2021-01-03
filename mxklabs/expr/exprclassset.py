@@ -3,8 +3,9 @@ from .module import Module
 
 class ExprClassSet(Module):
 
-  def __init__(self, ctx, identifier, module):
+  def __init__(self, ctx, proxy, identifier, module):
     Module.__init__(self, ctx, identifier, module)
+    self._proxy = proxy
     self.expr_defs = {}
     self.input_validator = self.load_class(self.module.definition['inputValidator'], ctx=self.ctx)
     self.expr_simplifier = self.load_class(self.module.definition['exprSimplifier'], ctx=self.ctx)
@@ -19,9 +20,9 @@ class ExprClassSet(Module):
       exprid = expr_def['identifier']
       self.expr_defs[exprid] = expr_def
       fun = lambda *ops, exprid=exprid, **attrs : self._expr_fun(*ops, exprid=exprid, **attrs)
-      setattr(self, exprid, fun)
+      setattr(self._proxy, exprid, fun)
       is_fun = lambda expr, exprid=exprid: self._is_expr_fun(expr, exprid)
-      setattr(self, f"is_{exprid}", is_fun)
+      setattr(self._proxy, f"is_{exprid}", is_fun)
 
     for expr_def in self.module.definition['expressions']:
       if not hasattr(self.value_inference, expr_def['identifier']):
