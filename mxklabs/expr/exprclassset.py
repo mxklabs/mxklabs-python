@@ -56,18 +56,6 @@ class ExprClassSet(Module):
   def get_cnf_mapping_class(self):
     return self.get_class(self.module.definition['cnfMapping'])
 
-  def get_class(self, name):
-    symbol = self.module
-    for attr in name.split('.'):
-      if not hasattr(symbol, attr):
-        raise RuntimeError(f"class '{self.identifier}.{name}' not found")
-      else:
-        symbol = getattr(symbol, attr)
-    return symbol
-
-  def load_class(self, name, **kwargs):
-    symbol = self.get_class(name)
-    return symbol(**kwargs)
 
 
 

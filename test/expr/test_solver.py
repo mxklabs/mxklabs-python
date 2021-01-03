@@ -37,3 +37,22 @@ def test_unsat1():
   # Is not satisfiable.
   assert(not result)
 
+def test_sat3():
+  ctx = mxklabs.expr.ExprContext()
+  true = ctx.bool.constant(value=1)
+
+  ctx.add_constraint(true)
+  result = ctx.solve()
+
+  # Is satisfiable.
+  assert(result)
+
+def test_unsat2():
+  ctx = mxklabs.expr.ExprContext()
+  true = ctx.bool.constant(value=0)
+
+  ctx.add_constraint(true)
+  result = ctx.solve()
+
+  # Is satisfiable.
+  assert(not result)

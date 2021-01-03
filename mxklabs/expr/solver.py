@@ -1,5 +1,6 @@
 #from .exprcontext import ExprContext
 from pysat.solvers import Glucose3
+from .exprutils import ExprUtils
 
 class SolveResult:
 
@@ -24,6 +25,11 @@ class SolveContext:
     self.mappers = {}
     self.mapping = {}
 
+    self._true = self.cnfctx.bool.variable(ExprUtils.make_variable_name_from_expr(self.cnfctx.bool.constant(value=1)))
+    self._false = self.cnfctx.cnf.logical_not(self._true)
+
+    self.cnfctx.add_constraint(self.cnfctx.cnf.logical_or(self._true))
+
     for expr_class_set_id, expr_class_set in self.ctx.exprclasssets.items():
       cnf_mapping_class = expr_class_set.get_cnf_mapping_class()
       self.mappers[expr_class_set_id] = cnf_mapping_class(self.cnfctx)
@@ -36,6 +42,14 @@ class SolveContext:
         # TODO: move this to valtype code.
         if expr.valtype == self.ctx.bool():
           mapped_expr = self.cnfctx.bool.variable(expr.name)
+        else:
+          raise RuntimeError(f"No implementation for lowering type {expr.valtype}")
+      elif self.ctx.is_constant(expr):
+        if expr.valtype == self.ctx.bool():
+          if expr.value:
+            mapped_expr = self._true
+          else:
+            mapped_expr = self.cnfctx.cnf.logical_not(self._true)
         else:
           raise RuntimeError(f"No implementation for lowering type {expr.valtype}")
       else:
@@ -104,7 +118,7 @@ class SolveContext:
       for _,v in self.ctx.vars.items():
         # TODO: generalise
         varmap[v] = cnf_varmap[self.map_expr(v)]
-        return SolveResult(varmap=varmap)
+      return SolveResult(varmap=varmap)
     else:
       # UNSAT
       print("UNSAT")
