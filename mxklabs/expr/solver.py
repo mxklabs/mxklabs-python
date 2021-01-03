@@ -34,8 +34,8 @@ class SolveContext:
     else:
       if self.ctx.is_variable(expr):
         # TODO: move this to valtype code.
-        if expr.valtype == self.ctx.valtypes.bool():
-          mapped_expr = self.cnfctx.cnf.variable(expr.name)
+        if expr.valtype == self.ctx.bool():
+          mapped_expr = self.cnfctx.bool.variable(expr.name)
         else:
           raise RuntimeError(f"No implementation for lowering type {expr.valtype}")
       else:

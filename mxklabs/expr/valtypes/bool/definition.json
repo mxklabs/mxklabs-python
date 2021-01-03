@@ -1,6 +1,6 @@
 {
-  "identifier" : "mxklabs.expr.valtypes.bool",
+  "identifier" : "mxklabs.expr.bool",
   "shortName" : "bool",
-  "semantics" : "semantics.Bool",
+  "semantics" : "semantics.ValtypeSemantics",
   "attrs" : []
 }

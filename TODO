@@ -12,8 +12,15 @@ mxklabs.expr
     and outputs the right thing.
 
 * Move variables to be made in a context rather than per expr set:
+* Change API.
 
-  ctx.variable(name="a", valtype="bool")
-  ctx.variable(name="p", valtype="bitvector", width=10)
+  ctx.bool.variable(name="a") for variable
+  ctx.bitvector.variable(name="a", width=16) for variable
+
+  ctx.bool.constant(value=1) for variable
+  ctx.bitvector.constant(value=12, width=16) for variable
+
+  ctx.bool.logical_and() for and operand in logical package.
+  ctx.bitvector.bitwise_and() for and operand in bitwise package.
 
 * Add support for bitvector expressions.

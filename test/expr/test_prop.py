@@ -4,7 +4,7 @@ import pytest
 def test_evaluate_not():
   ctx = mxklabs.expr.ExprContext()
 
-  a = ctx.prop.variable(name="a")
+  a = ctx.bool.variable(name="a")
   expr = ctx.prop.logical_not(a)
 
   assert(True == ctx.evaluate(expr, {a : False}))
@@ -13,8 +13,8 @@ def test_evaluate_not():
 def test_evaluate_and():
   ctx = mxklabs.expr.ExprContext()
 
-  a = ctx.prop.variable(name="a")
-  b = ctx.prop.variable(name="b")
+  a = ctx.bool.variable(name="a")
+  b = ctx.bool.variable(name="b")
   expr = ctx.prop.logical_and(a, b)
 
   assert(False == ctx.evaluate(expr, {a : False, b : False}))
@@ -25,8 +25,8 @@ def test_evaluate_and():
 def test_evaluate_or():
   ctx = mxklabs.expr.ExprContext()
 
-  a = ctx.prop.variable(name="a")
-  b = ctx.prop.variable(name="b")
+  a = ctx.bool.variable(name="a")
+  b = ctx.bool.variable(name="b")
   expr = ctx.prop.logical_or(a, b)
 
   assert(False == ctx.evaluate(expr, {a : False, b : False}))
@@ -37,8 +37,8 @@ def test_evaluate_or():
 def test_expr_hash():
   ctx = mxklabs.expr.ExprContext()
 
-  a1 = ctx.prop.variable(name="a")
-  b1 = ctx.prop.variable(name="b")
+  a1 = ctx.bool.variable(name="a")
+  b1 = ctx.bool.variable(name="b")
   not1 = ctx.prop.logical_not(a1)
   not2 = ctx.prop.logical_not(a1)
   and1 = ctx.prop.logical_and(a1, b1)
@@ -63,7 +63,7 @@ def test_expr_hash():
 
 def test_expr_pool():
   ctx = mxklabs.expr.ExprContext()
-  a1 = ctx.prop.variable(name="a")
+  a1 = ctx.bool.variable(name="a")
   not1 = ctx.prop.logical_not(a1)
   not2 = ctx.prop.logical_not(a1)
   assert(id(a1) != id(not2))
@@ -73,8 +73,8 @@ def test_expr_transform():
   ctx1 = mxklabs.expr.ExprContext(load_default_expr_class_sets=False)
   ctx1.load_expr_class_set("mxklabs.expr.definitions.prop")
 
-  a = ctx1.prop.variable(name="a")
-  b = ctx1.prop.variable(name="b")
+  a = ctx1.bool.variable(name="a")
+  b = ctx1.bool.variable(name="b")
   expr = ctx1.prop.logical_or(a, b)
 
   ctx2 = mxklabs.expr.ExprContext(load_default_expr_class_sets=False)
@@ -84,12 +84,12 @@ def test_expr_transform():
 
 def test_logical_not_simplify():
   ctx = mxklabs.expr.ExprContext()
-  a = ctx.prop.variable(name="a")
+  a = ctx.bool.variable(name="a")
   not_a = ctx.prop.logical_not(a)
-  b = ctx.prop.variable(name="b")
+  b = ctx.bool.variable(name="b")
   not_b = ctx.prop.logical_not(b)
-  t = ctx.prop.constant(value=True)
-  f = ctx.prop.constant(value=False)
+  t = ctx.bool.constant(value=True)
+  f = ctx.bool.constant(value=False)
 
   # not(True) => False
   assert(f == ctx.prop.logical_not(t))
@@ -112,7 +112,7 @@ def test_logical_not_simplify():
 
 
 ctx = mxklabs.expr.ExprContext()
-a1 = ctx.prop.variable(name="a")
+a1 = ctx.bool.variable(name="a")
 not1 = ctx.prop.logical_not(a1)
 not2 = ctx.prop.logical_not(a1)
 assert(id(a1) != id(not2))

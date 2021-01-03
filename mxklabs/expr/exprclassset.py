@@ -29,18 +29,6 @@ class ExprClassSet(Module):
       if not hasattr(self.type_inference, expr_def['identifier']):
         raise RuntimeError(f"no value inference found for '{self.short_name}.{expr_def['identifier']}'")
 
-  def is_variable(self, expr):
-    return self.ctx.is_variable(expr)
-
-  def variable(self, name, **attrs):
-    return self.ctx.make_var(name=name, valtype_fun=getattr(self.ctx.valtypes, self.module.definition['varType']), **attrs)
-
-  def is_constant(self, expr):
-    return self.ctx.is_constant(expr)
-
-  def constant(self, value, **attrs):
-    return self.ctx.make_constant(value=value, valtype_fun=getattr(self.ctx.valtypes, self.module.definition['varType']), **attrs)
-
   def _is_expr_fun(self, expr, exprid):
     return expr.expr_class_set == self and expr.identifier == exprid
 

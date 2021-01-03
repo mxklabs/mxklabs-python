@@ -6,28 +6,28 @@ class InputValidator:
     self.ctx = ctx
 
   def logical_not(self, *ops, **attrs):
-    ExprUtils.basicOpsAndAttrsCheck('logical_not', 1, 1, self.ctx.valtypes.bool(), ops, [], attrs)
+    ExprUtils.basicOpsAndAttrsCheck('logical_not', 1, 1, self.ctx.bool(), ops, [], attrs)
 
   def logical_and(self, *ops, **attrs):
-    ExprUtils.basicOpsAndAttrsCheck('logical_and', 2, None, self.ctx.valtypes.bool(), ops, [], attrs)
+    ExprUtils.basicOpsAndAttrsCheck('logical_and', 2, None, self.ctx.bool(), ops, [], attrs)
 
   def logical_nand(self, *ops, **attrs):
-    ExprUtils.basicOpsAndAttrsCheck('logical_nand', 2, None, self.ctx.valtypes.bool(), ops, [], attrs)
+    ExprUtils.basicOpsAndAttrsCheck('logical_nand', 2, None, self.ctx.bool(), ops, [], attrs)
 
   def logical_or(self, *ops, **attrs):
-    ExprUtils.basicOpsAndAttrsCheck('logical_or', 2, None, self.ctx.valtypes.bool(), ops, [], attrs)
+    ExprUtils.basicOpsAndAttrsCheck('logical_or', 2, None, self.ctx.bool(), ops, [], attrs)
 
   def logical_nor(self, *ops, **attrs):
-    ExprUtils.basicOpsAndAttrsCheck('logical_nor', 2, None, self.ctx.valtypes.bool(), ops, [], attrs)
+    ExprUtils.basicOpsAndAttrsCheck('logical_nor', 2, None, self.ctx.bool(), ops, [], attrs)
 
   def logical_xor(self, *ops, **attrs):
-    ExprUtils.basicOpsAndAttrsCheck('logical_xor', 2, 2, self.ctx.valtypes.bool(), ops, [], attrs)
+    ExprUtils.basicOpsAndAttrsCheck('logical_xor', 2, 2, self.ctx.bool(), ops, [], attrs)
 
   def logical_xnor(self, *ops, **attrs):
-    ExprUtils.basicOpsAndAttrsCheck('logical_xnor', 2, 2, self.ctx.valtypes.bool(), ops, [], attrs)
+    ExprUtils.basicOpsAndAttrsCheck('logical_xnor', 2, 2, self.ctx.bool(), ops, [], attrs)
 
   def implies(self, *ops, **attrs):
-    ExprUtils.basicOpsAndAttrsCheck('implies', 2, 2, self.ctx.valtypes.bool(), ops, [], attrs)
+    ExprUtils.basicOpsAndAttrsCheck('implies', 2, 2, self.ctx.bool(), ops, [], attrs)
 
 class ExprSimplifier:
   """ Responsible for simplifying and canonicalising expressions. Return
@@ -41,8 +41,8 @@ class ExprSimplifier:
   def logical_not(self, op0):
     # not(1) => 0
     # not(0) => 1
-    if self.ctx.prop.is_constant(op0):
-      return self.ctx.prop.constant(not op0.value)
+    if self.ctx.is_constant(op0):
+      return self.ctx.bool.constant(not op0.value)
 
     # not(not(e)) => e
     if self.ctx.prop.is_logical_not(op0):
@@ -60,12 +60,12 @@ class ExprSimplifier:
 
   def logical_and(self, *ops):
     # and(..., 0, ...) => 0
-    if any([self.ctx.prop.is_constant(op) and not op.value for op in ops]):
-      return self.ctx.prop.constant(False)
+    if any([self.ctx.is_constant(op) and not op.value for op in ops]):
+      return self.ctx.bool.constant(False)
 
     # and(1, ..., 1) => 1
-    if all([self.ctx.prop.is_constant(op) and op.value for op in ops]):
-      return self.ctx.prop.constant(True)
+    if all([self.ctx.is_constant(op) and op.value for op in ops]):
+      return self.ctx.bool.constant(True)
 
     # TODO: if and(expr, ..., not expr) => 0
 
@@ -82,12 +82,12 @@ class ExprSimplifier:
 
   def logical_or(self, *ops):
     # or(..., 1, ...) => 1
-    if any([self.ctx.prop.is_constant(op) and op.value for op in ops]):
-      return self.ctx.prop.constant(True)
+    if any([self.ctx.is_constant(op) and op.value for op in ops]):
+      return self.ctx.bool.constant(True)
 
     # or(0, ..., 0) => 0
-    if all([self.ctx.prop.is_constant(op) and not op.value for op in ops]):
-      return self.ctx.prop.constant(False)
+    if all([self.ctx.is_constant(op) and not op.value for op in ops]):
+      return self.ctx.bool.constant(False)
 
     # TODO: if or(expr, ..., not expr) => 1
 
@@ -107,8 +107,8 @@ class ExprSimplifier:
     # If xor(1,0) => 1
     # If xor(1,1) => 0
     # If xor(0,0) => 0
-    if all([self.ctx.prop.is_constant(op) for op in ops]):
-      return self.ctx.prop.constant(ops[0].value != ops[1].value)
+    if all([self.ctx.is_constant(op) for op in ops]):
+      return self.ctx.bool.constant(ops[0].value != ops[1].value)
 
     # Sort by operand hash.
     if hash(ops[1]) < hash(ops[0]):
@@ -128,28 +128,28 @@ class TypeInference:
     self.ctx = ctx
 
   def logical_not(self, *ops, **attrs):
-    return self.ctx.valtypes.bool()
+    return self.ctx.bool()
 
   def logical_and(self, *ops, **attrs):
-    return self.ctx.valtypes.bool()
+    return self.ctx.bool()
 
   def logical_nand(self, *ops, **attrs):
-    return self.ctx.valtypes.bool()
+    return self.ctx.bool()
 
   def logical_or(self, *ops, **attrs):
-    return self.ctx.valtypes.bool()
+    return self.ctx.bool()
 
   def logical_nor(self, *ops, **attrs):
-    return self.ctx.valtypes.bool()
+    return self.ctx.bool()
 
   def logical_xor(self, *ops, **attrs):
-    return self.ctx.valtypes.bool()
+    return self.ctx.bool()
 
   def logical_xnor(self, *ops, **attrs):
-    return self.ctx.valtypes.bool()
+    return self.ctx.bool()
 
   def implies(self, *ops, **attrs):
-    return self.ctx.valtypes.bool()
+    return self.ctx.bool()
 
 class ValueInference:
 
@@ -190,7 +190,7 @@ class CnfMapping:
 
   def logical_and(self, expr, *oplits):
     litname = ExprUtils.make_variable_name_from_expr(expr)
-    lit = self.ctx.make_var(litname, self.ctx.valtypes.bool)
+    lit = self.ctx.bool.variable(name=litname)
 
     # For each op: lit => oplit
     for oplit in oplits:
@@ -210,7 +210,7 @@ class CnfMapping:
 
   def logical_or(self, expr, *oplits):
     litname = ExprUtils.make_variable_name_from_expr(expr)
-    lit = self.ctx.make_var(litname, self.ctx.valtypes.bool)
+    lit = self.ctx.bool.variable(name=litname)
 
     # For each op: lit => oplit
     for oplit in oplits:
@@ -230,7 +230,7 @@ class CnfMapping:
 
   def logical_xor(self, expr, oplit0, oplit1):
     litname = ExprUtils.make_variable_name_from_expr(expr)
-    lit = self.ctx.make_var(litname, self.ctx.valtypes.bool)
+    lit = self.ctx.bool.variable(name=litname)
 
     # oplit0 and not oplit1 => lit
     self.ctx.add_constraint(self.ctx.cnf.logical_or(

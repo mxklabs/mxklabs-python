@@ -3,10 +3,7 @@ import pytest
 
 def test_sat1():
   ctx = mxklabs.expr.ExprContext()
-  a = ctx.prop.variable(name="a")
-
-  ctx.variable(name="a", valtype="bool")
-  ctx.variable(name="p", valtype="bitvector", width=10)
+  a = ctx.bool.variable(name="a")
 
   ctx.add_constraint(a)
   result = ctx.solve()
@@ -19,7 +16,7 @@ def test_sat1():
 
 def test_sat2():
   ctx = mxklabs.expr.ExprContext()
-  a = ctx.prop.variable(name="a")
+  a = ctx.bool.variable(name="a")
 
   ctx.add_constraint(ctx.prop.logical_not(a))
   result = ctx.solve()
@@ -32,7 +29,7 @@ def test_sat2():
 
 def test_unsat1():
   ctx = mxklabs.expr.ExprContext()
-  a = ctx.prop.variable(name="a")
+  a = ctx.bool.variable(name="a")
 
   ctx.add_constraint(ctx.prop.logical_and(a, ctx.prop.logical_not(a)))
   result = ctx.solve()
