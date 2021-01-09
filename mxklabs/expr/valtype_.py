@@ -9,44 +9,50 @@ class Valtype:
     self._attrs = attrs
     self._hash = None
 
-    for act_attr in attrs:
-      if act_attr not in valtype_class.attrs:
-        raise RuntimeError(f"{valtype_class.identifier}' does not expect attribute '{act_attr}'")
-    for exp_attr in valtype_class.attrs:
-      if exp_attr not in attrs:
-        raise RuntimeError(f"'{valtype_class.identifier}' expects attribute '{exp_attr}'")
+  def ctx(self):
+    return self._ctx
+
+  def valtype_def(self):
+    return self._valtype_def
+
+  def sub_valtypes(self):
+    return self._sub_valtypes
+
+  def attrs(self):
+    return self._attrs
 
   def __hash__(self):
     if self._hash is not None:
       return self._hash
 
     hash_items = []
-    hash_items.append(self.valtype_class)
-    hash_items += self.attrs.keys()
-    hash_items += self.attrs.values()
+    hash_items.append(self._ctx)
+    hash_items.append(self._valtype_def)
+    hash_items.append(self._sub_valtypes)
+    hash_items += self._attrs.keys()
+    hash_items += self._attrs.values()
+
     _hash = hash(tuple(hash_items))
     self._hash = _hash
     return _hash
 
   def __str__(self):
-    result = f'{self.valtype_class.identifier}'
-    if len(self.attrs) > 0:
+    result = f'{self._valtype_def.id()}'
+    if len(self._attrs) > 0:
       result += '{'
-      result += ','.join([f'{k}:{v}' for k, v in self.attrs])
+      result += ','.join([f'{k}:{v}' for k, v in self._attrs])
       result += '}'
+    if len(self._sub_valtypes) > 0:
+      result += '<'
+      result += ','.join([v.__str__() for v in self._sub_valtypes])
+      result += '>'
     return result
 
   def __repr__(self):
-    result = f'{self.valtype_class.identifier}'
-    if len(self.attrs) > 0:
-      result += '{'
-      result += ','.join([f'{k}:{v}' for k, v in self.attrs])
-      result += '}'
-    return result
+    return self.__str__()
 
   def __eq__(self, rhs):
-    return self.valtype_class == rhs.valtype_class and \
-           self.attrs == rhs.attrs
-
-  def get_cnf_mapping_class(self):
-    return self.valtype_class.get_cnf_mapping_class(**self.attrs)
+    return self._ctx == rhs._ctx and \
+           self._valtype_def == rhs._valtype_def and \
+           self._sub_valtypes == rhs._sub_valtypes and \
+           self._attrs == rhs._attrs
