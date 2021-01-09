@@ -2,10 +2,11 @@ import functools
 
 class Valtype:
 
-  def __init__(self, ctx, valtype_class, **attrs):
-    self.ctx = ctx
-    self.valtype_def = valtype_def
-    self.attrs = attrs
+  def __init__(self, ctx, valtype_def, sub_valtypes, attrs):
+    self._ctx = ctx
+    self._valtype_def = valtype_def
+    self._sub_valtypes = sub_valtypes
+    self._attrs = attrs
     self._hash = None
 
     for act_attr in attrs:

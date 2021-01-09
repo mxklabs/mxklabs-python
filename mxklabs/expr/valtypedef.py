@@ -29,21 +29,36 @@ class ValtypeDef:
     Determine whether a list of sub valtypes and a dictionary of attributes are valid
     for this type of valtype. Raise an exception if this is not the case.
     """
+    raise RuntimeError(f"'{self.__class__.__name__}.validate' has not been implemented")
 
-  def validate_value(self, valtype, )    
-
-  def is_valid_value(self, valtype, value):
-    if type(value) == int:
-      return value == 0 or value == 1
-    if type(value) == bool:
-      return True
-
-  def values(self, valtype):
-    yield False
-    yield True
+  def validate_value(self, valtype, value):
+    """
+    Determine if a python object is an object representing a valid value of valtype.
+    """
+    raise RuntimeError(f"'{self.__class__.__name__}.validate_value' has not been implemented")
 
   def num_values(self, valtype):
-    return 2
+    """
+    Determine the number of values of a valtype.
+    """
+    raise RuntimeError(f"'{self.__class__.__name__}.num_values' has not been implemented")
 
-  def value_to_str(self, valtype, value):
-    return 'False' if not value else 'True'
+  def values(self, valtype):
+    """
+    A generator of values of a valtype.
+    """
+    raise RuntimeError(f"'{self.__class__.__name__}.values' has not been implemented")
+
+  def convert_userobj_to_value(self, valtype, userobj):
+    """
+    Convert a user's input value to a valid value. If the userobj cannot be converted,
+    raise an exception.
+    """
+    raise RuntimeError(f"'{self.__class__.__name__}.convert_userobj_to_value' has not been implemented")
+
+  def convert_value_to_str(self, valtype, value):
+    """
+    Convert a valtype value to a string that is user-friendly.
+    """
+    raise RuntimeError(f"'{self.__class__.__name__}.convert_value_to_str' has not been implemented")
+

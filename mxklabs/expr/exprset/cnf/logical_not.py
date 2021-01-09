@@ -8,7 +8,8 @@ class LogicalNot(CnfExprDef):
 
   def validate(self, ops, attrs):
     # Expecting one or more operands, all boolean, no attributes.
-    ExprUtils.basic_ops_and_attrs_check(self.id(), 1, 1, self._ctx.bool(), ops, [], attrs)
+    ExprUtils.basic_ops_check(self.id(), 1, 1, self._ctx.bool(), ops)
+    ExprUtils.basic_attrs_check(self.id(), [], attrs)
     # Check operand is a boolean variable.
     if not self._ctx.is_variable(ops[0]) or ops[0].valtype() != self._ctx.bool():
       raise RuntimeError(f"'{self.id()}' must negate a variable (got operand '{ops[0]}')")

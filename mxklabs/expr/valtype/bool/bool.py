@@ -1,0 +1,32 @@
+from ...valtypedef import ValtypeDef
+from ...exprutils import ExprUtils
+
+class Bool(ValtypeDef):
+
+  def __init__(self, ctx):
+    ValtypeDef.__init__(ctx, package='mxklabs.expr.valtype')
+
+  def validate(self, sub_valtypes, attrs):
+    # Check sub_valtypes.
+    ExprUtils.basic_sub_valtypes_check(self.id(), 0, 0, None, sub_valtypes)
+    # No attributes.
+    ExprUtils.basic_attrs_check(self.id(), [], attrs)
+
+  def validate_value(self, valtype, value):
+    return value in [True, False]
+
+  def num_values(self, valtype):
+    return 2
+
+  def values(self, valtype):
+    yield False
+    yield True
+
+  def convert_userobj_to_value(self, valtype, userobj):
+    if userobj:
+      return True
+    else:
+      return False
+
+  def convert_value_to_str(self, valtype, value):
+    return "1" if value else "0"
