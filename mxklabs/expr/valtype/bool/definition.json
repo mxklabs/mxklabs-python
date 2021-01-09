@@ -1,6 +1,0 @@
-{
-  "identifier" : "mxklabs.expr.bool",
-  "namespace" : "bool",
-  "semantics" : "semantics.ValtypeSemantics",
-  "attrs" : []
-}

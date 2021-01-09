@@ -53,6 +53,10 @@ class ExprContext:
         self._valtype_defs[valtype_def.id()] = valtype_def
 
   def variable(self, name, valtype):
+    if not isinstance(name, str):
+      raise RuntimeError(f"name argument of variable is not a 'str'")
+    if not isinstance(valtype, Valtype):
+      raise RuntimeError(f"valtype argument of variable '{name}' is not a mxklabs.expr.Valtype object")
     if valtype.ctx() != self:
       raise RuntimeError(f"valtype argument of variable '{name}' was created in a different context")
     if valtype not in self._valtype_pool._pool:
@@ -60,10 +64,19 @@ class ExprContext:
     if name in self._variables.keys():
       raise RuntimeError(f"variable with name '{name}' already exists in context")
 
-    var = Variable(ctx=self, name=name, valtype=valtype)
-    var = self._expr_pool.make_unique(var)
-    self._variables[name] = var
-    return var
+    expr = Variable(ctx=self, name=name, valtype=valtype)
+    expr = self._expr_pool.make_unique(expr)
+    self._variables[name] = expr
+    return expr
+
+  def constant(self, value, valtype):
+    if valtype.ctx() != self:
+      raise RuntimeError(f"valtype argument of constant '{name}' was created in a different context")
+    if valtype not in self._valtype_pool._pool:
+      raise RuntimeError(f"valtype argument of variable '{name}' not found in context")
+    value = valtype.valtype_def().convert_userobj_to_value(valtype, value)
+    expr = Constant(ctx=self, value=value, valtype=valtype)
+    return self._expr_pool.make_unique(expr)
 
   #def constant(value, valtype):
 
