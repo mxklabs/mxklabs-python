@@ -3,15 +3,18 @@ from ...exprutils import ExprUtils
 
 class LogicalNot(CnfExprDef):
 
-  def __init__(self, ctx):
-    CnfExprDef.__init__(self, ctx)
+  def __init__(self, **kwargs):
+    CnfExprDef.__init__(self, **kwargs)
 
   def validate(self, ops, attrs):
     # Expecting one or more operands, all boolean, no attributes.
-    ExprUtils.basicOpsAndAttrsCheck(self.id(), 1, 1, self._ctx.bool(), ops, [], attrs)
+    ExprUtils.basic_ops_and_attrs_check(self.id(), 1, 1, self._ctx.bool(), ops, [], attrs)
     # Check operand is a boolean variable.
-    if not self._ctx.is_variable(ops[0]) or ops[0].valtype != self._ctx.bool():
+    if not self._ctx.is_variable(ops[0]) or ops[0].valtype() != self._ctx.bool():
       raise RuntimeError(f"'{self.id()}' must negate a variable (got operand '{ops[0]}')")
+
+  def validate_constraint(self, expr):
+    raise RuntimeError(f"'{self.id()}' cannot be used as a constraint")
 
   def replace(self, ops, attrs):
     return None

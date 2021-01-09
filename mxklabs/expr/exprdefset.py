@@ -1,27 +1,30 @@
 class ExprDefSet:
 
-  def __init__(self, ctx):
+  def __init__(self, ctx, baseid, package):
+    self._package = package
+    self._baseid = baseid
+    self._id = f"{package}.{baseid}"
     self._ctx = ctx
 
-  def get_namespace(self):
-    """
-    Return the 'namespace' string in which expressions in this set should reside.
-    """
-    raise RuntimeError(f"'{self.__class__.__name__}.get_namespace' has not been implemented")
+  def id(self):
+    return self._id
 
-  def get_expr_defs(self):
+  def baseid(self):
+    return self._baseid
+
+  def expr_defs(self):
     """
     Return the set of ExprDef objects associated with this ExprDefSet.
     """
     raise RuntimeError(f"'{self.__class__.__name__}.get_expr_defs' has not been implemented")
 
-  def get_valtypes(self):
+  def valtypes(self):
     """
     Return the set of valtype defs used by this ExprDefSet.
     """
     raise RuntimeError(f"'{self.__class__.__name__}.get_valtypes' has not been implemented")
 
-  def get_targets(self):
+  def targets(self):
     """
     Return target ExprDefSets that these expressions can be lowered to.
     """

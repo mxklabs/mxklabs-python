@@ -5,22 +5,17 @@ from .logical_or import LogicalOr
 class CnfExprDefSet(ExprDefSet):
 
   def __init__(self, ctx):
-    ExprDefSet.__init__(self, ctx)
+    ExprDefSet.__init__(self, ctx, baseid='cnf', package='mxklabs.expr.exprdefset')
     self._expr_defs = [
-      LogicalNot(ctx),
-      LogicalOr(ctx)
+      LogicalNot(ctx, self),
+      LogicalOr(ctx, self)
     ]
 
-  def get_namespace(self):
-    return "cnf"
-
-  def get_expr_defs(self):
+  def expr_defs(self):
     return self._expr_defs
 
-  def get_valtypes(self):
-    return [
-      "mxklabs.expr.valtype.bool"
-    ]
+  def valtypes(self):
+    return ["mxklabs.expr.valtype.bool"]
 
-  def get_targets(self):
+  def targets(self):
     return []

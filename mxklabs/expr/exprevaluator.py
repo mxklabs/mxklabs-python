@@ -19,7 +19,5 @@ class ExprEvaluator:
       else:
         # Evaluate expr's ops.
         opvals = [self.eval(op) for op in expr.ops]
-        # Get the function to evaluate op.
-        value_inference_fun = getattr(expr.expr_class_set.value_inference, expr.identifier)
-        # Evaluate it.
-        return value_inference_fun(expr, *opvals)
+        # Determine the value.
+        return expr.expr_def.determine_value(expr, opvals)

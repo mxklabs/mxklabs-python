@@ -4,7 +4,7 @@ class Valtype:
 
   def __init__(self, ctx, valtype_class, **attrs):
     self.ctx = ctx
-    self.valtype_class = valtype_class
+    self.valtype_def = valtype_def
     self.attrs = attrs
     self._hash = None
 

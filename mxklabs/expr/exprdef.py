@@ -4,16 +4,24 @@ class ExprDef:
 
   id_regex = re.compile(r'(?<!^)(?=[A-Z])')
 
-  def __init__(self, ctx):
+  def __init__(self, ctx, expr_def_set):
     self._ctx = ctx
+    self._expr_def_set = expr_def_set
+    self._baseid = ExprDef.id_regex.sub('_', self.__class__.__name__).lower()
+    self._id = f"{self._expr_def_set.id()}.{self._baseid}"
 
   def id(self):
     """
-    Return the identifier used to construct and represent the function. By
-    default we convert the class name to snake case (e.g. an ExprDef with class
-    name LogicalAnd will return an id of 'logical_and').
+    Return the fully qualified id, e.g. 'mxklabs.expr.exprdefset.cnf.logical_and'.
     """
-    return ExprDef.id_regex.sub('_', self.__class__.__name__).lower()
+    return self._id
+
+  def baseid(self):
+    """
+    Return the last part of the id, e.g. 'logical_and', defaults to snake case of
+    the class' name.
+    """
+    return self._baseid
 
   def validate(self, ops, attrs):
     """
@@ -24,6 +32,15 @@ class ExprDef:
     this is not the case.
     """
     raise RuntimeError(f"'{self.__class__.__name__}.validate' has not been implemented")
+
+  def validate_constraint(self, expr):
+    """
+    This method is called when an expression is being added as a constraint.
+
+    If the expression should not be used as a constraint raise an exception, else
+    return None.
+    """
+    raise RuntimeError(f"'{self.__class__.__name__}.validate_constraint' has not been implemented")
 
   def replace(self, ops, attrs):
     """
