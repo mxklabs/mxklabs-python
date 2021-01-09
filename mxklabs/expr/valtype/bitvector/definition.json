@@ -1,6 +1,6 @@
 {
   "identifier" : "mxklabs.expr.valtypes.bitvector",
-  "shortName" : "bitvector",
+  "namespace" : "bitvector",
   "semantics" : "semantics.ValtypeSemantics",
   "attrs" : ["width"]
 }

@@ -1,6 +1,6 @@
 {
-  "identifier" : "mxklabs.expr.definitions.cnf",
-  "shortName" : "cnf",
+  "identifier" : "mxklabs.expr.exprset.cnf",
+  "namespace" : "cnf",
   "dependencies" : {
     "valTypes" : ["mxklabs.expr.valtype.bool"]
   },

@@ -26,9 +26,9 @@ class ExprClassSet(Module):
 
     for expr_def in self.module.definition['expressions']:
       if not hasattr(self.value_inference, expr_def['identifier']):
-        raise RuntimeError(f"no value inference found for '{self.short_name}.{expr_def['identifier']}'")
+        raise RuntimeError(f"no value inference found for '{self.namespace}.{expr_def['identifier']}'")
       if not hasattr(self.type_inference, expr_def['identifier']):
-        raise RuntimeError(f"no value inference found for '{self.short_name}.{expr_def['identifier']}'")
+        raise RuntimeError(f"no value inference found for '{self.namespace}.{expr_def['identifier']}'")
 
   def _is_expr_fun(self, expr, exprid):
     return expr.expr_class_set == self and expr.identifier == exprid

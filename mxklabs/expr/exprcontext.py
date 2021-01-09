@@ -14,12 +14,12 @@ logger = logging.getLogger(f'mxklabs.expr.ExprContext')
 
 class Proxy:
 
-  def __init__(self, short_name):
-    self.short_name = short_name
+  def __init__(self, namespace):
+    self.namespace = namespace
 
   def __call__(self, **kwargs):
     if not hasattr(self, "callable"):
-      raise RuntimeError(f"'{self.short_name}' is not callable'")
+      raise RuntimeError(f"'{self.namespace}' is not callable'")
     else:
       return self.callable(**kwargs)
 
@@ -39,17 +39,17 @@ class ExprContext:
       for exprset in exprsets:
         exprset = self.load_expr_class_set(exprset)
 
-  def get_proxy(self, short_name):
-    """ Create and return a proxy object as an attribute for a given short_name (e.g. ctx.bool). """
-    if short_name not in self._proxies:
-      self._proxies[short_name] = Proxy(short_name)
-      setattr(self, short_name, self._proxies[short_name])
-    return self._proxies[short_name]
+  def get_proxy(self, namespace):
+    """ Create and return a proxy object as an attribute for a given namespace (e.g. ctx.bool). """
+    if namespace not in self._proxies:
+      self._proxies[namespace] = Proxy(namespace)
+      setattr(self, namespace, self._proxies[namespace])
+    return self._proxies[namespace]
 
-  def set_proxy_attr(self, identifier, short_name, attr_name, attr):
-    proxy = self.get_proxy(short_name)
+  def set_proxy_attr(self, identifier, namespace, attr_name, attr):
+    proxy = self.get_proxy(namespace)
     if hasattr(proxy, attr_name):
-      raise RuntimeError(f"'{identifier}' cannot be loaded (name '{short_name}.{attr_name}' is already in use)")
+      raise RuntimeError(f"'{identifier}' cannot be loaded (name '{namespace}.{attr_name}' is already in use)")
     else:
       setattr(proxy, attr_name, attr)
 
@@ -61,18 +61,18 @@ class ExprContext:
         identifier=identifier,
         module=module)
       self.valtype_classes[identifier] = valtype_class
-      short_name = module.definition['shortName']
+      namespace = module.definition['namespace']
 
       # Make it so we can call, e.g., ctx.bool() to get a type.
       def call_fun(**valtype_attrs):
         valtype = Valtype(self, valtype_class, **valtype_attrs)
         return self.valtype_pool.make_unique(valtype)
-      self.set_proxy_attr(identifier, short_name, "callable", call_fun)
+      self.set_proxy_attr(identifier, namespace, "callable", call_fun)
 
       # Make it so we can call, e.g., ctx.is_bool() check for type.
       def is_call_fun(valtype, **valtype_attrs):
         return valtype == call_fun(**valtype_attrs)
-      setattr(self, f"is_{short_name}", is_call_fun)
+      setattr(self, f"is_{namespace}", is_call_fun)
 
       # Make it so we can call, e.g., ctx.bool.variable(name="a") to create a variable.
       def variable_fun(name, **valtype_attrs):
@@ -84,14 +84,14 @@ class ExprContext:
           expr = self.exprpool.make_unique(expr)
           self.vars[name] = expr
           return expr
-      self.set_proxy_attr(identifier, short_name, "variable", variable_fun)
+      self.set_proxy_attr(identifier, namespace, "variable", variable_fun)
 
       # Make it so we can call, e.g., ctx.bool.constant(value=1) to create a constant.
       def constant_fun(value, **valtype_attrs):
         valtype = call_fun(**valtype_attrs)
         expr = Expr(ctx=self, expr_class_set=None, identifier="constant", ops=[], valtype=valtype, attrs={"value":value})
         return self.exprpool.make_unique(expr)
-      self.set_proxy_attr(identifier, short_name, "constant", constant_fun)
+      self.set_proxy_attr(identifier, namespace, "constant", constant_fun)
 
   def is_variable(self, expr):
     return expr.identifier == "variable"
@@ -117,7 +117,7 @@ class ExprContext:
     logger.info(f'Loading exprset \'{identifier}\'')
     module = importlib.import_module(identifier)
 
-    short_name = module.definition['shortName']
+    namespace = module.definition['namespace']
 
     if identifier in self.exprclasssets.keys():
       raise RuntimeError(f"'{identifier}' cannot be loaded twice (already loaded)")
@@ -125,7 +125,7 @@ class ExprContext:
       # Load dependencies.
       for valtype_class in module.definition["dependencies"]["valTypes"]:
         self.load_valtype_class(valtype_class)
-      proxy = self.get_proxy(short_name)
+      proxy = self.get_proxy(namespace)
 
       # Create expression set.
       exprset = ExprClassSet(ctx=self, proxy=proxy, identifier=identifier, module=module)

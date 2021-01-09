@@ -1,6 +1,6 @@
 {
   "identifier" : "mxklabs.expr.exprclassset.bool",
-  "shortName" : "bool",
+  "namespace" : "bool",
   "dependencies" : {
     "valTypes" : ["mxklabs.expr.valtype.bool"]
   },
