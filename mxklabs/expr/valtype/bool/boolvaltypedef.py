@@ -1,10 +1,10 @@
 from ...valtypedef import ValtypeDef
 from ...exprutils import ExprUtils
 
-class Bool(ValtypeDef):
+class BoolValtypeDef(ValtypeDef):
 
   def __init__(self, ctx):
-    ValtypeDef.__init__(ctx, package='mxklabs.expr.valtype')
+    ValtypeDef.__init__(self, ctx, baseid='bool', package='mxklabs.expr.valtype')
 
   def validate(self, sub_valtypes, attrs):
     # Check sub_valtypes.

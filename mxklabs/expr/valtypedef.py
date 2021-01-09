@@ -2,11 +2,9 @@ import re
 
 class ValtypeDef:
 
-  id_regex = re.compile(r'(?<!^)(?=[A-Z])')
-
-  def __init__(self, ctx, package):
+  def __init__(self, ctx, baseid, package):
     self._ctx = ctx
-    self._baseid = ValtypeDef.id_regex.sub('_', self.__class__.__name__).lower()
+    self._baseid = baseid
     self._id = f"{package}.{self._baseid}"
 
   def id(self):

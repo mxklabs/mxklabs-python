@@ -1,1 +1,1 @@
-from .bool import Bool
+from .boolvaltypedef import BoolValtypeDef

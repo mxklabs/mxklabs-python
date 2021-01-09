@@ -4,17 +4,80 @@ import functools
 
 class Expr:
 
-  def __init__(self, ctx, expr_def_set, expr_def, ops, attrs, valtype):
+  def __init__(self, ctx, valtype):
     self._ctx = ctx
+    self._valtype = valtype
+    self._hash = None
+    self._hash_items = [self._ctx, self._valtype]
+
+  def ctx(self):
+    return self._ctx
+
+  def valtype(self):
+    return self._valtype
+
+  def __str__(self):
+    return self.get_compact_str()
+
+  def __repr__(self):
+    return self.get_compact_str()
+
+  def __hash__(self):
+    if self._hash is not None:
+      return self._hash
+
+    self._hash = hash(tuple(self._hash_items))
+    return self._hash
+
+  # TODO: Find a way to cache this.
+  def __eq__(self, rhs):
+    # If hash computed and doesn't match, the expressions are not equivalent.
+    if self._hash is not None and rhs._hash is not None:
+      if self._hash != rhs._hash:
+        return False
+
+    # Compare each member.
+    return all([l == r for l, r in zip(self._hash_items, rhs._hash_items)])
+
+class Constant(Expr):
+
+  def __init__(self, ctx, value, valtype):
+    Expr.__init__(self, ctx, valtype)
+    self._value = value
+    self._hash_items.append(self._value)
+
+  def value(self):
+    return self._value
+
+  def get_compact_str(self):
+    return self._valtype.convert_value_to_str(self._value)
+
+class Variable(Expr):
+
+  def __init__(self, ctx, name, valtype):
+    Expr.__init__(self, ctx, valtype)
+    self._name = name
+    self._hash_items.append(self._name)
+
+  def name(self):
+    return self._name
+
+  def get_compact_str(self):
+    return name
+
+class OpExpr(Expr):
+
+  def __init__(self, ctx, expr_def_set, expr_def, ops, attrs, valtype):
+    Expr.__init__(self, ctx, valtype)
     self._expr_def_set = expr_def_set
     self._expr_def = expr_def
     self._ops = ops
     self._attrs = attrs
-    self._valtype = valtype
-    self._hash = None
 
-  def ctx(self):
-    return self._ctx
+    self._hash_items.append(self._expr_def_set)
+    self._hash_items.append(self._expr_def)
+    self._hash_items.append(self._ops)
+    self._hash_items.append(self._attrs)
 
   def expr_def_set(self):
     return self._expr_def_set
@@ -28,34 +91,9 @@ class Expr:
   def attrs(self):
     return self._attrs
 
-  def valtype(self):
-    return self._valtype
-
-  def __hash__(self):
-    if self._hash is not None:
-      return self._hash
-
-    hash_items = []
-    hash_items.append(self._expr_def_set)
-    hash_items.append(self._expr_def)
-    hash_items += self._ops
-    hash_items += self._attrs.keys()
-    hash_items += self._attrs.values()
-    hash_items.append(self._valtype)
-
-    _hash = hash(tuple(hash_items))
-    self._hash = _hash
-    return _hash
-
-  def __str__(self):
-    return self.get_compact_str()
-
-  def __repr__(self):
-    return self.get_compact_str()
-
-  def __getattr__(self, name):
-    if name in self._attrs:
-      return self._attrs[name]
+  def __getattr__(self, field):
+    if field in self._attrs:
+      return self._attrs[field]
     else:
       # Default behaviour
       raise AttributeError
@@ -73,34 +111,17 @@ class Expr:
       result += ")"
       return result
 
-  def get_pretty_str(self):
-    # TODO: Use valtype to string function here.
-    if self._ctx.is_variable(self):
-      return f"{self.name}"
-    elif self._ctx.is_constant(self):
-      return f"{self.value}"
-    else:
-      # TODO: Add attributes.
-      result = self._expr_def.id()
-      for op in self._ops:
-        result += f"\n  - {op}"
-      return result
-
-  # TODO: Find a way to cache this.
-  def __eq__(self, rhs):
-    # If hash computed and doesn't match, the expressions are not equivalent.
-    if self._hash is not None and rhs._hash is not None:
-      if self._hash != rhs._hash:
-        return False
-
-    # Compare each member.
-    result = self._ctx == rhs._ctx and \
-           self._expr_def_set == rhs._expr_def_set and \
-           self._expr_def == rhs._expr_def and \
-           self._ops == rhs._ops and \
-           self._attrs == rhs._attrs and \
-           self._valtype == rhs._valtype
-
-    return result
+  #def get_pretty_str(self):
+  #  # TODO: Use valtype to string function here.
+  #  if self._ctx.is_variable(self):
+  #    return f"{self.name}"
+  #  elif self._ctx.is_constant(self):
+  #    return f"{self.value}"
+  #  else:
+  #    # TODO: Add attributes.
+  #    result = self._expr_def.id()
+  #    for op in self._ops:
+  #      result += f"\n  - {op}"
+  #    return result
 
 

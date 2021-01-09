@@ -1,159 +1,77 @@
 import importlib
+import inspect
 import logging
-import os
 
-from .expr import Expr
-from .exprclassset import ExprClassSet
-from .exprevaluator import ExprEvaluator
-from .exprpool import ExprPool
-from .valtypeclass import ValtypeClass
-from .valtypeobj import Valtype
-from .solver import Solver
+from .expr import Constant, OpExpr, Variable
+from .exprcontextnamespace import ExprContextNamespace
+from .objpool import ObjPool
+from .valtype_ import Valtype
+from .valtypedef import ValtypeDef
 
 logger = logging.getLogger(f'mxklabs.expr.ExprContext')
-
-class Proxy:
-
-  def __init__(self, namespace):
-    self.namespace = namespace
-
-  def __call__(self, **kwargs):
-    if not hasattr(self, "callable"):
-      raise RuntimeError(f"'{self.namespace}' is not callable'")
-    else:
-      return self.callable(**kwargs)
 
 class ExprContext:
 
   def __init__(self, load_defaults=True):
-    self.exprclasssets = {}
-    self.exprpool = ExprPool()
-    self.valtype_pool = ExprPool()
-    self.valtype_classes = {}
-    self.vars = {}
-    self._proxies = {}
-    self.constraints = []
+    self._expr_pool = ObjPool()
+    self._namespaces = {}
+    self._valtype_defs = {}
+    self._valtype_pool = ObjPool()
+    self._variables = {}
 
-    if load_defaults:
-      exprsets = self._get_default_expr_class_sets()
-      for exprset in exprsets:
-        exprset = self.load_expr_class_set(exprset)
-
-  def get_proxy(self, namespace):
-    """ Create and return a proxy object as an attribute for a given namespace (e.g. ctx.bool). """
-    if namespace not in self._proxies:
-      self._proxies[namespace] = Proxy(namespace)
-      setattr(self, namespace, self._proxies[namespace])
-    return self._proxies[namespace]
-
-  def set_proxy_attr(self, identifier, namespace, attr_name, attr):
-    proxy = self.get_proxy(namespace)
-    if hasattr(proxy, attr_name):
-      raise RuntimeError(f"'{identifier}' cannot be loaded (name '{namespace}.{attr_name}' is already in use)")
+  def __getattr__(self, name):
+    if name in self._namespaces:
+      return self._namespaces[name]
     else:
-      setattr(proxy, attr_name, attr)
+      # Default behaviour
+      raise AttributeError
 
-  def load_valtype_class(self, identifier):
-    if identifier not in self.valtype_classes:
-      logger.info(f'Loading \'{identifier}\'')
-      module = importlib.import_module(identifier)
-      valtype_class = ValtypeClass(ctx=self,
-        identifier=identifier,
-        module=module)
-      self.valtype_classes[identifier] = valtype_class
-      namespace = module.definition['namespace']
+  def load_valtype(self, valtypeid):
+    if valtypeid in self._valtype_defs:
+      raise RuntimeError(f"'{valtypeid}' already loaded")
 
-      # Make it so we can call, e.g., ctx.bool() to get a type.
-      def call_fun(**valtype_attrs):
-        valtype = Valtype(self, valtype_class, **valtype_attrs)
-        return self.valtype_pool.make_unique(valtype)
-      self.set_proxy_attr(identifier, namespace, "callable", call_fun)
+    logger.info(f'Loading \'{valtypeid}\'')
+    module = importlib.import_module(valtypeid)
 
-      # Make it so we can call, e.g., ctx.is_bool() check for type.
-      def is_call_fun(valtype, **valtype_attrs):
-        return valtype == call_fun(**valtype_attrs)
-      setattr(self, f"is_{namespace}", is_call_fun)
+    # Look for ValtypeDef classes.
+    for name, obj in inspect.getmembers(module):
+      if inspect.isclass(obj) and issubclass(obj, ValtypeDef):
+        valtype_def = obj(self)
 
-      # Make it so we can call, e.g., ctx.bool.variable(name="a") to create a variable.
-      def variable_fun(name, **valtype_attrs):
-        valtype = call_fun(**valtype_attrs)
-        if name in self.vars.keys():
-          raise RuntimeError(f"variable with name '{name}' already exists in this context")
-        else:
-          expr = Expr(ctx=self, expr_class_set=None, identifier="variable", ops=[], valtype=valtype, attrs={"name":name})
-          expr = self.exprpool.make_unique(expr)
-          self.vars[name] = expr
-          return expr
-      self.set_proxy_attr(identifier, namespace, "variable", variable_fun)
+        # Make it so we can call, e.g., ctx.valtype.bool() to get a type.
+        def create_valtype(*sub_valtypes, **attrs):
+          valtype_def.validate(sub_valtypes, attrs)
+          valtype = Valtype(self, valtype_def, sub_valtypes, attrs)
+          return self._valtype_pool.make_unique(valtype)
+        self._add('valtype', valtype_def.baseid(), create_valtype)
 
-      # Make it so we can call, e.g., ctx.bool.constant(value=1) to create a constant.
-      def constant_fun(value, **valtype_attrs):
-        valtype = call_fun(**valtype_attrs)
-        expr = Expr(ctx=self, expr_class_set=None, identifier="constant", ops=[], valtype=valtype, attrs={"value":value})
-        return self.exprpool.make_unique(expr)
-      self.set_proxy_attr(identifier, namespace, "constant", constant_fun)
+        # Make it so we can call, e.g., ctx.valtype.is_bool() check for type.
+        def is_valtype(valtype, *sub_valtypes, **valtype_attrs):
+          return id(valtype) == id(create_valtype(*sub_valtypes, **valtype_attrs))
+        self._add('valtype', f"is_{valtype_def.baseid()}", is_valtype)
 
-  def is_variable(self, expr):
-    return expr.identifier == "variable"
+        self._valtype_defs[valtype_def.id()] = valtype_def
 
-  def is_constant(self, expr):
-    return expr.identifier == "constant"
+  def variable(self, name, valtype):
+    if valtype.ctx() != self:
+      raise RuntimeError(f"valtype argument of variable '{name}' was created in a different context")
+    if valtype not in self._valtype_pool._pool:
+      raise RuntimeError(f"valtype argument of variable '{name}' not found in context")
+    if name in self._variables.keys():
+      raise RuntimeError(f"variable with name '{name}' already exists in context")
 
-  def load_expr_class_set(self, identifier):
-    """
-        Load an expression set via a module name.
-        For example:
+    var = Variable(ctx=self, name=name, valtype=valtype)
+    var = self._expr_pool.make_unique(var)
+    self._variables[name] = var
+    return var
 
-        ```
-        from mxklabs.expr import ExprBuilder
+  #def constant(value, valtype):
 
-        builder = ExprBuilder()
-        builder.load_expr_class_set("mxklabs.expr.exprset.bitvector")
 
-        # Now use the bitvector exprset.
-        x = builder.bitvector.variable(width=10)
-        ```
-    """
-    logger.info(f'Loading exprset \'{identifier}\'')
-    module = importlib.import_module(identifier)
+  def _add(self, namespaceid, baseid, fun):
+    if namespaceid not in self._namespaces:
+      self._namespaces[namespaceid] = ExprContextNamespace(namespaceid)
+    self._namespaces[namespaceid]._set_attr(baseid, fun)
 
-    namespace = module.definition['namespace']
 
-    if identifier in self.exprclasssets.keys():
-      raise RuntimeError(f"'{identifier}' cannot be loaded twice (already loaded)")
-    else:
-      # Load dependencies.
-      for valtype_class in module.definition["dependencies"]["valTypes"]:
-        self.load_valtype_class(valtype_class)
-      proxy = self.get_proxy(namespace)
-
-      # Create expression set.
-      exprset = ExprClassSet(ctx=self, proxy=proxy, identifier=identifier, module=module)
-
-      self.exprclasssets[identifier] = exprset
-
-      return exprset
-
-  def add_constraint(self, expr):
-    if expr.valtype == self.bool():
-      self.constraints.append(expr)
-    else:
-      raise RuntimeError(f"constraints must be of type '{self.bool()}' (got {expr.valtype})")
-
-  def evaluate(self, expr, varmap):
-    """
-    Return the value of this expression under a given dictionary mapping
-    variables to values.
-    """
-    evaluator = ExprEvaluator(self, varmap)
-    return evaluator.eval(expr)
-
-  def solve(self):
-    cnfctx = ExprContext(load_defaults=False)
-    cnfctx.load_expr_class_set("mxklabs.expr.exprset.cnf")
-    solver = Solver(self, cnfctx)
-    return solver.solve()
-
-  def _get_default_expr_class_sets(self):
-    return ["mxklabs.expr.exprset.bool"]
 
