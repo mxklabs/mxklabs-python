@@ -1,26 +1,40 @@
 mxklabs.expr
 
+* Make operators use 'expr' namespace.
+* Add 'logical' or 'prop' expr_def_set.
+
+  ctx.prop.logical_and(...)
+
+* Add support for bitvectors.
+* Add support for dictionaries mapping strings of types.
+
+  ctx.valtypes.bitvector(width=10)  
+  ctx.bitvector.bitwise_and(bitv1, bitv2)
+
+  ctx.expr.bitvector_add()
+  ctx.expr.bitvector_subtr()
+  ctx.expr.bitvector_mult()
+  ctx.expr.bitvector_div()
+  ctx.expr.bitvector_mod()
+
+  ctx.expr.bitvector_gt()
+  ctx.expr.bitvector_gte()
+  ctx.expr.bitvector_lt()
+  ctx.expr.bitvector_lte()
+  ctx.expr.bitvector_eq()
+  ctx.expr.bitvector_ne()
+
+  ctx.expr.bitvector_tobool()
+  ctx.expr.bitvector_frombool()
+  ctx.expr.bitvector_slice()
+  ctx.expr.bitvector_concat()
+  ctx.expr.bitvector_index()
+
+* Add bitvector expr_def_set.
+* Add index operators for vector, a shorthand for operator[] on Expr to generate it.
+* Add index operators for dictionary, a shorthand for operator[] on Expr to generate it.
+
+* Add support for heterogeneous tuples of types.
+* Add support for homogeneous, fixed-size vectors of types.
+
 * Better error messages (file + line numbers)
-* Support constants.
-* Support bitvector type (in lowering).
-* Make the definitions slicker.
-* Do more checking of type inputs/outputs.
-
-  Check user input values for constants are valid.
-  Check value provided to user in variable mappings are valid.
-  Check each implementation in semantics.py receives the right input 
-    and outputs the right thing.
-
-* Move variables to be made in a context rather than per expr set:
-* Change API.
-
-  ctx.bool.variable(name="a") for variable
-  ctx.bitvector.variable(name="a", width=16) for variable
-
-  ctx.bool.constant(value=1) for variable
-  ctx.bitvector.constant(value=12, width=16) for variable
-
-  ctx.bool.logical_and() for and operand in logical package.
-  ctx.bitvector.bitwise_and() for and operand in bitwise package.
-
-* Add support for bitvector expressions.
