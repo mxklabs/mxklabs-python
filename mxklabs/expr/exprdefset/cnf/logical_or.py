@@ -8,22 +8,19 @@ class LogicalOr(CnfExprDef):
 
   def validate(self, ops, attrs):
     # Expecting one or more operands, all boolean, no attributes.
-    ExprUtils.basic_ops_check(self.id(), 1, None, self._ctx.bool(), ops)
+    ExprUtils.basic_ops_check(self.id(), 1, None, self._ctx.valtype.bool(), ops)
     ExprUtils.basic_attrs_check(self.id(), [], attrs)
     # Require all operands to either be boolean variables or negations of boolean variables.
     for op in ops:
-      if (not self._ctx.is_variable(ops[0]) or ops[0].valtype() != self._ctx.bool()) and \
-         (not self._ctx.cnf.is_logical_not(op))
+      if (not self._ctx.is_variable(ops[0]) or not self.ctx.valtype.is_bool(ops[0])) and \
+         (not self._ctx.cnf.is_logical_not(op)):
         raise RuntimeError(f"'{self.id()}' must be a disjunction over 'variable' and 'logical_not' expression (got '{op}')")
-
-  def validate_constraint(self, expr):
-    return None
 
   def replace(self, ops, attrs):
     return None
 
   def determine_valtype(self, ops, attrs, op_valtypes):
-    return self._ctx.bool()
+    return self._ctx.valtype.bool()
 
   def determine_value(self, expr, op_values):
     return any(op_values)
@@ -32,8 +29,8 @@ class LogicalOr(CnfExprDef):
 
     # TODO: Check target is cnf.
 
-    lit = target_ctx.bool.variable(name=
-        ExprUtils.make_variable_name_from_expr(expr)
+    lit = target_ctx.valtype.bool.variable(name=
+        ExprUtils.make_variable_name_from_expr(expr))
 
     # For each op: lit => oplit
     for oplit in op_target_mapping:

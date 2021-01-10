@@ -52,6 +52,8 @@ class Valtype:
     return self.__str__()
 
   def __eq__(self, rhs):
+    if not isinstance(rhs, Valtype):
+      return False
     return self._ctx == rhs._ctx and \
            self._valtype_def == rhs._valtype_def and \
            self._sub_valtypes == rhs._sub_valtypes and \

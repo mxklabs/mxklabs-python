@@ -33,15 +33,6 @@ class ExprDef:
     """
     raise RuntimeError(f"'{self.__class__.__name__}.validate' has not been implemented")
 
-  def validate_constraint(self, expr):
-    """
-    This method is called when an expression is being added as a constraint.
-
-    If the expression should not be used as a constraint raise an exception, else
-    return None.
-    """
-    raise RuntimeError(f"'{self.__class__.__name__}.validate_constraint' has not been implemented")
-
   def replace(self, ops, attrs):
     """
     This method is called prior to the construction of an expression.

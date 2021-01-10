@@ -18,7 +18,7 @@ class ExprDefSet:
     """
     raise RuntimeError(f"'{self.__class__.__name__}.get_expr_defs' has not been implemented")
 
-  def valtypes(self):
+  def valtype_ids(self):
     """
     Return the set of valtype defs used by this ExprDefSet.
     """

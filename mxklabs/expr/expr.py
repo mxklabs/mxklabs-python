@@ -63,7 +63,7 @@ class Variable(Expr):
     return self._name
 
   def get_compact_str(self):
-    return name
+    return self._name
 
 class OpExpr(Expr):
 

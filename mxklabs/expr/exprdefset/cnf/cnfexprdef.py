@@ -1,9 +1,9 @@
 from ...exprdef import ExprDef
 
-class CnfExprDef:
+class CnfExprDef(ExprDef):
 
-  def __init__(self, ctx):
-    ExprDef.__init__(self, ctx)
+  def __init__(self, **kwargs):
+    ExprDef.__init__(self, **kwargs)
 
   def _make_not(self, target_ctx, oplit):
     # All literals are either variables or negations of variables. If we
