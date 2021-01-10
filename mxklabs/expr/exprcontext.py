@@ -40,6 +40,9 @@ class ExprContext:
 
         # Make it so we can call, e.g., ctx.valtype.bool() to get a type.
         def create_valtype(*sub_valtypes, **attrs):
+          # Check sub_valtypes are valid valtypes.
+          for index, sub_valtype in zip(range(len(sub_valtypes)), sub_valtypes):
+            self._check_valtype(f"sub_valtype {index}", valtype)
           valtype_def.validate(sub_valtypes, attrs)
           valtype = Valtype(self, valtype_def, sub_valtypes, attrs)
           return self._valtype_pool.make_unique(valtype)
@@ -53,28 +56,26 @@ class ExprContext:
         self._valtype_defs[valtype_def.id()] = valtype_def
 
   def variable(self, name, valtype):
+    # Check valtype is valid.
+    self._check_valtype(f"valtype argument of variable '{name}'", valtype)
+    # Check variable name is valid.
     if not isinstance(name, str):
       raise RuntimeError(f"name argument of variable is not a 'str'")
-    if not isinstance(valtype, Valtype):
-      raise RuntimeError(f"valtype argument of variable '{name}' is not a mxklabs.expr.Valtype object")
-    if valtype.ctx() != self:
-      raise RuntimeError(f"valtype argument of variable '{name}' was created in a different context")
-    if valtype not in self._valtype_pool._pool:
-      raise RuntimeError(f"valtype argument of variable '{name}' not found in context")
+    # Check variable name is unique.
     if name in self._variables.keys():
       raise RuntimeError(f"variable with name '{name}' already exists in context")
-
+    # Create variable.
     expr = Variable(ctx=self, name=name, valtype=valtype)
     expr = self._expr_pool.make_unique(expr)
     self._variables[name] = expr
     return expr
 
   def constant(self, value, valtype):
-    if valtype.ctx() != self:
-      raise RuntimeError(f"valtype argument of constant '{name}' was created in a different context")
-    if valtype not in self._valtype_pool._pool:
-      raise RuntimeError(f"valtype argument of variable '{name}' not found in context")
+    # Check valtype is valid.
+    self._check_valtype(f"valtype argument of constant", valtype)
+    # Check and convert user's value.
     value = valtype.valtype_def().convert_userobj_to_value(valtype, value)
+    # Create constant.
     expr = Constant(ctx=self, value=value, valtype=valtype)
     return self._expr_pool.make_unique(expr)
 
@@ -86,5 +87,13 @@ class ExprContext:
       self._namespaces[namespaceid] = ExprContextNamespace(namespaceid)
     self._namespaces[namespaceid]._set_attr(baseid, fun)
 
+  def _check_valtype(self, descr, valtype):
+    if not isinstance(valtype, Valtype):
+      raise RuntimeError(f"{descr} is not a mxklabs.expr.Valtype object")
+    if valtype.ctx() != self:
+      raise RuntimeError(f"{descr} was created in a different context")
+    if not self._valtype_pool.contains(valtype):
+      raise RuntimeError(f"{descr} not found in context")
+    
 
 

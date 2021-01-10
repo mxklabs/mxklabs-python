@@ -24,9 +24,12 @@ class BoolValtypeDef(ValtypeDef):
 
   def convert_userobj_to_value(self, valtype, userobj):
     if type(userobj) == int:
-      return userobj == 0 or userobj == 1
+      if userobj == 0:
+        return False
+      elif userobj == 1:
+        return True
     if type(userobj) == bool:
-      return True
+      return userobj
     raise RuntimeError(f"'{userobj}' is not a valid value for valtype '{valtype}' (expected boolean)")
 
   def convert_value_to_str(self, valtype, value):
