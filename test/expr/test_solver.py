@@ -1,31 +1,40 @@
 import mxklabs.expr
 import pytest
 
-def test_sat1():
-  ctx = mxklabs.expr.ExprContext()
-  a = ctx.bool.variable(name="a")
+def test_solver_cnf():
+  ctx = mxklabs.expr.ExprContext(load_defaults=False)
+  ctx.load_expr_def_set('mxklabs.expr.exprdefset.cnf')
 
-  ctx.add_constraint(a)
+  a = ctx.variable(name="a", valtype=ctx.valtype.bool())
+
+  ctx.add_constraint(ctx.cnf.logical_or(a))
   result = ctx.solve()
 
   # Is satisfiable.
   assert(result)
+
   # Must have a=True
   varmap = result.get_varmap()
   assert(True == varmap[a])
 
-def test_sat2():
-  ctx = mxklabs.expr.ExprContext()
-  a = ctx.bool.variable(name="a")
 
-  ctx.add_constraint(ctx.bool.logical_not(a))
+def test_sat2():
+  ctx = mxklabs.expr.ExprContext(load_defaults=False)
+  ctx.load_expr_def_set('mxklabs.expr.exprdefset.cnf')#
+
+  a = ctx.variable(name="a", valtype=ctx.valtype.bool())
+
+  ctx.add_constraint(ctx.cnf.logical_or(ctx.cnf.logical_not(a)))
   result = ctx.solve()
 
   # Is satisfiable.
   assert(result)
+
   # Must have a=False
   varmap = result.get_varmap()
   assert(False == varmap[a])
+
+"""
 
 def test_unsat1():
   ctx = mxklabs.expr.ExprContext()
@@ -56,3 +65,4 @@ def test_unsat2():
 
   # Is satisfiable.
   assert(not result)
+"""

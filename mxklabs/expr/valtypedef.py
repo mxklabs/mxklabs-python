@@ -60,3 +60,21 @@ class ValtypeDef:
     """
     raise RuntimeError(f"'{self.__class__.__name__}.convert_value_to_str' has not been implemented")
 
+  def booltup_size(self, valtype):
+    """
+    Return the number of booleans required to represent this value when converting to CNF.
+    """
+    raise RuntimeError(f"'{self.__class__.__name__}.booltup_size' has not been implemented")
+
+  def convert_value_to_booltup(self, valtype, value):
+    """
+    Convert value to booltup value.
+    """
+    raise RuntimeError(f"'{self.__class__.__name__}.convert_value_to_booltup' has not been implemented")
+
+  def convert_booltup_to_value(self, valtype, value):
+    """
+    Convert booltup value to real value.
+    """
+    raise RuntimeError(f"'{self.__class__.__name__}.convert_booltup_to_value' has not been implemented")
+

@@ -1,4 +1,5 @@
 from .cnfexprdef import CnfExprDef
+from ...cnftarget import CnfTarget
 from ...exprutils import ExprUtils
 
 class LogicalOr(CnfExprDef):
@@ -25,22 +26,29 @@ class LogicalOr(CnfExprDef):
   def determine_value(self, expr, op_values):
     return any(op_values)
 
-  def map_to_target(self, expr, op_target_mapping, target_ctx):
+  def map_to_target(self, expr, op_target_mapping, target):
 
-    # TODO: Check target is cnf.
+    if isinstance(target, CnfTarget):
 
-    lit = target_ctx.valtype.bool.variable(name=
-        ExprUtils.make_variable_name_from_expr(expr))
+      oplits = [self._unpack(ol) for ol in op_target_mapping]
 
-    # For each op: lit => oplit
-    for oplit in op_target_mapping:
-      target_ctx.add_constraint(target_ctx.cnf.logical_or(
-        oplit,
-        self._make_not(target_ctx, lit)))
+      lit = target.ctx().variable(
+          name=ExprUtils.make_variable_name_from_expr(expr),
+          valtype=target.ctx().valtype.bool())
 
-    # not oplit_0 and ... and not oplit_n => not lit
-    target_ctx.add_constraint(target_ctx.cnf.logical_or(
-        *[oplit for oplit in op_target_mapping],
-        self._make_not(target_ctx, lit)))
+      # For each op: lit => oplit
+      for oplit in oplits:
+        target.ctx().add_constraint(target.ctx().cnf.logical_or(
+          oplit,
+          self._make_not(target.ctx(), lit)))
 
-    return lit
+      # not oplit_0 and ... and not oplit_n => not lit
+      target.ctx().add_constraint(target.ctx().cnf.logical_or(
+          *[oplit for oplit in oplits],
+          self._make_not(target.ctx(), lit)))
+
+      return self._pack(lit)
+
+    else:
+      raise RuntimeError(f"'{self.id()}' does not support target '{type(target)}'")
+

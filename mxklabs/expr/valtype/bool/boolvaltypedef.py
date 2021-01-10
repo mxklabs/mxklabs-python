@@ -34,3 +34,12 @@ class BoolValtypeDef(ValtypeDef):
 
   def convert_value_to_str(self, valtype, value):
     return "1" if value else "0"
+
+  def booltup_size(self, valtype):
+    return 1
+
+  def convert_value_to_booltup(self, valtype, value):
+    return [value]
+
+  def convert_booltup_to_value(self, valtype, value):
+    return value[0]

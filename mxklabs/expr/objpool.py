@@ -6,6 +6,9 @@ class ObjPool:
   def contains(self, obj):
     return obj in self._pool
 
+  def values(self):
+    return self._pool.values()
+
   def make_unique(self, obj):
     if obj in self._pool:
       return self._pool[obj]

@@ -1,4 +1,5 @@
 from .cnfexprdef import CnfExprDef
+from ...cnftarget import CnfTarget
 from ...exprutils import ExprUtils
 
 class LogicalNot(CnfExprDef):
@@ -23,6 +24,15 @@ class LogicalNot(CnfExprDef):
   def determine_value(self, expr, op_values):
     return not op_values[0]
 
-  def map_to_target(self, expr, op_target_mapping, target_ctx):
-    # TODO: Check target is cnf.
-    return self._make_not(target_ctx, op_target_mapping[0])
+  def map_to_target(self, expr, op_target_mapping, target):
+
+    if isinstance(target, CnfTarget):
+
+      oplits = [self._unpack(ol) for ol in op_target_mapping]
+      return self._pack(
+          self._make_not(
+            target.ctx(),
+            oplits[0]))
+
+    else:
+      raise RuntimeError(f"'{self.id()}' does not support target '{type(target)}'")

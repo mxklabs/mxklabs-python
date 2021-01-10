@@ -2,6 +2,7 @@ import importlib
 import inspect
 import logging
 
+from .cnfsolver import CnfSolver
 from .expr import Constant, Expr, OpExpr, Variable
 from .exprcontextnamespace import ExprContextNamespace
 from .exprdefset_ import ExprDefSet
@@ -21,6 +22,10 @@ class ExprContext:
     self._valtype_defs = {}
     self._valtype_pool = ObjPool()
     self._variables = {}
+
+    if load_defaults:
+      self.load_valtype('mxklabs.expr.valtype.bool')
+      #self.load_expr_def_set('mxklabs.expr.expr_def_set.cnf')
 
   def __getattr__(self, name):
     if name in self._namespaces:
@@ -115,8 +120,6 @@ class ExprContext:
               if not isinstance(expr, OpExpr):
                 return False
               # Check our expr_def matches.
-              print(f"expr.expr_def().id() = {expr.expr_def().id()}")
-              print(f"expr_def.id() = {expr_def.id()}")
               return (id(expr.expr_def()) == id(expr_def))
 
             # Make it callable (must use lambda to avoid issues).
@@ -159,7 +162,7 @@ class ExprContext:
     # Check it's a valid expression in this context.
     self._check_expr("'is_constant' argument", expr)
     # Check it's a variable.
-    return isinstance(expr, constant)
+    return isinstance(expr, Constant)
 
   def add_constraint(self, expr):
     # Check expression.
@@ -171,6 +174,18 @@ class ExprContext:
     if not self.valtype.is_bool(expr.valtype()):
       raise RuntimeError(f"constraint expressions must be of valtype '{self.valtype.bool()}' (got {expr.valtype()})")
     self._constraint_pool.make_unique(expr)
+
+  def solve(self):
+    cnfctx = ExprContext(load_defaults=False)
+    cnfctx.load_expr_def_set('mxklabs.expr.exprdefset.cnf')
+    solver = CnfSolver(self, cnfctx)
+    return solver.solve()
+
+  def variables(self):
+    return self._variables.values()
+
+  def constraints(self):
+    return self._constraint_pool.values()
 
   def _add(self, namespaceid, baseid, fun):
     # Add an attribute to a namespace.

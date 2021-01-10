@@ -64,11 +64,11 @@ class ExprDef:
     """
     raise RuntimeError(f"'{self.__class__.__name__}.determine_value' has not been implemented")
 
-  def map_to_target(self, expr, op_target_mapping, target_ctx):
+  def map_to_target(self, expr, op_target_mapping, target):
     """
     This method is called once an expression is constructed.
 
-    This method is called to map the expression to a target context for a given
+    This method is called to map the expression to a target object for a given
     list of operands and a dictionary of attributes and a list of return values
     returned by this function for the operands.
     """
