@@ -50,7 +50,8 @@ class Constant(Expr):
     return self._value
 
   def get_compact_str(self):
-    return self._valtype.convert_value_to_str(self._value)
+    return self._valtype.valtype_def().convert_value_to_str(
+      self._valtype, self._value)
 
 class Variable(Expr):
 
@@ -77,7 +78,8 @@ class OpExpr(Expr):
     self._hash_items.append(self._expr_def_set)
     self._hash_items.append(self._expr_def)
     self._hash_items.append(self._ops)
-    self._hash_items.append(self._attrs)
+    self._hash_items += self._attrs.keys()
+    self._hash_items += self._attrs.values()
 
   def expr_def_set(self):
     return self._expr_def_set
@@ -100,16 +102,11 @@ class OpExpr(Expr):
 
   def get_compact_str(self):
     # TODO: Use valtype to string function here.
-    if self._ctx.is_variable(self):
-      return f"{self.name}"
-    elif self._ctx.is_constant(self):
-      return f"{self.value}"
-    else:
-      # TODO: Add attributes.
-      result = f"{self._expr_def.id()}("
-      result += ",".join([f"{op}" for op in self._ops])
-      result += ")"
-      return result
+    # TODO: Add attributes.
+    result = f"{self._expr_def.id()}("
+    result += ",".join([f"{op}" for op in self._ops])
+    result += ")"
+    return result
 
   #def get_pretty_str(self):
   #  # TODO: Use valtype to string function here.

@@ -53,10 +53,14 @@ class ExprContext:
             valtype_def.validate(sub_valtypes, attrs)
             valtype = Valtype(self, valtype_def, sub_valtypes, attrs)
             return self._valtype_pool.make_unique(valtype)
+          # Make it callable.
           self._add('valtype', valtype_def.baseid(), create_valtype)
 
           # Make it so we can call, e.g., ctx.valtype.is_bool() check for type.
           def is_valtype(valtype, *sub_valtypes, **valtype_attrs):
+            # Error if it's not a valtype.
+            self._check_valtype(f"'is_{valtype_def.baseid()}' argument", valtype)
+            # Check by id.
             return id(valtype) == id(create_valtype(*sub_valtypes, **valtype_attrs))
           self._add('valtype', f"is_{valtype_def.baseid()}", is_valtype)
 
@@ -82,7 +86,7 @@ class ExprContext:
           for expr_def in expr_def_set.expr_defs():
 
             # Make it so we can call, e.g., ctx.cnf.logical_and(...).
-            def create_expr(*ops, **attrs):
+            def create_expr(expr_def_set, expr_def, ops, attrs):
               # Check ops are valid expressions.
               for index, op in zip(range(len(ops)), ops):
                 self._check_expr(f"op {index}", op)
@@ -98,15 +102,26 @@ class ExprContext:
               # Create expression.
               expr = OpExpr(self, expr_def_set, expr_def, ops, attrs, valtype)
               return self._expr_pool.make_unique(expr)
-            self._add(expr_def_set.baseid(), expr_def.baseid(), create_expr)
+
+            # Make it callable (must use lambda to avoid issues).
+            self._add(expr_def_set.baseid(), expr_def.baseid(),
+                lambda *ops, expr_def_set=expr_def_set, expr_def=expr_def, **attrs: create_expr(expr_def_set, expr_def, ops, attrs))
 
             # Make it so we can call, e.g., ctx.cnf.is_logical_and(...).
-            def is_expr(expr):
+            def is_expr(expr_def_set, expr_def, expr):
               # Check it's a valid expression in this context.
-              self._check_expr("expression", expr)
+              self._check_expr(f"'is_{expr_def.baseid()}' argument", expr)
+              # If it's a variable or a constant, it's not one of our exprs.
+              if not isinstance(expr, OpExpr):
+                return False
               # Check our expr_def matches.
-              return id(expr.expr_def()) == id(expr_def)
-            self._add(expr_def_set.baseid(), f"is_{expr_def.baseid()}", is_expr)
+              print(f"expr.expr_def().id() = {expr.expr_def().id()}")
+              print(f"expr_def.id() = {expr_def.id()}")
+              return (id(expr.expr_def()) == id(expr_def))
+
+            # Make it callable (must use lambda to avoid issues).
+            self._add(expr_def_set.baseid(), f"is_{expr_def.baseid()}",
+                lambda expr, expr_def_set=expr_def_set, expr_def=expr_def: is_expr(expr_def_set, expr_def, expr))
 
           self._expr_def_sets[expr_def_set.id()] = expr_def_set
 
@@ -125,6 +140,12 @@ class ExprContext:
     self._variables[name] = expr
     return expr
 
+  def is_variable(self, expr):
+    # Check it's a valid expression in this context.
+    self._check_expr("'is_variable' argument", expr)
+    # Check it's a variable.
+    return isinstance(expr, Variable)
+
   def constant(self, value, valtype):
     # Check valtype is valid.
     self._check_valtype(f"valtype argument of constant", valtype)
@@ -134,6 +155,12 @@ class ExprContext:
     expr = Constant(ctx=self, value=value, valtype=valtype)
     return self._expr_pool.make_unique(expr)
 
+  def is_constant(self, expr):
+    # Check it's a valid expression in this context.
+    self._check_expr("'is_constant' argument", expr)
+    # Check it's a variable.
+    return isinstance(expr, constant)
+
   def add_constraint(self, expr):
     # Check expression.
     self._check_expr("constraint", expr)
@@ -141,7 +168,7 @@ class ExprContext:
     if 'mxklabs.expr.valtype.bool' not in self._valtype_defs:
       raise RuntimeError("constraint expressions must be of valtype 'mxklabs.expr.valtype.bool', but this valtype is not loaded in this context")
     # Check the expression is bool
-    if not self.valtype.is_bool(expr):
+    if not self.valtype.is_bool(expr.valtype()):
       raise RuntimeError(f"constraint expressions must be of valtype '{self.valtype.bool()}' (got {expr.valtype()})")
     self._constraint_pool.make_unique(expr)
 

@@ -22,8 +22,8 @@ class ExprUtils:
     # Check op_valtypes matches expectation.
     if exp_op_valtype is not None:
       for op_index, op in zip(range(len(ops)), ops):
-        if op.valtype != exp_op_valtype:
-          raise RuntimeError(f"'{exprid}' expects operands of type '{exp_op_valtype}' (operand {op_index} has type '{op.valtype()}')")
+        if op.valtype() != exp_op_valtype:
+          raise RuntimeError(f"'{exprid}' expects operands of valtype '{exp_op_valtype}' (operand {op_index} has valtype '{op.valtype()}')")
 
   @staticmethod
   def basic_sub_valtypes_check(valtype_id, min_sub_valtypes, max_sub_valtypes, exp_sub_valtype, sub_valtypes):
@@ -43,13 +43,13 @@ class ExprUtils:
     # Check sub_valtypes are actually valtype objects.
     for index, sub_valtype in zip(range(len(sub_valtypes)), sub_valtypes):
       if not isinstance(op, Valtype):
-        raise RuntimeError(f"'{valtype_id}' expects sub_valtypes of type mxklabs.expr.Valtype (sub_valtypes {index} has type {type(sub_valtype)})")
+        raise RuntimeError(f"'{valtype_id}' expects sub_valtypes of valtype mxklabs.expr.Valtype (sub_valtypes {index} has valtype {type(sub_valtype)})")
 
     # Check sub_valtypes match.
     if exp_sub_valtype is not None:
       for index, sub_valtype in zip(range(len(sub_valtypes)), sub_valtypes):
         if sub_valtype != exp_sub_valtype:
-          raise RuntimeError(f"'{valtype_id}' expects sub_valtypes of type '{exp_sub_valtype}' (sub_valtypes {index} has type {sub_valtype})")
+          raise RuntimeError(f"'{valtype_id}' expects sub_valtypes of valtype '{exp_sub_valtype}' (sub_valtypes {index} has valtype {sub_valtype})")
 
   @staticmethod
   def basic_attrs_check(objid, exp_attrs, act_attrs):

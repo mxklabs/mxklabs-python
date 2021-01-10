@@ -14,9 +14,11 @@ def test_load():
   # Test it's not not unequal to itself.
   assert(not (bool1 != bool1))
 
-  # Test other things are not considered bools.
-  assert(not ctx.valtype.is_bool(1))
-  assert(not ctx.valtype.is_bool(False))
+  # Test calling with non-Valtype objects results in exception.
+  with pytest.raises(RuntimeError, match=r"'is_bool' argument is not a mxklabs.expr.Valtype object"):
+    assert(not ctx.valtype.is_bool(1))
+  with pytest.raises(RuntimeError, match=r"'is_bool' argument is not a mxklabs.expr.Valtype object"):
+    assert(not ctx.valtype.is_bool(False))
 
   # Test if we create another bool it's the same object.
   bool2 = ctx.valtype.bool()
