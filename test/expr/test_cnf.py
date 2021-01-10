@@ -29,20 +29,20 @@ def test_invalid_exprs():
 
   # logical_or with constant.
   with pytest.raises(RuntimeError, match=r"'mxklabs.expr.exprdefset.cnf.logical_or' operands must be either a boolean variable or a logical negation of a boolean variable \(operand 0 is '1'\)"):
-    ctx.cnf.logical_or(
-      false)
+    ctx.cnf.logical_or(false)
 
   # logical_or with logical_or.
   with pytest.raises(RuntimeError, match=r"'mxklabs.expr.exprdefset.cnf.logical_or' operands must be either a boolean variable or a logical negation of a boolean variable \(operand 0 is 'mxklabs.expr.exprdefset.cnf.logical_or\(v1\)'\)"):
-    ctx.cnf.logical_or(
-      ctx.cnf.logical_or(v1))
+    ctx.cnf.logical_or(ctx.cnf.logical_or(v1))
 
-  # Check you can't add variables as constraints.
-  # Check you can't add nots as constraints constraints.
+  # logical_not with constant
+  with pytest.raises(RuntimeError, match=r"'mxklabs.expr.exprdefset.cnf.logical_not' operand must be a boolean variable \(operand is '1'\)"):
+    ctx.cnf.logical_not(false)
 
-  # Check you can't have nots in nots.
-  # Check you can't have constants in nots.
-  # Check you can't have ors in nots.
+  # logical_not with logical_or
+  with pytest.raises(RuntimeError, match=r"'mxklabs.expr.exprdefset.cnf.logical_not' operand must be a boolean variable \(operand is 'mxklabs.expr.exprdefset.cnf.logical_or\(v1\)'\)"):
+    ctx.cnf.logical_not(ctx.cnf.logical_or(v1))
 
-  # Check you can't have ors in ors.
-  # Check you can't have constants in ors.
+  # logical_not with logical_not
+  with pytest.raises(RuntimeError, match=r"'mxklabs.expr.exprdefset.cnf.logical_not' operand must be a boolean variable \(operand is 'mxklabs.expr.exprdefset.cnf.logical_not\(v1\)'\)"):
+    ctx.cnf.logical_not(ctx.cnf.logical_not(v1))

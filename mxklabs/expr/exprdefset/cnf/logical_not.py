@@ -12,7 +12,7 @@ class LogicalNot(CnfExprDef):
     ExprUtils.basic_attrs_check(self.id(), [], attrs)
     # Check operand is a boolean variable.
     if not (self._ctx.is_variable(ops[0]) and self._ctx.valtype.is_bool(ops[0].valtype())):
-      raise RuntimeError(f"'{self.id()}' must negate a variable (got operand '{ops[0]}')")
+      raise RuntimeError(f"'{self.id()}' operand must be a boolean variable (operand is '{ops[0]}')")
 
   def replace(self, ops, attrs):
     return None
