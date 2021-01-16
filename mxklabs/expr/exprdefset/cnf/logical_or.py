@@ -17,10 +17,10 @@ class LogicalOr(CnfExprDef):
          (not self._ctx.expr.is_logical_not(op)):
         raise RuntimeError(f"'{self.id()}' operands must be either a boolean variable or a logical negation of a boolean variable (operand {index} is '{op}')")
 
-  def determine_valtype(self, ops, attrs, op_valtypes):
+  def valtype(self, ops, attrs, op_valtypes):
     return self._ctx.valtype.bool()
 
-  def determine_value(self, expr, op_values):
+  def evaluate(self, expr, op_values):
     return any(op_values)
 
   def has_feature(self, featurestr):

@@ -20,4 +20,4 @@ class ExprEvaluator:
         # Evaluate expr's ops.
         opvals = [self.eval(op) for op in expr.ops]
         # Determine the value.
-        return expr.expr_def.determine_value(expr, opvals)
+        return expr.expr_def.evaluate(expr, opvals)

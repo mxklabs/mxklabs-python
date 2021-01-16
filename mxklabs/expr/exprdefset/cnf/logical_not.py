@@ -15,10 +15,10 @@ class LogicalNot(CnfExprDef):
     if not (self._ctx.is_variable(ops[0]) and self._ctx.valtype.is_bool(ops[0].valtype())):
       raise RuntimeError(f"'{self.id()}' operand must be a boolean variable (operand is '{ops[0]}')")
 
-  def determine_valtype(self, ops, attrs, op_valtypes):
+  def valtype(self, ops, attrs, op_valtypes):
     return self._ctx.valtype.bool()
 
-  def determine_value(self, expr, op_values):
+  def evaluate(self, expr, op_values):
     return not op_values[0]
 
 def has_feature(self, featurestr):

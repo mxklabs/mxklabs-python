@@ -33,7 +33,7 @@ class ExprDef:
     """
     raise RuntimeError(f"'{self.__class__.__name__}.validate' has not been implemented")
 
-  def determine_valtype(self, ops, attrs, op_valtypes):
+  def valtype(self, ops, attrs, op_valtypes):
     """
     This method is called prior to the construction of an expression.
 
@@ -41,16 +41,16 @@ class ExprDef:
     list of operands and a dictionary of attributes and a list of valtypes for
     its operands.
     """
-    raise RuntimeError(f"'{self.__class__.__name__}.determine_valtype' has not been implemented")
+    raise RuntimeError(f"'{self.__class__.__name__}.valtype' has not been implemented")
 
-  def determine_value(self, expr, op_values):
+  def evaluate(self, expr, op_values):
     """
     This method is called once an expression is constructed.
 
     This method is called to determine an expression's value for a given list
     of operands and a dictionary of attributes and a list of values for operands.
     """
-    raise RuntimeError(f"'{self.__class__.__name__}.determine_value' has not been implemented")
+    raise RuntimeError(f"'{self.__class__.__name__}.evaluate' has not been implemented")
 
   def has_feature(self, featurestr):
     """
@@ -58,8 +58,10 @@ class ExprDef:
     be overloaded by each expression and should return true only for features they support.
     Currently known features are:
 
-    * 'has_simplify' - The expr can be simplified with a 'simplify' function.
-    * 'to_cnf'       - The expr has a 'to_cnf' function.
+    * 'simplify'     - The expr can be simplified with a 'simplify' function.
+    * 'decompose'    - The expr has semantics expressed in terms of other exprs.
+    * 'cnf'       - The expr has a 'cnf' function.
+
     """
     return False
 
@@ -75,7 +77,7 @@ class ExprDef:
     """
     raise RuntimeError(f"'{self.__class__.__name__}.simplify' has not been implemented")
 
-  def to_cnf(self, expr, op_target_mapping, target):
+  def cnf(self, expr, op_target_mapping, target):
     """
     This method is called once an expression is constructed.
 
@@ -83,4 +85,4 @@ class ExprDef:
     list of operands and a dictionary of attributes and a list of return values
     returned by this function for the operands.
     """
-    raise RuntimeError(f"'{self.__class__.__name__}.to_cnf' not supported")
+    raise RuntimeError(f"'{self.__class__.__name__}.cnf' not supported")

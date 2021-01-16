@@ -12,10 +12,10 @@ class LogicalNot(LogicalExprDef):
     ExprUtils.basic_ops_check(self.id(), 1, 1, self._ctx.valtype.bool(), ops)
     ExprUtils.basic_attrs_check(self.id(), [], attrs)
 
-  def determine_valtype(self, ops, attrs, op_valtypes):
+  def valtype(self, ops, attrs, op_valtypes):
     return self._ctx.valtype.bool()
 
-  def determine_value(self, expr, op_values):
+  def evaluate(self, expr, op_values):
     return not op_values[0]
 
   def simplify(self, ops, attrs):
@@ -43,10 +43,10 @@ class LogicalNot(LogicalExprDef):
   def has_feature(self, featurestr):
     if featurestr == 'simplify':
       return True
-    elif featurestr == 'to_cnf':
+    elif featurestr == 'cnf':
       return True
     return False
 
-  def to_cnf(self, expr, op_target_mapping, target):
+  def cnf(self, expr, op_target_mapping, target):
     oplits = [self._unpack(ol) for ol in op_target_mapping]
     return self._pack(target.make_not(oplits[0]))
