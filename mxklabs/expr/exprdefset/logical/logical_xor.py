@@ -46,7 +46,7 @@ class LogicalXor(LogicalExprDef):
 
     lit = target.make_lit(expr)
 
-  # oplit0 and not oplit1 => lit
+    # oplit0 and not oplit1 => lit
     target.ctx().add_constraint(target.ctx().expr.logical_or(
         target.make_not(oplit0),
         oplit1,

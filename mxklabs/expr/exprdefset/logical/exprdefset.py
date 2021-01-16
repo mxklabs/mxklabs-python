@@ -18,7 +18,7 @@ class LogicalExprDefSet(ExprDefSet):
       LogicalNand(ctx=ctx, expr_def_set=self),
       LogicalNor(ctx=ctx, expr_def_set=self),
       LogicalNot(ctx=ctx, expr_def_set=self),
-      LogicalOr(ctx=ctx, expr_def_set=self)
+      LogicalOr(ctx=ctx, expr_def_set=self),
       LogicalXor(ctx=ctx, expr_def_set=self),
       LogicalXnor(ctx=ctx, expr_def_set=self)
     ]

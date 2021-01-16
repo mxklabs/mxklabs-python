@@ -21,28 +21,34 @@ class LogicalAnd(LogicalExprDef):
   def has_feature(self, featurestr):
     if featurestr == 'simplify':
       return True
+    if featurestr == 'canonicalize':
+      return True
     elif featurestr == 'cnf':
       return True
     return False
 
-  def simplify(self, ops, attrs):
+  def simplify(self, expr):
     # and(..., 0, ...) => 0
-    if any([self._ctx.is_constant(op) and not op.value() for op in ops]):
+    if any([self._ctx.is_constant(op) and not op.value() for op in expr.ops()]):
       return self._ctx.constant(value=False, valtype=self._ctx.valtype.bool())
 
     # and(1, ..., 1) => 1
-    if all([self._ctx.is_constant(op) and op.value() for op in ops]):
+    if all([self._ctx.is_constant(op) and op.value() for op in expr.ops()]):
       return self._ctx.constant(value=True, valtype=self._ctx.valtype.bool())
 
     # TODO: if and(expr, ..., not expr) => 0
 
+    # Can't simplify.
+    return expr
+
+  def canonicalize(self, expr):
     # Sort by operand hash.
-    ops = list(ops)
+    ops = list(expr.ops())
     new_ops = sorted(ops, key=hash)
     if new_ops != ops:
       return self._ctx.expr.logical_and(*new_ops)
 
-    return None
+    return expr
 
   def cnf(self, expr, op_target_mapping, target):
     oplits = [self._unpack(ol) for ol in op_target_mapping]

@@ -59,21 +59,44 @@ class ExprDef:
     Currently known features are:
 
     * 'simplify'     - The expr can be simplified with a 'simplify' function.
-    * 'decompose'    - The expr has semantics expressed in terms of other exprs.
-    * 'cnf'       - The expr has a 'cnf' function.
+                       This can include things like constant propagation.
+    * 'decompose'    - The expr can be decomposed with a 'decompose' function
+                       to obtain an alternative expression with identical
+                       semantics.
+    * 'canonicalize' - The expr can be canonicalized a 'canonicalize' function.
+    * 'cnf'          - The expr has a 'cnf' function.
 
     """
     return False
 
-  def simplify(self, ops, attrs):
+  def simplify(self, expr):
     """
-    This method is called prior to the construction of an expression.
+    This method is called once an expression is constructed.
 
     If desired, return an expression to substitute an expression being
     considered for construction. This mechanism exists to allow for
     canonicalisation of expressions and constant propagation, etc., at
     construction time. Return None to construct the expression as-is or
     return an alternative expression constructed via ctx.
+    """
+    raise RuntimeError(f"'{self.__class__.__name__}.simplify' has not been implemented")
+
+  def decompose(self, expr):
+    """
+    This method is called once an expression is constructed.
+
+    Return an alternative composition of expressions that is logically
+    equivalent.
+    """
+    raise RuntimeError(f"'{self.__class__.__name__}.replace' has not been implemented")
+
+  def canonicalize(self, expr):
+    """
+    This method is called once an expression is constructed.
+
+    Obtain a 'more canonicalized' version of the expr. That is, two expressions
+    that are logically equivalent but previously not identical, may become
+    identical after canonicalisation.
     """
     raise RuntimeError(f"'{self.__class__.__name__}.simplify' has not been implemented")
 
