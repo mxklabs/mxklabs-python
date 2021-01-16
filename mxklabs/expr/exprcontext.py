@@ -90,7 +90,7 @@ class ExprContext:
           # Iterate over expression definitions.
           for expr_def in expr_def_set.expr_defs():
 
-            # Make it so we can call, e.g., ctx.cnf.logical_and(...).
+            # Make it so we can call, e.g., ctx.expr.logical_and(...).
             def create_expr(expr_def_set, expr_def, ops, attrs):
               # Check ops are valid expressions.
               for index, op in zip(range(len(ops)), ops):
@@ -109,10 +109,10 @@ class ExprContext:
               return self._expr_pool.make_unique(expr)
 
             # Make it callable (must use lambda to avoid issues).
-            self._add(expr_def_set.baseid(), expr_def.baseid(),
+            self._add('expr', expr_def.baseid(),
                 lambda *ops, expr_def_set=expr_def_set, expr_def=expr_def, **attrs: create_expr(expr_def_set, expr_def, ops, attrs))
 
-            # Make it so we can call, e.g., ctx.cnf.is_logical_and(...).
+            # Make it so we can call, e.g., ctx.expr.is_logical_and(...).
             def is_expr(expr_def_set, expr_def, expr):
               # Check it's a valid expression in this context.
               self._check_expr(f"'is_{expr_def.baseid()}' argument", expr)
@@ -123,7 +123,7 @@ class ExprContext:
               return (id(expr.expr_def()) == id(expr_def))
 
             # Make it callable (must use lambda to avoid issues).
-            self._add(expr_def_set.baseid(), f"is_{expr_def.baseid()}",
+            self._add('expr', f"is_{expr_def.baseid()}",
                 lambda expr, expr_def_set=expr_def_set, expr_def=expr_def: is_expr(expr_def_set, expr_def, expr))
 
           self._expr_def_sets[expr_def_set.id()] = expr_def_set

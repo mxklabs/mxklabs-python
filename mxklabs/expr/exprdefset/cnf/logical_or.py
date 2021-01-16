@@ -14,7 +14,7 @@ class LogicalOr(CnfExprDef):
     # Require all operands to either be boolean variables or negations of boolean variables.
     for index, op in zip(range(len(ops)), ops):
       if (not (self._ctx.is_variable(op) and self._ctx.valtype.is_bool(op.valtype()))) and \
-         (not self._ctx.cnf.is_logical_not(op)):
+         (not self._ctx.expr.is_logical_not(op)):
         raise RuntimeError(f"'{self.id()}' operands must be either a boolean variable or a logical negation of a boolean variable (operand {index} is '{op}')")
 
   def replace(self, ops, attrs):
@@ -38,12 +38,12 @@ class LogicalOr(CnfExprDef):
 
       # For each op: lit => oplit
       for oplit in oplits:
-        target.ctx().add_constraint(target.ctx().cnf.logical_or(
+        target.ctx().add_constraint(target.ctx().expr.logical_or(
           oplit,
           self._make_not(target.ctx(), lit)))
 
       # not oplit_0 and ... and not oplit_n => not lit
-      target.ctx().add_constraint(target.ctx().cnf.logical_or(
+      target.ctx().add_constraint(target.ctx().expr.logical_or(
           *[oplit for oplit in oplits],
           self._make_not(target.ctx(), lit)))
 

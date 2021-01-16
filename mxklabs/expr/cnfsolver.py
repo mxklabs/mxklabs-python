@@ -61,7 +61,7 @@ class CnfSolveContext:
     for constraint in self._ctx.constraints():
       constraint_litvec = self.map_expr(constraint)
       self._cnfctx.add_constraint(
-        self._cnfctx.cnf.logical_or(constraint_litvec[0]))
+        self._cnfctx.expr.logical_or(constraint_litvec[0]))
 
     print(f"variables={self._cnfctx.variables()}")
     print('-'*80)
@@ -78,7 +78,7 @@ class CnfSolveContext:
     g = Glucose3()
 
     for c in self._cnfctx.constraints():
-      assert(self._cnfctx.cnf.is_logical_or(c))
+      assert(self._cnfctx.expr.is_logical_or(c))
       clause = []
       for op in c.ops():
         if self._cnfctx.is_variable(op):
@@ -88,7 +88,7 @@ class CnfSolveContext:
             var_num += 1
           clause.append(var_num_mapping[op])
         else:
-          assert(self._cnfctx.cnf.is_logical_not(op))
+          assert(self._cnfctx.expr.is_logical_not(op))
           assert(self._cnfctx.is_variable(op.ops()[0]))
           if op.ops()[0] not in var_num_mapping:
             var_num_mapping[op.ops()[0]] = var_num

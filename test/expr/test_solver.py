@@ -7,7 +7,7 @@ def test_solver_cnf():
 
   a = ctx.variable(name="a", valtype=ctx.valtype.bool())
 
-  ctx.add_constraint(ctx.cnf.logical_or(a))
+  ctx.add_constraint(ctx.expr.logical_or(a))
   result = ctx.solve()
 
   # Is satisfiable.
@@ -24,7 +24,7 @@ def test_sat2():
 
   a = ctx.variable(name="a", valtype=ctx.valtype.bool())
 
-  ctx.add_constraint(ctx.cnf.logical_or(ctx.cnf.logical_not(a)))
+  ctx.add_constraint(ctx.expr.logical_or(ctx.expr.logical_not(a)))
   result = ctx.solve()
 
   # Is satisfiable.

@@ -11,9 +11,9 @@ def test_cnf():
   v2 = ctx.variable(name='v2', valtype=ctx.valtype.bool())
 
   # Create logical_or(v1, logical_not(v2))
-  expr = ctx.cnf.logical_or(
+  expr = ctx.expr.logical_or(
     v1,
-    ctx.cnf.logical_not(v2))
+    ctx.expr.logical_not(v2))
 
   # Add constraint.
   ctx.add_constraint(expr)
@@ -29,20 +29,20 @@ def test_invalid_exprs():
 
   # logical_or with constant.
   with pytest.raises(RuntimeError, match=r"'mxklabs.expr.exprdefset.cnf.logical_or' operands must be either a boolean variable or a logical negation of a boolean variable \(operand 0 is '1'\)"):
-    ctx.cnf.logical_or(false)
+    ctx.expr.logical_or(false)
 
   # logical_or with logical_or.
   with pytest.raises(RuntimeError, match=r"'mxklabs.expr.exprdefset.cnf.logical_or' operands must be either a boolean variable or a logical negation of a boolean variable \(operand 0 is 'mxklabs.expr.exprdefset.cnf.logical_or\(v1\)'\)"):
-    ctx.cnf.logical_or(ctx.cnf.logical_or(v1))
+    ctx.expr.logical_or(ctx.expr.logical_or(v1))
 
   # logical_not with constant
   with pytest.raises(RuntimeError, match=r"'mxklabs.expr.exprdefset.cnf.logical_not' operand must be a boolean variable \(operand is '1'\)"):
-    ctx.cnf.logical_not(false)
+    ctx.expr.logical_not(false)
 
   # logical_not with logical_or
   with pytest.raises(RuntimeError, match=r"'mxklabs.expr.exprdefset.cnf.logical_not' operand must be a boolean variable \(operand is 'mxklabs.expr.exprdefset.cnf.logical_or\(v1\)'\)"):
-    ctx.cnf.logical_not(ctx.cnf.logical_or(v1))
+    ctx.expr.logical_not(ctx.expr.logical_or(v1))
 
   # logical_not with logical_not
   with pytest.raises(RuntimeError, match=r"'mxklabs.expr.exprdefset.cnf.logical_not' operand must be a boolean variable \(operand is 'mxklabs.expr.exprdefset.cnf.logical_not\(v1\)'\)"):
-    ctx.cnf.logical_not(ctx.cnf.logical_not(v1))
+    ctx.expr.logical_not(ctx.expr.logical_not(v1))
