@@ -1,1 +1,1 @@
-from .logicalexprdefset import LogicalExprDefSet
+from .exprdefset import LogicalExprDefSet

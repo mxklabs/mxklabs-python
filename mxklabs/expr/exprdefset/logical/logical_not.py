@@ -1,4 +1,4 @@
-from .logicalexprdef import LogicalExprDef
+from .exprdef import LogicalExprDef
 from ...cnftarget import CnfTarget
 from ...exprutils import ExprUtils
 

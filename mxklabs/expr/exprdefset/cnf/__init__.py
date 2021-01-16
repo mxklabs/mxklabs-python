@@ -1,1 +1,1 @@
-from .cnfexprdefset import CnfExprDefSet
+from .exprdefset import CnfExprDefSet
