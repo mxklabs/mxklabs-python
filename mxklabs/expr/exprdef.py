@@ -33,18 +33,6 @@ class ExprDef:
     """
     raise RuntimeError(f"'{self.__class__.__name__}.validate' has not been implemented")
 
-  def replace(self, ops, attrs):
-    """
-    This method is called prior to the construction of an expression.
-
-    If desired, return an expression to substitute an expression being
-    considered for construction. This mechanism exists to allow for
-    canonicalisation of expressions and constant propagation, etc., at
-    construction time. Return None to construct the expression as-is or
-    return an alternative expression constructed via ctx.
-    """
-    raise RuntimeError(f"'{self.__class__.__name__}.replace' has not been implemented")
-
   def determine_valtype(self, ops, attrs, op_valtypes):
     """
     This method is called prior to the construction of an expression.
@@ -64,7 +52,30 @@ class ExprDef:
     """
     raise RuntimeError(f"'{self.__class__.__name__}.determine_value' has not been implemented")
 
-  def map_to_target(self, expr, op_target_mapping, target):
+  def has_feature(self, featurestr):
+    """
+    Check whether the op supports a specific 'feature'. Features are optional. This function should
+    be overloaded by each expression and should return true only for features they support.
+    Currently known features are:
+
+    * 'has_simplify' - The expr can be simplified with a 'simplify' function.
+    * 'to_cnf'       - The expr has a 'to_cnf' function.
+    """
+    return False
+
+  def simplify(self, ops, attrs):
+    """
+    This method is called prior to the construction of an expression.
+
+    If desired, return an expression to substitute an expression being
+    considered for construction. This mechanism exists to allow for
+    canonicalisation of expressions and constant propagation, etc., at
+    construction time. Return None to construct the expression as-is or
+    return an alternative expression constructed via ctx.
+    """
+    raise RuntimeError(f"'{self.__class__.__name__}.simplify' has not been implemented")
+
+  def to_cnf(self, expr, op_target_mapping, target):
     """
     This method is called once an expression is constructed.
 
@@ -72,4 +83,4 @@ class ExprDef:
     list of operands and a dictionary of attributes and a list of return values
     returned by this function for the operands.
     """
-    raise RuntimeError(f"'{self.__class__.__name__}.map_to_target' has not been implemented")
+    raise RuntimeError(f"'{self.__class__.__name__}.to_cnf' not supported")

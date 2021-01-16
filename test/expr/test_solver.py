@@ -24,7 +24,7 @@ def test_sat2():
 
   a = ctx.variable(name="a", valtype=ctx.valtype.bool())
 
-  ctx.add_constraint(ctx.expr.logical_or(ctx.expr.logical_not(a)))
+  ctx.add_constraint(ctx.expr.logical_not(a))
   result = ctx.solve()
 
   # Is satisfiable.
@@ -33,6 +33,19 @@ def test_sat2():
   # Must have a=False
   varmap = result.get_varmap()
   assert(False == varmap[a])
+
+
+def test_sat3():
+  ctx = mxklabs.expr.ExprContext(load_defaults=False)
+  ctx.load_expr_def_set('mxklabs.expr.exprdefset.logical')#
+
+  a = ctx.variable(name="a", valtype=ctx.valtype.bool())
+
+  ctx.add_constraint(ctx.expr.logical_and(a, ctx.expr.logical_not(a)))
+  result = ctx.solve()
+
+  # Is satisfiable.
+  assert(not result)
 
 """
 

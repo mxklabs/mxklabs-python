@@ -50,7 +50,7 @@ class CnfSolveContext:
       else:
         #print(f'expr={expr}')
         op_target_mapping = [self.map_expr(expr_op) for expr_op in expr.ops()]
-        mapped_expr = expr.expr_def().map_to_target(expr, op_target_mapping, self._target)
+        mapped_expr = expr.expr_def().to_cnf(expr, op_target_mapping, self._target)
 
       self._expr_map[expr] = mapped_expr
       return mapped_expr

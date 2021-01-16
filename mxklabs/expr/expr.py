@@ -31,6 +31,7 @@ class Expr:
 
   # TODO: Find a way to cache this.
   def __eq__(self, rhs):
+
     # If hash computed and doesn't match, the expressions are not equivalent.
     if self._hash is not None and rhs._hash is not None:
       if self._hash != rhs._hash:
@@ -103,7 +104,7 @@ class OpExpr(Expr):
   def get_compact_str(self):
     # TODO: Use valtype to string function here.
     # TODO: Add attributes.
-    result = f"{self._expr_def.id()}("
+    result = f"{self._expr_def.baseid()}("
     result += ",".join([f"{op}" for op in self._ops])
     result += ")"
     return result

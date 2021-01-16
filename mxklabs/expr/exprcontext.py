@@ -98,9 +98,10 @@ class ExprContext:
               # Check ops and attrs are valid.
               expr_def.validate(ops, attrs)
               # Optionally do a substitution.
-              replacement = expr_def.replace(ops, attrs)
-              if replacement is not None:
-                return replacement
+              if expr_def.has_feature('simplify'):
+                replacement = expr_def.simplify(ops, attrs)
+                if replacement is not None:
+                  return replacement
               # Work out the valtype.
               op_valtypes = [op.valtype() for op in ops]
               valtype = expr_def.determine_valtype(ops, attrs, op_valtypes)

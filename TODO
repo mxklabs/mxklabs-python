@@ -1,6 +1,5 @@
 mxklabs.expr
 
-* Make operators use 'expr' namespace.
 * Add 'logical' or 'prop' expr_def_set.
 
   ctx.prop.logical_and(...)
@@ -8,7 +7,7 @@ mxklabs.expr
 * Add support for bitvectors.
 * Add support for dictionaries mapping strings of types.
 
-  ctx.valtypes.bitvector(width=10)  
+  ctx.valtypes.bitvector(width=10)
   ctx.bitvector.bitwise_and(bitv1, bitv2)
 
   ctx.expr.bitvector_add()
