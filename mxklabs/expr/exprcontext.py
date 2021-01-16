@@ -6,6 +6,7 @@ from .cnfsolver import CnfSolver
 from .expr import Constant, Expr, OpExpr, Variable
 from .exprcontextnamespace import ExprContextNamespace
 from .exprdefset_ import ExprDefSet
+from .exprwalker import ExprWalker
 from .objpool import ObjPool
 from .valtype_ import Valtype
 from .valtypedef import ValtypeDef
@@ -22,10 +23,16 @@ class ExprContext:
     self._valtype_defs = {}
     self._valtype_pool = ObjPool()
     self._variables = {}
+    self._walker = ExprWalker(self)
+
+    self._add('util', 'simplify', lambda expr: self._walker.simplify(expr))
+    self._add('util', 'pushnot', lambda expr: self._walker.pushnot(expr))
+    self._add('util', 'canonicalize', lambda expr: self._walker.canonicalize(expr))
+    self._add('util', 'decompose', lambda expr: self._walker.decompose(expr))
 
     if load_defaults:
       self.load_valtype('mxklabs.expr.valtype.bool')
-      #self.load_expr_def_set('mxklabs.expr.expr_def_set.cnf')
+      self.load_expr_def_set('mxklabs.expr.exprdefset.logical')
 
   def __getattr__(self, name):
     if name in self._namespaces:
@@ -178,7 +185,7 @@ class ExprContext:
 
   def solve(self):
     cnfctx = ExprContext(load_defaults=False)
-    cnfctx.load_expr_def_set('mxklabs.expr.exprdefset.cnf')
+    cnfctx.load_expr_def_set('mxklabs.expr.exprdefset.logical')
     solver = CnfSolver(self, cnfctx)
     return solver.solve()
 
@@ -211,4 +218,5 @@ class ExprContext:
       raise RuntimeError(f"{descr} was created in a different context")
     if not self._valtype_pool.contains(valtype):
       raise RuntimeError(f"{descr} not found in context")
+
 

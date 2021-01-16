@@ -25,7 +25,6 @@ class Expr:
   def __hash__(self):
     if self._hash is not None:
       return self._hash
-
     self._hash = hash(tuple(self._hash_items))
     return self._hash
 
@@ -78,7 +77,7 @@ class OpExpr(Expr):
 
     self._hash_items.append(self._expr_def_set)
     self._hash_items.append(self._expr_def)
-    self._hash_items.append(self._ops)
+    self._hash_items += self._ops
     self._hash_items += self._attrs.keys()
     self._hash_items += self._attrs.values()
 

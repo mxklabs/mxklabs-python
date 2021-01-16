@@ -18,19 +18,6 @@ class LogicalXor(LogicalExprDef):
   def evaluate(self, expr, op_values):
     return any(op_values)
 
-  def simplify(self, ops, attrs):
-    op0 = ops[0]
-    op1 = ops[1]
-
-    # xor(const0,const1) => const0 ^ const1
-    if self._ctx.is_constant(op0) and self._ctx.is_constant(op1):
-      return self._ctx.constant(value=op0.value()!=op1.value(), valtype=self._ctx.valtype.bool())
-
-    # Sort by operand hash.
-    if hash(op1) < hash(op0):
-      return self._ctx.expr.logical_xor(op1, op0)
-
-    return None
 
   def has_feature(self, featurestr):
     if featurestr == 'simplify':
@@ -38,6 +25,26 @@ class LogicalXor(LogicalExprDef):
     elif featurestr == 'cnf':
       return True
     return False
+
+  def simplify(self, expr):
+    op0 = expr.ops()[0]
+    op1 = expr.ops()[1]
+
+    # xor(const0,const1) => const0 ^ const1
+    if self._ctx.is_constant(op0) and self._ctx.is_constant(op1):
+      return self._ctx.constant(value=op0.value()!=op1.value(), valtype=self._ctx.valtype.bool())
+
+    return expr
+
+  def canonicalize(self, expr):
+    op0 = expr.ops()[0]
+    op1 = expr.ops()[1]
+
+    # Sort by operand hash.
+    if hash(op1) < hash(op0):
+      return self._ctx.expr.logical_xor(op1, op0)
+
+    return expr
 
   def cnf(self, expr, op_target_mapping, target):
     oplits = [self._unpack(ol) for ol in op_target_mapping]

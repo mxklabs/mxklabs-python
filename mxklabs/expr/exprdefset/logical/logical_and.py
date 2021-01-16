@@ -46,7 +46,7 @@ class LogicalAnd(LogicalExprDef):
     ops = list(expr.ops())
     new_ops = sorted(ops, key=hash)
     if new_ops != ops:
-      return self._ctx.expr.logical_and(*new_ops)
+      return self._ctx.expr.logical_and(*new_ops, simplify=True)
 
     return expr
 

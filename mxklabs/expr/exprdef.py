@@ -58,13 +58,11 @@ class ExprDef:
     be overloaded by each expression and should return true only for features they support.
     Currently known features are:
 
-    * 'simplify'     - The expr can be simplified with a 'simplify' function.
-                       This can include things like constant propagation.
-    * 'decompose'    - The expr can be decomposed with a 'decompose' function
-                       to obtain an alternative expression with identical
-                       semantics.
-    * 'canonicalize' - The expr can be canonicalized a 'canonicalize' function.
-    * 'cnf'          - The expr has a 'cnf' function.
+    * 'simplify'
+    * 'pushnot'
+    * 'canonicalize'
+    * 'decompose'
+    * 'cnf'
 
     """
     return False
@@ -73,11 +71,27 @@ class ExprDef:
     """
     This method is called once an expression is constructed.
 
-    If desired, return an expression to substitute an expression being
-    considered for construction. This mechanism exists to allow for
-    canonicalisation of expressions and constant propagation, etc., at
-    construction time. Return None to construct the expression as-is or
-    return an alternative expression constructed via ctx.
+    Return a logically equivalent expression that is no more
+    complex than expr. This is a good place to apply, e.g.,
+    constant propagation.
+    """
+    raise RuntimeError(f"'{self.__class__.__name__}.simplify' has not been implemented")
+
+  def pushnot(self, expr):
+    """
+    This method is called once an expression is constructed.
+
+    Push logical_not expressions down to leaf nodes.
+    """
+    raise RuntimeError(f"'{self.__class__.__name__}.pushnot' has not been implemented")
+
+  def canonicalize(self, expr):
+    """
+    This method is called once an expression is constructed.
+
+    Obtain a 'more canonicalized' version of the expr. That is, two expressions
+    that are logically equivalent but previously not identical, may become
+    identical after canonicalisation.
     """
     raise RuntimeError(f"'{self.__class__.__name__}.simplify' has not been implemented")
 
@@ -89,16 +103,6 @@ class ExprDef:
     equivalent.
     """
     raise RuntimeError(f"'{self.__class__.__name__}.replace' has not been implemented")
-
-  def canonicalize(self, expr):
-    """
-    This method is called once an expression is constructed.
-
-    Obtain a 'more canonicalized' version of the expr. That is, two expressions
-    that are logically equivalent but previously not identical, may become
-    identical after canonicalisation.
-    """
-    raise RuntimeError(f"'{self.__class__.__name__}.simplify' has not been implemented")
 
   def cnf(self, expr, op_target_mapping, target):
     """

@@ -19,9 +19,9 @@ class LogicalNor(LogicalExprDef):
     return any(op_values)
 
   def has_feature(self, featurestr):
-    if featurestr == 'simplify':
+    if featurestr == 'decompose':
       return True
     return False
 
-  def simplify(self, ops, attrs):
-    return self._ctx.expr.logical_not(self._ctx.expr.logical_or(ops))
+  def decompose(self, expr):
+    return self._ctx.expr.logical_not(self._ctx.expr.logical_or(expr.ops()))
