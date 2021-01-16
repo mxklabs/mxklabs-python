@@ -3,7 +3,7 @@ import pytest
 
 def test_solver_cnf():
   ctx = mxklabs.expr.ExprContext(load_defaults=False)
-  ctx.load_expr_def_set('mxklabs.expr.exprdefset.cnf')
+  ctx.load_expr_def_set('mxklabs.expr.exprdefset.logical')
 
   a = ctx.variable(name="a", valtype=ctx.valtype.bool())
 
@@ -20,7 +20,7 @@ def test_solver_cnf():
 
 def test_sat2():
   ctx = mxklabs.expr.ExprContext(load_defaults=False)
-  ctx.load_expr_def_set('mxklabs.expr.exprdefset.cnf')#
+  ctx.load_expr_def_set('mxklabs.expr.exprdefset.logical')#
 
   a = ctx.variable(name="a", valtype=ctx.valtype.bool())
 
