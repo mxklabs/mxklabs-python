@@ -1,5 +1,4 @@
 from .exprdef import LogicalExprDef
-from ...cnftarget import CnfTarget
 from ...exprutils import ExprUtils
 
 class LogicalNot(LogicalExprDef):
@@ -22,8 +21,6 @@ class LogicalNot(LogicalExprDef):
     if featurestr == 'simplify':
       return True
     elif featurestr == 'pushnot':
-      return True
-    elif featurestr == 'cnf':
       return True
     return False
 
@@ -59,6 +56,4 @@ class LogicalNot(LogicalExprDef):
     # Can't simplify.
     return expr
 
-  def cnf(self, expr, op_target_mapping, target):
-    oplits = [self._unpack(ol) for ol in op_target_mapping]
-    return self._pack(target.make_not(oplits[0]))
+

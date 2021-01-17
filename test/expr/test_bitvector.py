@@ -19,9 +19,9 @@ def test_load():
   assert(not (bv1 != bv1))
 
   # Test calling with non-Valtype objects results in exception.
-  with pytest.raises(RuntimeError, match=r"'is_bitvector' argument is not a mxklabs.expr.Valtype object"):
+  with pytest.raises(RuntimeError, match=r"'is_bitvector' argument \('1'\) is not a mxklabs.expr.Valtype object"):
     assert(not ctx.valtype.is_bitvector(1))
-  with pytest.raises(RuntimeError, match=r"'is_bitvector' argument is not a mxklabs.expr.Valtype object"):
+  with pytest.raises(RuntimeError, match=r"'is_bitvector' argument \('False'\) is not a mxklabs.expr.Valtype object"):
     assert(not ctx.valtype.is_bitvector(False))
 
   # Test if we create another bitvector of the same width it's the same object.

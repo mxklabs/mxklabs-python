@@ -1,5 +1,4 @@
 from .exprdef import LogicalExprDef
-from ...cnftarget import CnfTarget
 from ...exprutils import ExprUtils
 
 class LogicalXor(LogicalExprDef):
@@ -69,36 +68,3 @@ class LogicalXor(LogicalExprDef):
       return self._ctx.expr.logical_xor(op1, op0)
 
     return expr
-
-  def cnf(self, expr, op_target_mapping, target):
-    oplits = [self._unpack(ol) for ol in op_target_mapping]
-    oplit0 = oplits[0]
-    oplit1 = oplits[1]
-
-    lit = target.make_lit(expr)
-
-    # oplit0 and not oplit1 => lit
-    target.ctx().add_constraint(target.ctx().expr.logical_or(
-        target.make_not(oplit0),
-        oplit1,
-        lit))
-
-    # not oplit0 and oplit1 => lit
-    target.ctx().add_constraint(target.ctx().expr.logical_or(
-        oplit0,
-        target.make_not(oplit1),
-        lit))
-
-    # oplit0 and oplit1 => not lit
-    target.ctx().add_constraint(target.ctx().expr.logical_or(
-        target.make_not(oplit0),
-        target.make_not(oplit1),
-        target.make_not(lit)))
-
-    # not oplit0 and not oplit1 => not lit
-    target.ctx().add_constraint(target.ctx().expr.logical_or(
-        oplit0,
-        oplit1,
-        target.make_not(lit)))
-
-    return self._pack(lit)

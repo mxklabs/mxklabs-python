@@ -12,7 +12,7 @@ class ExprDef:
 
   def id(self):
     """
-    Return the fully qualified id, e.g. 'mxklabs.expr.exprdefset.cnf.logical_and'.
+    Return the fully qualified id, e.g. 'mxklabs.expr.logical_and'.
     """
     return self._id
 
@@ -62,7 +62,6 @@ class ExprDef:
     * 'pushnot'
     * 'canonicalize'
     * 'decompose'
-    * 'cnf'
 
     """
     return False
@@ -104,12 +103,3 @@ class ExprDef:
     """
     raise RuntimeError(f"'{self.__class__.__name__}.replace' has not been implemented")
 
-  def cnf(self, expr, op_target_mapping, target):
-    """
-    This method is called once an expression is constructed.
-
-    This method is called to map the expression to a target object for a given
-    list of operands and a dictionary of attributes and a list of return values
-    returned by this function for the operands.
-    """
-    raise RuntimeError(f"'{self.__class__.__name__}.cnf' not supported")

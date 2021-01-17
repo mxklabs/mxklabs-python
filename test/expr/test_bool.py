@@ -15,9 +15,9 @@ def test_load():
   assert(not (bool1 != bool1))
 
   # Test calling with non-Valtype objects results in exception.
-  with pytest.raises(RuntimeError, match=r"'is_bool' argument is not a mxklabs.expr.Valtype object"):
+  with pytest.raises(RuntimeError, match=r"'is_bool' argument \('1'\) is not a mxklabs.expr.Valtype object"):
     assert(not ctx.valtype.is_bool(1))
-  with pytest.raises(RuntimeError, match=r"'is_bool' argument is not a mxklabs.expr.Valtype object"):
+  with pytest.raises(RuntimeError, match=r"'is_bool' argument \('False'\) is not a mxklabs.expr.Valtype object"):
     assert(not ctx.valtype.is_bool(False))
 
   # Test if we create another bool it's the same object.

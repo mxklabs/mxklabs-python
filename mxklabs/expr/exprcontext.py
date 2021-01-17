@@ -199,7 +199,7 @@ class ExprContext:
 
   def solve(self):
     cnfctx = ExprContext(load_defaults=False)
-    cnfctx.load_expr_def_set('mxklabs.expr.exprdefset.logical')
+    cnfctx.load_expr_def_set('mxklabs.expr.exprdefset.cnf')
     solver = CnfSolver(self, cnfctx)
     return solver.solve()
 
@@ -218,19 +218,19 @@ class ExprContext:
   def _check_expr(self, descr, expr):
     # Check if an expression is sane.
     if not isinstance(expr, Expr):
-      raise RuntimeError(f"{descr} is not a mxklabs.expr.Expr object")
+      raise RuntimeError(f"{descr} ('{expr}') is not a mxklabs.expr.Expr object")
     if expr.ctx() != self:
-      raise RuntimeError(f"{descr} was created in a different context")
+      raise RuntimeError(f"{descr} ('{expr}') was created in a different context")
     if not self._expr_pool.contains(expr):
-      raise RuntimeError(f"{descr} not found in context")
+      raise RuntimeError(f"{descr} ('{expr}') not found in context")
 
   def _check_valtype(self, descr, valtype):
     # Check if a valtype is sane.
     if not isinstance(valtype, Valtype):
-      raise RuntimeError(f"{descr} is not a mxklabs.expr.Valtype object")
+      raise RuntimeError(f"{descr} ('{valtype}') is not a mxklabs.expr.Valtype object")
     if valtype.ctx() != self:
-      raise RuntimeError(f"{descr} was created in a different context")
+      raise RuntimeError(f"{descr} ('{valtype}') was created in a different context")
     if not self._valtype_pool.contains(valtype):
-      raise RuntimeError(f"{descr} not found in context")
+      raise RuntimeError(f"{descr} ('{valtype}') not found in context")
 
 

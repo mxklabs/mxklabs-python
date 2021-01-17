@@ -13,7 +13,7 @@ def test_invalid_valtype():
   ctx.load_valtype('mxklabs.expr.valtype.bool')
 
   # Check we can't use some random object for valtype.
-  with pytest.raises(RuntimeError, match=r"valtype argument of variable 'bool1' is not a mxklabs.expr.Valtype object"):
+  with pytest.raises(RuntimeError, match=r"valtype argument of variable 'bool1' \('1'\) is not a mxklabs.expr.Valtype object"):
     bool1 = ctx.variable(name='bool1', valtype=1)
 
 def test_invalid_name():
@@ -32,7 +32,7 @@ def test_valtype_from_different_ctx():
   ctx2.load_valtype('mxklabs.expr.valtype.bool')
 
   # Check we can't create a variable in ctx1 with valtype from ctx2.
-  with pytest.raises(RuntimeError, match=r"valtype argument of variable 'bool1' was created in a different context"):
+  with pytest.raises(RuntimeError, match=r"valtype argument of variable 'bool1' \('bool'\) was created in a different context"):
     bool1 = ctx1.variable(name='bool1', valtype=ctx2.valtype.bool())
 
 def test_duplicate_variable_name_in_ctx():

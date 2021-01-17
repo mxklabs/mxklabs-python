@@ -44,7 +44,25 @@ def test_sat3():
   ctx.add_constraint(ctx.expr.logical_and(a, ctx.expr.logical_not(a)))
   result = ctx.solve()
 
-  # Is satisfiable.
+  # Is not satisfiable.
+  assert(not result)
+
+
+def test_sat4():
+  ctx = mxklabs.expr.ExprContext(load_defaults=False)
+  ctx.load_expr_def_set('mxklabs.expr.exprdefset.logical')#
+
+  a = ctx.variable(name="a", valtype=ctx.valtype.bool())
+  b = ctx.variable(name="b", valtype=ctx.valtype.bool())
+  tt = ctx.constant(value=1, valtype=ctx.valtype.bool())
+  ff = ctx.constant(value=0, valtype=ctx.valtype.bool())
+
+  ctx.add_constraint(ctx.expr.logical_xnor(a, tt))
+  ctx.add_constraint(ctx.expr.logical_implies(a, b))
+  ctx.add_constraint(ctx.expr.logical_xnor(b, ff))
+  result = ctx.solve()
+
+  # Is not satisfiable.
   assert(not result)
 
 """

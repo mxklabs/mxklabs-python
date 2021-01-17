@@ -1,5 +1,4 @@
 from .exprdef import CnfExprDef
-from ...cnftarget import CnfTarget
 from ...exprutils import ExprUtils
 
 class LogicalNot(CnfExprDef):

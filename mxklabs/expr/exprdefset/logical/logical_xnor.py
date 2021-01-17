@@ -1,5 +1,4 @@
 from .exprdef import LogicalExprDef
-from ...cnftarget import CnfTarget
 from ...exprutils import ExprUtils
 
 class LogicalXnor(LogicalExprDef):
@@ -23,5 +22,5 @@ class LogicalXnor(LogicalExprDef):
       return True
     return False
 
-  def decompose(self, ops, attrs):
-    return self._ctx.expr.logical_not(self._ctx.expr.logical_xor(ops))
+  def decompose(self, expr):
+    return self._ctx.expr.logical_not(self._ctx.expr.logical_xor(*expr.ops()))

@@ -1,5 +1,4 @@
 from .exprdef import LogicalExprDef
-from ...cnftarget import CnfTarget
 from ...exprutils import ExprUtils
 
 class LogicalOr(LogicalExprDef):
@@ -22,8 +21,6 @@ class LogicalOr(LogicalExprDef):
     if featurestr == 'simplify':
       return True
     if featurestr == 'canonicalize':
-      return True
-    elif featurestr == 'cnf':
       return True
     return False
 
@@ -68,21 +65,3 @@ class LogicalOr(LogicalExprDef):
       return self._ctx.expr.logical_or(*new_ops)
 
     return expr
-
-  def cnf(self, expr, op_target_mapping, target):
-    oplits = [self._unpack(ol) for ol in op_target_mapping]
-
-    lit = target.make_lit(expr)
-
-    # For each op: lit => oplit
-    for oplit in oplits:
-      target.ctx().add_constraint(target.ctx().expr.logical_or(
-        oplit,
-        target.make_not(lit)))
-
-    # not oplit_0 and ... and not oplit_n => not lit
-    target.ctx().add_constraint(target.ctx().expr.logical_or(
-        *[oplit for oplit in oplits],
-        target.make_not(lit)))
-
-    return self._pack(lit)

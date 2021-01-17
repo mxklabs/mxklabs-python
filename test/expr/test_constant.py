@@ -35,5 +35,5 @@ def test_valtype_from_different_ctx():
   ctx2.load_valtype('mxklabs.expr.valtype.bool')
 
   # Check we can't create a variable in ctx1 with valtype from ctx2.
-  with pytest.raises(RuntimeError, match=r"valtype argument of constant was created in a different context"):
+  with pytest.raises(RuntimeError, match=r"valtype argument of constant \('bool'\) was created in a different context"):
     bool1 = ctx1.constant(value='bool1', valtype=ctx2.valtype.bool())
