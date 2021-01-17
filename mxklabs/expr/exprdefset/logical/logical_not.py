@@ -56,6 +56,7 @@ class LogicalNot(LogicalExprDef):
     if self._ctx.expr.is_logical_xor(op0):
       return self._ctx.expr.logical_xor(op0.ops()[0], self._ctx.expr.logical_not(op0.ops()[1]))
 
+    # Can't simplify.
     return expr
 
   def cnf(self, expr, op_target_mapping, target):
