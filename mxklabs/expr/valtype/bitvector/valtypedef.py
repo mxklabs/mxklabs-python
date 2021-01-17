@@ -16,30 +16,27 @@ class BitvectorValtypeDef(ValtypeDef):
     return value in [True, False]
 
   def num_values(self, valtype):
-    return 2
+    return 2**valtype.width
 
   def values(self, valtype):
-    yield False
-    yield True
+    return range(0, 2**valtype.width)
 
   def convert_userobj_to_value(self, valtype, userobj):
     if type(userobj) == int:
-      if userobj == 0:
-        return False
-      elif userobj == 1:
-        return True
-    if type(userobj) == bool:
-      return userobj
+      if userobj >= 0 and userobj < 2**valtype.width:
+        return userobj
     raise RuntimeError(f"'{userobj}' is not a valid value for valtype '{valtype}' (expected boolean)")
 
   def convert_value_to_str(self, valtype, value):
-    return "1" if value else "0"
+    booltup_value = self.convert_value_to_booltup(valtype, value)
+    bitstr = "".join(["1" if bit else "0" for bit in reversed(booltup_value)])
+    return f"{bin(bitstr)} ({value:d})"
 
   def booltup_size(self, valtype):
-    return 1
+    return valtype.width
 
   def convert_value_to_booltup(self, valtype, value):
-    return [value]
+    return [((value >> bit) & 1) == 1 for bit in range(valtype.width)]
 
   def convert_booltup_to_value(self, valtype, value):
-    return value[0]
+    return sum(1 << bit if value[0] else 0 for bit in range(valtype.width))
