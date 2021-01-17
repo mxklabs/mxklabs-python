@@ -24,3 +24,7 @@ def test_load():
   bool2 = ctx.valtype.bool()
   assert(id(bool1) == id(bool2))
 
+  # Test __str__ and __repr__.
+  assert("bool" == str(bool1))
+  assert("bool" == repr(bool1))
+

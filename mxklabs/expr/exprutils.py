@@ -54,12 +54,15 @@ class ExprUtils:
   @staticmethod
   def basic_attrs_check(objid, exp_attrs, act_attrs):
     # Check attributes.
-    for actAttr in act_attrs:
-      if actAttr not in exp_attrs:
-        raise RuntimeError(f"'{objid}' does not expect attribute '{actAttr}'")
-    for expAttr in exp_attrs:
-      if expAttr not in act_attrs:
-        raise RuntimeError(f"'{objid}' expects attribute '{expAttr}'")
+    for act_attr in act_attrs:
+      if act_attr not in exp_attrs:
+        raise RuntimeError(f"'{objid}' does not expect attribute '{act_attr}'")
+    for exp_attr in exp_attrs:
+      if exp_attr not in act_attrs:
+        raise RuntimeError(f"'{objid}' expects attribute '{exp_attr}'")
+    for exp_attr in exp_attrs:
+      if type(act_attrs[exp_attr]) != exp_attrs[exp_attr]:
+        raise RuntimeError(f"'{objid}' expects attribute '{exp_attr}' to be of type '{exp_attrs[exp_attr]}' (got '{type(act_attrs[exp_attr])}')")
 
   @staticmethod
   def make_variable_name_from_expr(expr, bit=None):

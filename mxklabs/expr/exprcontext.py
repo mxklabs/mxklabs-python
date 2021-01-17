@@ -72,8 +72,22 @@ class ExprContext:
           def is_valtype(valtype, *sub_valtypes, **valtype_attrs):
             # Error if it's not a valtype.
             self._check_valtype(f"'is_{valtype_def.baseid()}' argument", valtype)
-            # Check by id.
-            return id(valtype) == id(create_valtype(*sub_valtypes, **valtype_attrs))
+
+            if valtype.ctx() != self:
+              return False
+            if valtype.valtype_def() != valtype_def:
+              return False
+            if valtype.sub_valtypes() != sub_valtypes:
+              return False
+            for attr in valtype.attrs():
+              if attr in valtype_attrs and valtype_attrs[attr] != None:
+                if valtype.attrs()[attr] != valtype_attrs[attr]:
+                  return False
+
+            return True
+
+            # Check by id (this doesn't work when we don't pass some attrs).
+            #return id(valtype) == id(create_valtype(*sub_valtypes, **valtype_attrs))
           self._add('valtype', f"is_{valtype_def.baseid()}", is_valtype)
 
           self._valtype_defs[valtype_def.id()] = valtype_def
@@ -177,7 +191,7 @@ class ExprContext:
     self._check_expr("constraint", expr)
     # Check we have booleans loaded.
     if 'mxklabs.expr.valtype.bool' not in self._valtype_defs:
-      raise RuntimeError("constraint expressions must be of valtype 'mxklabs.expr.valtype.bool', but this valtype is not loaded in this context")
+      raise RuntimeError("constraint expressions must be of valtype 'bool', but this valtype is not loaded in this context")
     # Check the expression is bool
     if not self.valtype.is_bool(expr.valtype()):
       raise RuntimeError(f"constraint expressions must be of valtype '{self.valtype.bool()}' (got {expr.valtype()})")

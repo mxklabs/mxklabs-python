@@ -24,7 +24,7 @@ def test_invalid_value():
   ctx.load_valtype('mxklabs.expr.valtype.bool')
 
   # Check we can't use some random object for value.
-  with pytest.raises(RuntimeError, match=r"'3' is not a valid value for valtype 'mxklabs.expr.valtype.bool'"):
+  with pytest.raises(RuntimeError, match=r"'3' is not a valid value for valtype 'bool'"):
     bool1 = ctx.constant(value=3, valtype=ctx.valtype.bool())
 
 def test_valtype_from_different_ctx():

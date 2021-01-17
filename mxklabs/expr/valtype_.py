@@ -37,15 +37,14 @@ class Valtype:
     return _hash
 
   def __str__(self):
-    result = f'{self._valtype_def.id()}'
-    if len(self._attrs) > 0:
-      result += '{'
-      result += ','.join([f'{k}:{v}' for k, v in self._attrs])
-      result += '}'
-    if len(self._sub_valtypes) > 0:
-      result += '<'
-      result += ','.join([v.__str__() for v in self._sub_valtypes])
-      result += '>'
+    result = f'{self._valtype_def.baseid()}'
+
+    items = [v.__str__() for v in self._sub_valtypes]
+    items += [f'{k}={v}' for k, v in self._attrs.items()]
+    if len(items) > 0:
+      result += '('
+      result += ','.join(items)
+      result += ')'
     return result
 
   def __repr__(self):
