@@ -7,10 +7,10 @@ class BitvectorValtypeDef(ValtypeDef):
     ValtypeDef.__init__(self, ctx, baseid='bitvector', package='mxklabs.expr.valtype')
 
   def validate(self, sub_valtypes, attrs):
-    # Check sub_valtypes.
-    ExprUtils.basic_sub_valtypes_check(self.id(), 0, 0, None, sub_valtypes)
     # One attribute: width.
     ExprUtils.basic_attrs_check(self.id(), {'width':int}, attrs)
+    # Check sub_valtypes.
+    ExprUtils.basic_sub_valtypes_check(self.id(), 0, 0, None, sub_valtypes)
 
   def validate_value(self, valtype, value):
     return value in [True, False]

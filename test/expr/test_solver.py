@@ -65,6 +65,23 @@ def test_sat4():
   # Is not satisfiable.
   assert(not result)
 
+def test_sat5():
+  ctx = mxklabs.expr.ExprContext(load_defaults=False)
+  ctx.load_expr_def_set('mxklabs.expr.exprdefset.bitvector')
+  ctx.load_expr_def_set('mxklabs.expr.exprdefset.logical')
+
+  a = ctx.variable(name="a", valtype=ctx.valtype.bitvector(width=8))
+  b = ctx.variable(name="b", valtype=ctx.valtype.bool())
+
+  ctx.add_constraint(ctx.expr.bitvector_to_bool(a, index=2))
+
+  result = ctx.solve()
+
+  # Is not satisfiable.
+  assert(result)
+
+  print(result)
+
 """
 
 def test_unsat1():

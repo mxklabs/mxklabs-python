@@ -1,5 +1,9 @@
 mxklabs.expr
 
+* Remove types that don't add anything: BitvectorExprDef and others.
+* Implement cone-of-influence filter for index-like operators as some ops may not matter 
+  and don't need to be converted.
+* Check attrs before ops/sub_valtypes.
 * Add 'logical' or 'prop' expr_def_set.
 
   ctx.prop.logical_and(...)

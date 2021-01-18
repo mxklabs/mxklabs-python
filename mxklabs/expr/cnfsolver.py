@@ -70,6 +70,13 @@ class CnfProxy:
     else:
       raise RuntimeError(f"unable to convert '{expr}' to CNF")
 
+  def map_bitvector_from_bools(self, expr, mapped_ops):
+    oplits = [self._unpack(ol) for ol in mapped_ops]
+    return oplits
+
+  def map_bitvector_to_bool(self, expr, mapped_ops):
+    return self._pack(mapped_ops[0][expr.attrs()['index']])
+
   def map_logical_and(self, expr, mapped_ops):
     oplits = [self._unpack(ol) for ol in mapped_ops]
 

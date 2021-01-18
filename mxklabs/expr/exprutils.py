@@ -1,11 +1,12 @@
 import string
 
 from .expr import Expr
+from .valtype_ import Valtype
 
 class ExprUtils:
 
   @staticmethod
-  def basic_ops_check(exprid, min_ops, max_ops, exp_op_valtype, ops):
+  def basic_ops_check(exprid, min_ops, max_ops, valtype_checker, ops):
 
     # Check number of operands.
     if (min_ops is not None and \
@@ -19,11 +20,17 @@ class ExprUtils:
       if (max_ops is not None and len(ops) > max_ops):
         raise RuntimeError(f"'{exprid}' expects at most {max_ops} operand{'s' if max_ops > 1 else ''} (got {len(ops)})")
 
-    # Check op_valtypes matches expectation.
-    if exp_op_valtype is not None:
+    # Check op_valtypes matches static type for all ops.
+    if isinstance(valtype_checker, Valtype):
       for op_index, op in zip(range(len(ops)), ops):
-        if op.valtype() != exp_op_valtype:
-          raise RuntimeError(f"'{exprid}' expects operands of valtype '{exp_op_valtype}' (operand {op_index} has valtype '{op.valtype()}')")
+        if op.valtype() != valtype_checker:
+          raise RuntimeError(f"'{exprid}' expects operands of valtype '{valtype_checker}' (operand {op_index} has valtype '{op.valtype()}')")
+    # Check expr_op_valtype is a custom type checker
+    if callable(valtype_checker):
+      for op_index, op in zip(range(len(ops)), ops):
+        if not valtype_checker(op.valtype(), op_index):
+          raise RuntimeError(f"'{exprid}' operand {op_index} has an invalid valtype ('{op.valtype()}')")
+
 
   @staticmethod
   def basic_sub_valtypes_check(valtype_id, min_sub_valtypes, max_sub_valtypes, exp_sub_valtype, sub_valtypes):

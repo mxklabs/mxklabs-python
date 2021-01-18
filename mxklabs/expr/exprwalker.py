@@ -67,14 +67,5 @@ class ExprWalker:
           return expr
       return self._bottom_up(expr, exprfun)
 
-    def decompose(self, expr):
-      """ Bottom-up decompose. """
-      # TODO: This isn't right, need to do top down and may have to keep decomposing unless
-      # we want to guarantee the op we're decomposing to is itself not decomposable.
-      def exprfun(expr):
-        if expr.expr_def().has_feature('decompose'):
-          return expr.expr_def().decompose(expr)
-        else:
-          return expr
-      return self._bottom_up(expr, exprfun)
+
 
