@@ -23,4 +23,4 @@ class LogicalNand(LogicalExprDef):
     return False
 
   def decompose(self, expr):
-    return self._ctx.expr.logical_not(self._ctx.expr.logical_and(expr.ops()))
+    return self._ctx.expr.logical_not(self._ctx.expr.logical_and(*expr.ops()))

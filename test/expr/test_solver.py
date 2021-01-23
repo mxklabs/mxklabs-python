@@ -84,6 +84,15 @@ def test_sat5():
   varmap = result.get_varmap()
   assert((varmap[a] >> 2) & 1 == 1)
 
+
+
+
+
+
+
+
+  # For all values, check
+
 """
 
 def test_unsat1():

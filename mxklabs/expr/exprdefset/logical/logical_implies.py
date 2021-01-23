@@ -15,7 +15,7 @@ class LogicalImplies(LogicalExprDef):
     return self._ctx.valtype.bool()
 
   def evaluate(self, expr, op_values):
-    return any(op_values)
+    return not op_values[0] or op_values[1]
 
   def has_feature(self, featurestr):
     if featurestr == 'decompose':

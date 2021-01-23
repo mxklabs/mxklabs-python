@@ -16,21 +16,21 @@ class BitvectorValtypeDef(ValtypeDef):
     return value in [True, False]
 
   def num_values(self, valtype):
-    return 2**valtype.width
+    return 2**valtype.attrs()['width']
 
   def values(self, valtype):
-    return range(0, 2**valtype.width)
+    return range(0, 2**valtype.attrs()['width'])
 
   def convert_userobj_to_value(self, valtype, userobj):
     if type(userobj) == int:
-      if userobj >= 0 and userobj < 2**valtype.width:
+      if userobj >= 0 and userobj < 2**valtype.attrs()['width']:
         return userobj
     raise RuntimeError(f"'{userobj}' is not a valid value for valtype '{valtype}' (expected boolean)")
 
   def convert_value_to_str(self, valtype, value):
     booltup_value = self.convert_value_to_booltup(valtype, value)
     bitstr = "".join(["1" if bit else "0" for bit in reversed(booltup_value)])
-    return f"{bin(bitstr)} ({value:d})"
+    return f"0b{bitstr}"
 
   def booltup_size(self, valtype):
     return valtype.attrs()['width']
@@ -39,5 +39,4 @@ class BitvectorValtypeDef(ValtypeDef):
     return [((value >> bit) & 1) == 1 for bit in range(valtype.attrs()['width'])]
 
   def convert_booltup_to_value(self, valtype, booltup):
-    print(f"booltup={booltup}")
     return sum(1 << bit if booltup[bit] else 0 for bit in range(valtype.attrs()['width']))

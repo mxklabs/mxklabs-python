@@ -67,5 +67,25 @@ class ExprWalker:
           return expr
       return self._bottom_up(expr, exprfun)
 
+    @functools.lru_cache(maxsize=None)
+    def decompose(self, expr):
+      """ Top-down decompose until no longer decomposable. """
+      assert(id(self._ctx) == id(expr.ctx()))
+      if self._ctx.is_variable(expr):
+        return expr
+      elif self._ctx.is_constant(expr):
+        return expr
+      else:
+        while expr.expr_def().has_feature('decompose'):
+          decomposed_expr = expr.expr_def().decompose(expr)
+          if decomposed_expr == expr:
+            break
+          else:
+            expr = decomposed_expr
+            walked_ops = [self.decompose(op) for op in expr.ops()]
+            expr = OpExpr(self._ctx, expr.expr_def_set(), expr.expr_def(), walked_ops, expr.attrs(), expr.valtype())
+            expr = self._ctx._expr_pool.make_unique(expr)
+        return expr
+
 
 

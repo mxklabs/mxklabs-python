@@ -6,6 +6,7 @@ from .cnfsolver import CnfSolver
 from .expr import Constant, Expr, OpExpr, Variable
 from .exprcontextnamespace import ExprContextNamespace
 from .exprdefset_ import ExprDefSet
+from .exprevaluator import ExprEvaluator
 from .exprwalker import ExprWalker
 from .objpool import ObjPool
 from .valtype_ import Valtype
@@ -25,6 +26,11 @@ class ExprContext:
     self._variables = {}
     self._walker = ExprWalker(self)
 
+    def evaluate(expr, varmap):
+      evaluator = ExprEvaluator(self, varmap)
+      return evaluator.eval(expr)
+
+    self._add('util', 'evaluate', evaluate)
     self._add('util', 'simplify', lambda expr: self._walker.simplify(expr))
     self._add('util', 'pushnot', lambda expr: self._walker.pushnot(expr))
     self._add('util', 'canonicalize', lambda expr: self._walker.canonicalize(expr))
@@ -32,7 +38,9 @@ class ExprContext:
 
     if load_defaults:
       self.load_valtype('mxklabs.expr.valtype.bool')
+      self.load_valtype('mxklabs.expr.valtype.bitvector')
       self.load_expr_def_set('mxklabs.expr.exprdefset.logical')
+      self.load_expr_def_set('mxklabs.expr.exprdefset.bitvector')
 
   def __getattr__(self, name):
     if name in self._namespaces:
@@ -196,6 +204,11 @@ class ExprContext:
     if not self.valtype.is_bool(expr.valtype()):
       raise RuntimeError(f"constraint expressions must be of valtype '{self.valtype.bool()}' (got {expr.valtype()})")
     self._constraint_pool.make_unique(expr)
+
+  def clear(self):
+    self._variables = {}
+    self._constraint_pool.clear()
+    self._expr_pool.clear()
 
   def solve(self):
     cnfctx = ExprContext(load_defaults=False)

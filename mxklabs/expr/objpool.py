@@ -16,3 +16,6 @@ class ObjPool:
       self._pool[obj] = obj
       return obj
 
+  def clear(self):
+    self._pool = {}
+

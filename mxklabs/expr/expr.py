@@ -93,6 +93,9 @@ class OpExpr(Expr):
   def attrs(self):
     return self._attrs
 
+  def evaluate(self, op_values):
+    return self._expr_def.evaluate(self, op_values)
+
   def __getattr__(self, field):
     if field in self._attrs:
       return self._attrs[field]

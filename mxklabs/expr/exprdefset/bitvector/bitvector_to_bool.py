@@ -19,7 +19,7 @@ class BitvectorToBool(BitvectorExprDef):
     return self._ctx.valtype.bool()
 
   def evaluate(self, expr, op_values):
-    return op_values[expr.index]
+    return (op_values[0] >> expr.attrs()['index']) & 1
 
   def has_feature(self, featurestr):
     if featurestr == 'simplify':
@@ -27,12 +27,17 @@ class BitvectorToBool(BitvectorExprDef):
     return False
 
   def simplify(self, expr):
-    index = [expr.attrs()['index']]
-    print(f"index={expr.attrs()['index']}")
-    print(f"ops={expr.ops()}")
+    index = expr.attrs()['index']
+
     # bitvector_to_bool(e0, ..., e_i=const, .., e_8, index=i) => e_i
     if self._ctx.is_constant(expr.ops()[0]):
-      return self._ctx.constant(value=expr.valtype().valtype_def().convert_value_to_booltup(expr.valtype(), expr.value())[index], valtype=self._ctx.valtype.bool())
+      op_value = expr.ops()[0].value()
+      op_valtype = expr.ops()[0].valtype()
+      op_valtype_def = op_valtype.valtype_def()
+      op_booltup_value = op_valtype_def.convert_value_to_booltup(op_valtype, op_value)
+      return self._ctx.constant(value=op_booltup_value[index], valtype=self._ctx.valtype.bool())
+
+    # TODO: What if it's a to_bool over from_bool?
 
     # Can't simplify.
     return expr

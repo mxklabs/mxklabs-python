@@ -28,3 +28,6 @@ def test_load():
   assert("bool" == str(bool1))
   assert("bool" == repr(bool1))
 
+  # Test values.
+  assert(list(bool1.values()) == [False, True])
+

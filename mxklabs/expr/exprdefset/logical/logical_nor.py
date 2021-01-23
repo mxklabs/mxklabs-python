@@ -23,4 +23,4 @@ class LogicalNor(LogicalExprDef):
     return False
 
   def decompose(self, expr):
-    return self._ctx.expr.logical_not(self._ctx.expr.logical_or(expr.ops()))
+    return self._ctx.expr.logical_not(self._ctx.expr.logical_or(*expr.ops()))

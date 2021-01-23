@@ -21,6 +21,9 @@ class Valtype:
   def attrs(self):
     return self._attrs
 
+  def values(self):
+    return self._valtype_def.values(self)
+
   def __hash__(self):
     if self._hash is not None:
       return self._hash
