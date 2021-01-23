@@ -80,7 +80,9 @@ def test_sat5():
   # Is not satisfiable.
   assert(result)
 
-  print(result)
+  # Check bit 2 is set.
+  varmap = result.get_varmap()
+  assert((varmap[a] >> 2) & 1 == 1)
 
 """
 

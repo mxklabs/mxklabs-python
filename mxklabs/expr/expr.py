@@ -104,7 +104,9 @@ class OpExpr(Expr):
     # TODO: Use valtype to string function here.
     # TODO: Add attributes.
     result = f"{self._expr_def.baseid()}("
-    result += ",".join([f"{op}" for op in self._ops])
+    items = [f"{op}" for op in self._ops]
+    items += [f"{k}={v}" for k, v in self._attrs.items()]
+    result += ", ".join(items)
     result += ")"
     return result
 

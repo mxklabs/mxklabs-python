@@ -1,4 +1,5 @@
 import logging
+import random
 
 #from .exprcontext import ExprContext
 from pysat.solvers import Glucose3
@@ -52,7 +53,7 @@ class CnfProxy:
     # Lower a variable as a list of boolean variables.
     booltup_size = expr.valtype().valtype_def().booltup_size(expr.valtype())
     mapped_expr = [self._cnfctx.variable(
-        name=ExprUtils.make_variable_name_from_expr(expr),
+        name=ExprUtils.make_variable_name_from_expr(expr, bit=b),
         valtype=self._cnfctx.valtype.bool())
       for b in range(booltup_size)]
     return mapped_expr
@@ -208,6 +209,7 @@ class CnfSolveContext:
         mapped_expr = self._proxy.map_opexpr(expr, mapped_ops)
 
       self._expr_map[expr] = mapped_expr
+      print(f"self._expr_map[{expr}] = {mapped_expr}")
       return mapped_expr
 
   def solve(self):
@@ -261,23 +263,51 @@ class CnfSolveContext:
       # SAT
       logger.info(f"SAT")
 
-      # Get mapping for CNF literals.
+      # Get mapping for cnfctx literals.
       cnf_varmap = {}
       model = g.get_model()
       for i in model:
         if i in var_num_mapping_inv:
           cnf_varmap[var_num_mapping_inv[i]] = True
-        if -i in var_num_mapping_inv:
+        elif -i in var_num_mapping_inv:
           cnf_varmap[var_num_mapping_inv[-i]] = False
 
-      # Get mapping for valtype variables.
+      # Get mapping for srcctx variables.
       varmap = {}
       for v in self._srcctx.variables():
         valtype = v.valtype()
         valtype_def = valtype.valtype_def()
-        booltup = [cnf_varmap[cnf_v] for cnf_v in self.map_expr(v)]
+
+        have_cnf_vs = [cnf_v in cnf_varmap for cnf_v in self.map_expr(v)]
+
+        booltup = []
+        for cnf_v in self.map_expr(v):
+          if cnf_v in cnf_varmap:
+            booltup.append(cnf_varmap[cnf_v])
+          else:
+            # Apparently it doesn't matter...
+            booltup.append(random.choice([True, False]))
+
+
         value = valtype_def.convert_booltup_to_value(valtype, booltup)
         varmap[v] = value
+
+        # We can use this to make up a conflict constraint.
+        #if all(have_cnf_vs):
+        #  # If we have all bits of the variable in the solver's map we
+        #  # can construct a value expr for it.
+        #  booltup = [cnf_varmap[cnf_v] for cnf_v in self.map_expr(v)]
+        #  value = valtype_def.convert_booltup_to_value(valtype, booltup)
+        #  varmap[v] = self._srcctx.expr.is_equal(
+        #    v,
+        #    constant(value, valtype))
+        #elif not any(have_cnf_vs):
+        #  # If we don't have any bits for a variable then it is unconstrained.
+        #  varmap[v] = self._srcctx.constant(value=1, valtype=self._srcctx.valtype.bool())
+        #else:
+        #  # We have some bits, but not all bits. This is awkward.
+
+
       return CnfSolveResult(varmap=varmap)
 
     else:

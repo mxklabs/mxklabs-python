@@ -73,9 +73,13 @@ class ExprUtils:
 
   @staticmethod
   def make_variable_name_from_expr(expr, bit=None):
-    result = f"[{repr(expr)}"
+    result = ""
+    if not expr.ctx().is_variable(expr):
+      result += "<"
+    result += f"{repr(expr)}"
     if bit is not None:
       result += f":{bit}"
-    result += "]"
+    if not expr.ctx().is_variable(expr):
+      result += ">"
     return result
 

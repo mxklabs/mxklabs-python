@@ -33,10 +33,11 @@ class BitvectorValtypeDef(ValtypeDef):
     return f"{bin(bitstr)} ({value:d})"
 
   def booltup_size(self, valtype):
-    return valtype.width
+    return valtype.attrs()['width']
 
   def convert_value_to_booltup(self, valtype, value):
-    return [((value >> bit) & 1) == 1 for bit in range(valtype.width)]
+    return [((value >> bit) & 1) == 1 for bit in range(valtype.attrs()['width'])]
 
-  def convert_booltup_to_value(self, valtype, value):
-    return sum(1 << bit if value[0] else 0 for bit in range(valtype.width))
+  def convert_booltup_to_value(self, valtype, booltup):
+    print(f"booltup={booltup}")
+    return sum(1 << bit if booltup[bit] else 0 for bit in range(valtype.attrs()['width']))
