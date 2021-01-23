@@ -8,7 +8,7 @@ def test_solver_cnf():
   a = ctx.variable(name="a", valtype=ctx.valtype.bool())
 
   ctx.add_constraint(ctx.expr.logical_or(a))
-  result = ctx.solve()
+  result = ctx.util.solve()
 
   # Is satisfiable.
   assert(result)
@@ -25,7 +25,7 @@ def test_sat2():
   a = ctx.variable(name="a", valtype=ctx.valtype.bool())
 
   ctx.add_constraint(ctx.expr.logical_not(a))
-  result = ctx.solve()
+  result = ctx.util.solve()
 
   # Is satisfiable.
   assert(result)
@@ -42,7 +42,7 @@ def test_sat3():
   a = ctx.variable(name="a", valtype=ctx.valtype.bool())
 
   ctx.add_constraint(ctx.expr.logical_and(a, ctx.expr.logical_not(a)))
-  result = ctx.solve()
+  result = ctx.util.solve()
 
   # Is not satisfiable.
   assert(not result)
@@ -60,7 +60,7 @@ def test_sat4():
   ctx.add_constraint(ctx.expr.logical_xnor(a, tt))
   ctx.add_constraint(ctx.expr.logical_implies(a, b))
   ctx.add_constraint(ctx.expr.logical_xnor(b, ff))
-  result = ctx.solve()
+  result = ctx.util.solve()
 
   # Is not satisfiable.
   assert(not result)
@@ -75,7 +75,7 @@ def test_sat5():
 
   ctx.add_constraint(ctx.expr.bitvector_to_bool(a, index=2))
 
-  result = ctx.solve()
+  result = ctx.util.solve()
 
   # Is not satisfiable.
   assert(result)
@@ -100,7 +100,7 @@ def test_unsat1():
   a = ctx.bool.variable(name="a")
 
   ctx.add_constraint(ctx.bool.logical_and(a, ctx.bool.logical_not(a)))
-  result = ctx.solve()
+  result = ctx.util.solve()
 
   # Is not satisfiable.
   assert(not result)
@@ -110,7 +110,7 @@ def test_sat3():
   true = ctx.bool.constant(value=1)
 
   ctx.add_constraint(true)
-  result = ctx.solve()
+  result = ctx.util.solve()
 
   # Is satisfiable.
   assert(result)
@@ -120,7 +120,7 @@ def test_unsat2():
   true = ctx.bool.constant(value=0)
 
   ctx.add_constraint(true)
-  result = ctx.solve()
+  result = ctx.util.solve()
 
   # Is satisfiable.
   assert(not result)

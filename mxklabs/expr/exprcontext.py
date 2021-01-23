@@ -26,10 +26,17 @@ class ExprContext:
     self._variables = {}
     self._walker = ExprWalker(self)
 
+    def solve():
+      cnfctx = ExprContext(load_defaults=False)
+      cnfctx.load_expr_def_set('mxklabs.expr.exprdefset.cnf')
+      solver = CnfSolver(self, cnfctx)
+      return solver.solve()
+
     def evaluate(expr, varmap):
       evaluator = ExprEvaluator(self, varmap)
       return evaluator.eval(expr)
 
+    self._add('util', 'solve', solve)
     self._add('util', 'evaluate', evaluate)
     self._add('util', 'simplify', lambda expr: self._walker.simplify(expr))
     self._add('util', 'pushnot', lambda expr: self._walker.pushnot(expr))
@@ -209,12 +216,6 @@ class ExprContext:
     self._variables = {}
     self._constraint_pool.clear()
     self._expr_pool.clear()
-
-  def solve(self):
-    cnfctx = ExprContext(load_defaults=False)
-    cnfctx.load_expr_def_set('mxklabs.expr.exprdefset.cnf')
-    solver = CnfSolver(self, cnfctx)
-    return solver.solve()
 
   def variables(self):
     return self._variables.values()

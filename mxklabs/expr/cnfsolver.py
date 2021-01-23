@@ -1,5 +1,6 @@
 import logging
 import random
+import itertools
 
 #from .exprcontext import ExprContext
 from pysat.solvers import Glucose3
@@ -172,17 +173,21 @@ class CnfProxy:
 
 class CnfSolveResult:
 
-  def __init__(self, varmap=None):
-    self.varmap = varmap
+  def __init__(self, varmap=None, varmap_gen=None):
+    self._varmap = varmap
+    self._varmap_gen = varmap_gen
 
   def __bool__(self):
-    return self.varmap is not None
+    return self._varmap is not None
 
   def __nonzero__(self):
     return self.__bool__()
 
   def get_varmap(self):
-    return self.varmap
+    return self._varmap
+
+  def get_varmap_gen(self):
+    return self._varmap_gen
 
 class CnfSolveContext:
 
@@ -274,6 +279,8 @@ class CnfSolveContext:
 
       # Get mapping for srcctx variables.
       varmap = {}
+      varmap_gen = {}
+
       for v in self._srcctx.variables():
         valtype = v.valtype()
         valtype_def = valtype.valtype_def()
@@ -281,16 +288,25 @@ class CnfSolveContext:
         have_cnf_vs = [cnf_v in cnf_varmap for cnf_v in self.map_expr(v)]
 
         booltup = []
+        boolgen = []
+
         for cnf_v in self.map_expr(v):
           if cnf_v in cnf_varmap:
             booltup.append(cnf_varmap[cnf_v])
+            boolgen.append([cnf_varmap[cnf_v]])
           else:
             # Apparently it doesn't matter...
             booltup.append(random.choice([True, False]))
-
+            boolgen.append([True, False])
 
         value = valtype_def.convert_booltup_to_value(valtype, booltup)
         varmap[v] = value
+
+        def gen():
+          for booltup in itertools.product(*boolgen):
+            yield valtype_def.convert_booltup_to_value(valtype, booltup)
+
+        varmap_gen[v] = gen
 
         # We can use this to make up a conflict constraint.
         #if all(have_cnf_vs):
@@ -308,7 +324,7 @@ class CnfSolveContext:
         #  # We have some bits, but not all bits. This is awkward.
 
 
-      return CnfSolveResult(varmap=varmap)
+      return CnfSolveResult(varmap=varmap, varmap_gen=varmap_gen)
 
     else:
       # UNSAT
