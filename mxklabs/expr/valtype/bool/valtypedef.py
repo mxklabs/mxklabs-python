@@ -43,3 +43,7 @@ class BoolValtypeDef(ValtypeDef):
 
   def convert_booltup_to_value(self, valtype, value):
     return value[0]
+
+  def get_bool_expr(self, expr, index):
+    assert(index == 0)
+    return expr

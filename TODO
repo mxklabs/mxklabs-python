@@ -1,5 +1,8 @@
 mxklabs.expr
 
+* See if it's possible to detangle dependencies between expr_sets
+* Better variable name management.
+* Move ctx.constant, ctx.is_constant, ctx.variable, ctx.is_variable to ctx.expr.*
 * Remove types that don't add anything: BitvectorExprDef and others.
 * Implement cone-of-influence filter for index-like operators as some ops may not matter 
   and don't need to be converted.

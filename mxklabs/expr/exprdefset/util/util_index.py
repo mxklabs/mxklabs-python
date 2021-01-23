@@ -1,10 +1,10 @@
-from .exprdef import BitvectorExprDef
+from .exprdef import UtilExprDef
 from ...exprutils import ExprUtils
 
-class BitvectorToBool(BitvectorExprDef):
+class UtilIndex(UtilExprDef):
 
   def __init__(self, **kwargs):
-    BitvectorExprDef.__init__(self, **kwargs)
+    UtilExprDef.__init__(self, **kwargs)
 
   def validate(self, ops, attrs):
     # Expecting one or more operands, all boolean, no attributes.
@@ -29,7 +29,7 @@ class BitvectorToBool(BitvectorExprDef):
   def simplify(self, expr):
     index = expr.attrs()['index']
 
-    # bitvector_to_bool(e0, ..., e_i=const, .., e_8, index=i) => e_i
+    # index(const, index=n) => (const >> n) & 1
     if self._ctx.is_constant(expr.ops()[0]):
       op_value = expr.ops()[0].value()
       op_valtype = expr.ops()[0].valtype()

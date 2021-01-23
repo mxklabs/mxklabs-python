@@ -52,15 +52,6 @@ def test_load():
   assert(list(bv3.values()) == [0,1,2,3,4,5,6,7])
   assert(list(bv4.values()) == [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15])
 
-def test_bitvector_to_bool():
-  ctx = mxklabs.expr.ExprContext()
-
-  # Test with one input, index=3
-  inputs = [ctx.valtype.bitvector(width=4)]
-  output = lambda op0: (op0 >> 3) & 1 == 1
-  attrs = {'index':3}
-  ExprTester(ctx, ctx.expr.bitvector_to_bool, inputs, attrs, output)
-
 def test_bitvector_from_bool():
   ctx = mxklabs.expr.ExprContext()#
 

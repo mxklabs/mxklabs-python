@@ -41,6 +41,7 @@ class CnfDecomposer:
 class CnfProxy:
 
   def __init__(self, srcctx, cnfctx):
+    self._name_map = {}
     self._srcctx = srcctx
     self._cnfctx = cnfctx
     self._true = self._cnfctx.variable(name='__true', valtype=self._cnfctx.valtype.bool())
@@ -53,10 +54,16 @@ class CnfProxy:
   def map_variable(self, expr):
     # Lower a variable as a list of boolean variables.
     booltup_size = expr.valtype().valtype_def().booltup_size(expr.valtype())
-    mapped_expr = [self._cnfctx.variable(
-        name=ExprUtils.make_variable_name_from_expr(expr, bit=b),
-        valtype=self._cnfctx.valtype.bool())
-      for b in range(booltup_size)]
+    if booltup_size == 1:
+      mapped_expr = [self._cnfctx.variable(
+          name=ExprUtils.make_variable_name_from_expr(expr),
+          valtype=self._cnfctx.valtype.bool())]
+    else:
+      mapped_expr = [self._cnfctx.variable(
+          name=ExprUtils.make_variable_name_from_expr(expr, bit=b),
+          valtype=self._cnfctx.valtype.bool())
+        for b in range(booltup_size)]
+    self._name_map[expr] = [var.name() for var in mapped_expr]
     return mapped_expr
 
   def map_constant(self, expr):
@@ -72,12 +79,9 @@ class CnfProxy:
     else:
       raise RuntimeError(f"unable to convert '{expr}' to CNF")
 
-  def map_bitvector_from_bools(self, expr, mapped_ops):
+  def map_bitvector_from_bool(self, expr, mapped_ops):
     oplits = [self._unpack(ol) for ol in mapped_ops]
     return oplits
-
-  def map_bitvector_to_bool(self, expr, mapped_ops):
-    return self._pack(mapped_ops[0][expr.attrs()['index']])
 
   def map_logical_and(self, expr, mapped_ops):
     oplits = [self._unpack(ol) for ol in mapped_ops]
@@ -109,8 +113,8 @@ class CnfProxy:
     # For each op: lit => oplit
     for oplit in oplits:
       self._cnfctx.add_constraint(self._cnfctx.expr.logical_or(
-        oplit,
-        self._make_not(lit)))
+        self._make_not(oplit),
+        lit))
 
     # not oplit_0 and ... and not oplit_n => not lit
     self._cnfctx.add_constraint(self._cnfctx.expr.logical_or(
@@ -152,6 +156,68 @@ class CnfProxy:
 
     return self._pack(lit)
 
+  def map_util_index(self, expr, mapped_ops):
+    return self._pack(mapped_ops[0][expr.attrs()['index']])
+
+  def map_util_equals(self, expr, mapped_ops):
+    oplits0 = mapped_ops[0]
+    oplits1 = mapped_ops[1]
+    assert(len(oplits0) == len(oplits1))
+    bits = len(oplits0)
+
+    # TODO: there may be more optimal ways to do this. but we're basically
+    # introducing literals for every bit, doitn bit-wise xnor, then doing
+    # a logical and over the resulting lits.
+
+    # NOTE: We may want to do something better for small numbers of bits as
+    # it wouldn't be too expensive to avoid the intermediate literals.
+
+    bit_lits = [self._make_lit(expr, bit=bit) for bit in range(bits)]
+
+    for bit in range(bits):
+      # oplits0[bit] and oplits1[bit] => bit_lits[bit]
+      self._cnfctx.add_constraint(self._cnfctx.expr.logical_or(
+          self._make_not(oplits0[bit]),
+          self._make_not(oplits1[bit]),
+          self._make_not(bit_lits[bit])))
+
+      # not oplits0[bit] and not oplits1[bit] => bit_lits[bit]
+      self._cnfctx.add_constraint(self._cnfctx.expr.logical_or(
+          oplits0[bit],
+          oplits1[bit],
+          self._make_not(bit_lits[bit])))
+
+      # oplits0[bit] and not oplits1[bit] => not bit_lits[bit]
+      self._cnfctx.add_constraint(self._cnfctx.expr.logical_or(
+          self._make_not(oplits0[bit]),
+          oplits1[bit],
+          bit_lits[bit]))
+
+      # not oplits0[bit] and oplits1[bit] => not bit_lits[bit]
+      self._cnfctx.add_constraint(self._cnfctx.expr.logical_or(
+          oplits0[bit],
+          self._make_not(oplits1[bit]),
+          bit_lits[bit]))
+
+    expr_lit = self._make_lit(expr)
+
+    # For each bit: expr_lit => bit_lits[bit]
+    for bit in range(bits):
+      self._cnfctx.add_constraint(self._cnfctx.expr.logical_or(
+        bit_lits[bit],
+        self._make_not(expr_lit)))
+
+    # bit_lits[0] and ... and bit_lits[bits-1] => expr_lit
+    self._cnfctx.add_constraint(self._cnfctx.expr.logical_or(
+        *[self._make_not(bit_lit) for bit_lit in bit_lits],
+        expr_lit))
+
+    return self._pack(expr_lit)
+
+  #  for lit0, lit1 in zip(mapped_ops[0], mapped_ops[0])
+  #
+  #  return self._pack(mapped_ops[0][expr.attrs()['index']])
+
   def _pack(self, lit):
     return [lit]
 
@@ -159,9 +225,11 @@ class CnfProxy:
     return booltup[0]
 
   def _make_lit(self, expr, bit=None):
-    return self._cnfctx.variable(
+    lit = self._cnfctx.variable(
         name=ExprUtils.make_variable_name_from_expr(expr, bit),
         valtype=self._cnfctx.valtype.bool())
+    self._name_map[expr] = lit.name()
+    return lit
 
   def _make_not(self, lit):
     # All literals are either variables or negations of variables. If we
@@ -173,9 +241,10 @@ class CnfProxy:
 
 class CnfSolveResult:
 
-  def __init__(self, varmap=None, varmap_gen=None):
+  def __init__(self, varmap=None, varmap_gen=None, varmap_expr=None):
     self._varmap = varmap
     self._varmap_gen = varmap_gen
+    self._varmap_expr = varmap_expr
 
   def __bool__(self):
     return self._varmap is not None
@@ -188,6 +257,9 @@ class CnfSolveResult:
 
   def get_varmap_gen(self):
     return self._varmap_gen
+
+  def get_varmap_expr(self):
+    return self._varmap_expr
 
 class CnfSolveContext:
 
@@ -214,26 +286,41 @@ class CnfSolveContext:
         mapped_expr = self._proxy.map_opexpr(expr, mapped_ops)
 
       self._expr_map[expr] = mapped_expr
-      print(f"self._expr_map[{expr}] = {mapped_expr}")
+      #print(f"self._expr_map[{expr}] = {mapped_expr}")
       return mapped_expr
 
   def solve(self):
     # Add each constraint.
-    for c in self._srcctx.constraints():
+    for constraint in self._srcctx.constraints():
+      c = constraint
       c = self._decomposer.decompose(c)
       c = self._srcctx.util.pushnot(c)
       c = self._srcctx.util.simplify(c)
       c = self._srcctx.util.canonicalize(c)
+      print(f"Simplifying {constraint} to {c} ")
       constraint_litvec = self.map_expr(c)
       self._cnfctx.add_constraint(
         self._cnfctx.expr.logical_or(constraint_litvec[0]))
 
-    print(f"variables={self._cnfctx.variables()}")
+    
     print('-'*80)
-    print(f"constraints=")
+    print(f"ctx_constraints=")
+    for c in self._srcctx.constraints():
+      print(f"- {c}")
+    print('-'*80)
+    print(f"cnf_variables=")
+    for var in self._cnfctx.variables():
+      print(f"- {var}")
+    print('-'*80)
+    print(f'cnf_name_map=')
+    for k, v in self._proxy._name_map.items():
+      print(f'- {k} -> {v}')
+    print('-'*80)
+    print(f"cnf_constraints=")
     for c in self._cnfctx.constraints():
       print(f"- {c}")
     print('-'*80)
+
 
     var_num = 1
     var_num_mapping = {}
@@ -262,7 +349,7 @@ class CnfSolveContext:
           clause.append(-var_num_mapping[op.ops()[0]])
       g.add_clause(clause)
 
-    print(f"var_num_mapping={var_num_mapping}")
+    #print(f"var_num_mapping={var_num_mapping}")
 
     if g.solve():
       # SAT
@@ -281,32 +368,58 @@ class CnfSolveContext:
       varmap = {}
       varmap_gen = {}
 
+      varmap_subexprs = []
+
       for v in self._srcctx.variables():
         valtype = v.valtype()
         valtype_def = valtype.valtype_def()
 
-        have_cnf_vs = [cnf_v in cnf_varmap for cnf_v in self.map_expr(v)]
+        mapped_v = self.map_expr(v)
+
+        have_cnf_vs = [cnf_v in cnf_varmap for cnf_v in mapped_v]
 
         booltup = []
         boolgen = []
+        boolexprs = []
 
-        for cnf_v in self.map_expr(v):
+        for index, cnf_v in zip(range(len(mapped_v)), mapped_v):
           if cnf_v in cnf_varmap:
             booltup.append(cnf_varmap[cnf_v])
             boolgen.append([cnf_varmap[cnf_v]])
+            boolexprs.append(
+              self._srcctx.expr.util_equal(
+                valtype_def.get_bool_expr(v, index=index),
+                self._srcctx.constant(value=cnf_varmap[cnf_v], valtype=self._srcctx.valtype.bool())))
           else:
             # Apparently it doesn't matter...
             booltup.append(random.choice([True, False]))
             boolgen.append([True, False])
 
         value = valtype_def.convert_booltup_to_value(valtype, booltup)
+        print(f"value {value} FOR {v}")
+
         varmap[v] = value
 
-        def gen():
+        def gen(boolgen, valtype, v):
+          print(f"gen({boolgen}, {valtype}) FOR {v}")
           for booltup in itertools.product(*boolgen):
-            yield valtype_def.convert_booltup_to_value(valtype, booltup)
+            yield valtype.valtype_def().convert_booltup_to_value(valtype, booltup)
 
-        varmap_gen[v] = gen
+        for booltup in itertools.product(*boolgen):
+          actvalue = valtype_def.convert_booltup_to_value(valtype, booltup)
+          print(f"FOUND {booltup} ({actvalue}) -> FOR {v}")
+
+        varmap_gen[v] = lambda boolgen=boolgen, valtype=valtype, v=v: gen(boolgen, valtype, v)
+
+        if len(boolexprs) == 0:
+          # Don't do anything.
+          pass
+        elif len(boolexprs) == 1:
+          # Add the singular expression.
+          varmap_subexprs.append(boolexprs[0])
+        else:
+          varmap_subexprs.append(self._srcctx.expr.logical_and(*boolexprs))
+
 
         # We can use this to make up a conflict constraint.
         #if all(have_cnf_vs):
@@ -323,8 +436,16 @@ class CnfSolveContext:
         #else:
         #  # We have some bits, but not all bits. This is awkward.
 
+      if len(varmap_subexprs) == 0:
+        varmap_expr = self._srcctx.constant(value=1, valtype=self._srcctx.valtypel.bool())
+      elif len(varmap_subexprs) == 1:
+        varmap_expr = varmap_subexprs[0]
+      else:
+        varmap_expr = self._srcctx.expr.logical_and(*varmap_subexprs)
 
-      return CnfSolveResult(varmap=varmap, varmap_gen=varmap_gen)
+      varmap_expr = self._srcctx.util.simplify(varmap_expr)
+
+      return CnfSolveResult(varmap=varmap, varmap_gen=varmap_gen, varmap_expr=varmap_expr)
 
     else:
       # UNSAT

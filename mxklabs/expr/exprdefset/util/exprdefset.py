@@ -1,12 +1,14 @@
 from ...exprdefset_ import ExprDefSet
-from .bitvector_from_bool import BitvectorFromBool
+from .util_index import UtilIndex
+from .util_equal import UtilEqual
 
-class BitvectorExprDefSet(ExprDefSet):
+class UtilExprDefSet(ExprDefSet):
 
   def __init__(self, ctx):
-    ExprDefSet.__init__(self, ctx, baseid='bitvector', package='mxklabs.expr.exprdefset')
+    ExprDefSet.__init__(self, ctx, baseid='util', package='mxklabs.expr.exprdefset')
     self._expr_defs = [
-      BitvectorFromBool(ctx=ctx, expr_def_set=self)
+      UtilIndex(ctx=ctx, expr_def_set=self),
+      UtilEqual(ctx=ctx, expr_def_set=self)
     ]
 
   def expr_defs(self):
@@ -18,7 +20,7 @@ class BitvectorExprDefSet(ExprDefSet):
 
   def expr_def_set_ids(self):
     return ["mxklabs.expr.exprdefset.logical",
-            "mxklabs.expr.exprdefset.util"]
+            "mxklabs.expr.exprdefset.bitvector"]
 
   def targets(self):
     return []

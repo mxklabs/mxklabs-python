@@ -5,6 +5,8 @@ from .valtype_ import Valtype
 
 class ExprUtils:
 
+  expr_name_counter = 0
+
   @staticmethod
   def basic_ops_check(exprid, min_ops, max_ops, valtype_checker, ops):
 
@@ -73,13 +75,30 @@ class ExprUtils:
 
   @staticmethod
   def make_variable_name_from_expr(expr, bit=None):
-    result = ""
+
     if not expr.ctx().is_variable(expr):
-      result += "<"
-    result += f"{repr(expr)}"
+      result = f"__expr{ExprUtils.expr_name_counter}"
+      ExprUtils.expr_name_counter += 1
+    else:
+      result = expr.name()
+  
     if bit is not None:
-      result += f":{bit}"
-    if not expr.ctx().is_variable(expr):
-      result += ">"
+      result += f"[{bit}]"
     return result
+
+    #result = "$"
+    #if not expr.ctx().is_variable(expr):
+    #  result += "<"
+    #result += f"{repr(expr)}"
+    #if bit is not None:
+    #  result += f":{bit}"
+    #result += ""
+    #if not expr.ctx().is_variable(expr):
+    #  result += ">"
+    #result = result.replace("_", "_")
+    #result = result.replace("(", "~L~")
+    #result = result.replace(")", "~R~")
+    #result = result.replace(" ", "")
+    #result = result.replace(",", "~")
+    #return result
 

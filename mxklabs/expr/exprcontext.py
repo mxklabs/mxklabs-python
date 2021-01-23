@@ -48,6 +48,7 @@ class ExprContext:
       self.load_valtype('mxklabs.expr.valtype.bitvector')
       self.load_expr_def_set('mxklabs.expr.exprdefset.logical')
       self.load_expr_def_set('mxklabs.expr.exprdefset.bitvector')
+      self.load_expr_def_set('mxklabs.expr.exprdefset.util')
 
   def __getattr__(self, name):
     if name in self._namespaces:
@@ -119,10 +120,6 @@ class ExprContext:
         if inspect.isclass(obj) and issubclass(obj, ExprDefSet):
           expr_def_set = obj(self)
 
-          # Load dependencies.
-          for valtype_id in expr_def_set.valtype_ids():
-            self.load_valtype(valtype_id)
-
           # Iterate over expression definitions.
           for expr_def in expr_def_set.expr_defs():
 
@@ -164,6 +161,14 @@ class ExprContext:
                 lambda expr, expr_def_set=expr_def_set, expr_def=expr_def: is_expr(expr_def_set, expr_def, expr))
 
           self._expr_def_sets[expr_def_set.id()] = expr_def_set
+
+          # Load dependencies.
+          for valtype_id in expr_def_set.valtype_ids():
+            self.load_valtype(valtype_id)
+
+          # Load dependencies.
+          for expr_def_set_id in expr_def_set.expr_def_set_ids():
+            self.load_expr_def_set(expr_def_set_id)
 
   def variable(self, name, valtype):
     # Check valtype is valid.

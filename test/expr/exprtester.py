@@ -88,19 +88,35 @@ class ExprTester:
 
     # Create the expression with variables for inputs.
     varexpr = self._expr_fun(*varlist, **self._attrs)
-    self._ctx.add_constraint(varexpr)
+    # Create a variable to match the output.
+    outvar = self._ctx.variable(name="__out", valtype=varexpr.valtype())
+
+    # Add a constraint.
+    self._ctx.add_constraint(self._ctx.expr.util_equal(
+      varexpr,
+      outvar))
 
     act_map = {}
     while True:
       result = self._ctx.util.solve()
       if result:
+        print(f"ExprTester SAT")
+        print(f"Found '{result.get_varmap()}' for '{varexpr}'")
+        
         gens = [result.get_varmap_gen()[v]() for v in varlist]
         for in_valtup in itertools.product(*gens):
           varmap = { varlist[i] : in_valtup[i] for i in range(self._num_ops)}
-          act_map[in_valtup] = self._ctx.util.evaluate(varexpr, varmap)
-        # Should add constraint.
-        break
+          outgen = result.get_varmap_gen()[outvar]()
+          for outval in outgen:
+            print(f"Found '{in_valtup}' -> {outval} for '{varexpr}'")
+            act_map[in_valtup] = outval
+        # Prevent same results from happening again.
+        new_constraint = self._ctx.expr.logical_not(result.get_varmap_expr())
+        self._ctx.add_constraint(new_constraint)
+        print(f"Adding constraint '{new_constraint}' for '{varexpr}'")
+
       else:
+        print(f"ExprTester UNSAT")
         break
     assert(exp_map == act_map), f"Expected '{varexpr}' to have in/out map {exp_map} (got {act_map})"
 

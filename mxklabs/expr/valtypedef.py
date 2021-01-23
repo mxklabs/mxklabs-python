@@ -78,3 +78,9 @@ class ValtypeDef:
     """
     raise RuntimeError(f"'{self.__class__.__name__}.convert_booltup_to_value' has not been implemented")
 
+  def get_bool_expr(self, expr, index):
+    """
+    Get expression that extracts the index-th boolean from an expr with this valtype.
+    """
+    raise RuntimeError(f"'{self.__class__.__name__}.get_bool_expr' has not been implemented")
+

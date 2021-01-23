@@ -24,6 +24,12 @@ class ExprDefSet:
     """
     raise RuntimeError(f"'{self.__class__.__name__}.get_valtypes' has not been implemented")
 
+  def expr_def_set_ids(self):
+    """
+    Return the set of expr def sets used by this ExprDefSet.
+    """
+    raise RuntimeError(f"'{self.__class__.__name__}.expr_def_sets_ids' has not been implemented")
+
   def targets(self):
     """
     Return target ExprDefSets that these expressions can be lowered to.

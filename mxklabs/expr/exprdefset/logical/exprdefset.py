@@ -29,5 +29,8 @@ class LogicalExprDefSet(ExprDefSet):
   def valtype_ids(self):
     return ["mxklabs.expr.valtype.bool"]
 
+  def expr_def_set_ids(self):
+    return ["mxklabs.expr.exprdefset.util"]
+
   def targets(self):
     return []
