@@ -64,3 +64,12 @@ def test_bitvector_from_bool():
   attrs = {'width':3}
   ExprTester(ctx, ctx.expr.bitvector_from_bool, inputs, attrs, output)
 
+def test_bitvector_mult():
+  ctx = mxklabs.expr.ExprContext()#
+
+  # Test with two 3-bit bitvectors
+  inputs = [ctx.valtype.bitvector(width=3), ctx.valtype.bitvector(width=3)]
+  output = lambda op0, op1: op0 * op1
+  attrs = {'width':6}
+  ExprTester(ctx, ctx.expr.bitvector_mult, inputs, attrs, output)
+
