@@ -297,29 +297,29 @@ class CnfSolveContext:
       c = self._srcctx.util.pushnot(c)
       c = self._srcctx.util.simplify(c)
       c = self._srcctx.util.canonicalize(c)
-      print(f"Simplifying {constraint} to {c} ")
+      #print(f"Simplifying {constraint} to {c} ")
       constraint_litvec = self.map_expr(c)
       self._cnfctx.add_constraint(
         self._cnfctx.expr.logical_or(constraint_litvec[0]))
 
     
-    print('-'*80)
-    print(f"ctx_constraints=")
-    for c in self._srcctx.constraints():
-      print(f"- {c}")
-    print('-'*80)
-    print(f"cnf_variables=")
-    for var in self._cnfctx.variables():
-      print(f"- {var}")
-    print('-'*80)
-    print(f'cnf_name_map=')
-    for k, v in self._proxy._name_map.items():
-      print(f'- {k} -> {v}')
-    print('-'*80)
-    print(f"cnf_constraints=")
-    for c in self._cnfctx.constraints():
-      print(f"- {c}")
-    print('-'*80)
+    #print('-'*80)
+    #print(f"ctx_constraints=")
+    #for c in self._srcctx.constraints():
+    #  print(f"- {c}")
+    #print('-'*80)
+    #print(f"cnf_variables=")
+    #for var in self._cnfctx.variables():
+    #  print(f"- {var}")
+    #print('-'*80)
+    #print(f'cnf_name_map=')
+    #for k, v in self._proxy._name_map.items():
+    #  print(f'- {k} -> {v}')
+    #print('-'*80)
+    #print(f"cnf_constraints=")
+    #for c in self._cnfctx.constraints():
+    #  print(f"- {c}")
+    #print('-'*80)
 
 
     var_num = 1
@@ -396,18 +396,18 @@ class CnfSolveContext:
             boolgen.append([True, False])
 
         value = valtype_def.convert_booltup_to_value(valtype, booltup)
-        print(f"value {value} FOR {v}")
+        #print(f"value {value} FOR {v}")
 
         varmap[v] = value
 
         def gen(boolgen, valtype, v):
-          print(f"gen({boolgen}, {valtype}) FOR {v}")
+          #print(f"gen({boolgen}, {valtype}) FOR {v}")
           for booltup in itertools.product(*boolgen):
             yield valtype.valtype_def().convert_booltup_to_value(valtype, booltup)
 
-        for booltup in itertools.product(*boolgen):
-          actvalue = valtype_def.convert_booltup_to_value(valtype, booltup)
-          print(f"FOUND {booltup} ({actvalue}) -> FOR {v}")
+        #for booltup in itertools.product(*boolgen):
+        #  actvalue = valtype_def.convert_booltup_to_value(valtype, booltup)
+        #  #print(f"FOUND {booltup} ({actvalue}) -> FOR {v}")
 
         varmap_gen[v] = lambda boolgen=boolgen, valtype=valtype, v=v: gen(boolgen, valtype, v)
 

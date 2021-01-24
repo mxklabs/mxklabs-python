@@ -39,9 +39,7 @@ class BitvectorValtypeDef(ValtypeDef):
     return [((value >> bit) & 1) == 1 for bit in range(valtype.attrs()['width'])]
 
   def convert_booltup_to_value(self, valtype, booltup):
-    result = sum(1 << bit if booltup[bit] else 0 for bit in range(valtype.attrs()['width']))
-    print(f"booltup={booltup}, width={valtype.attrs()['width']} --> {result}")
-    return result
+    return sum(1 << bit if booltup[bit] else 0 for bit in range(valtype.attrs()['width']))
 
   def get_bool_expr(self, expr, index):
     return self._ctx.expr.util_index(expr, index=index)

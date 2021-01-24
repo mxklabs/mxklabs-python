@@ -23,7 +23,6 @@ class ExprWalker:
         expr = OpExpr(self._ctx, expr.expr_def_set(), expr.expr_def(), walked_ops, expr.attrs(), expr.valtype())
         expr = self._ctx._expr_pool.make_unique(expr)
         expr = exprfun(expr)
-        print('')
         return expr
 
     @functools.lru_cache(maxsize=None)
